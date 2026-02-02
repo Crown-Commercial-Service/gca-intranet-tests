@@ -1,0 +1,22 @@
+# Logs
+logs
+*.log
+
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# dotenv environment variable files
+.env
+.env.*
+!.env.example
+
+.DS_Store
+/.idea
+
+# Playwright test results
+playwright-report/
+test-results/
+*storybook.log
+storybook-static

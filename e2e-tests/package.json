@@ -1,0 +1,29 @@
+{
+  "name": "gca-intranet-project-e2e-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "End-to-end test suite for the gsa wordpress application using Playwright.",
+  "main": "",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --browser=chromium",
+    "test:headed": "playwright test --headed",
+    "test:smoke": "playwright test tests/smoke.spec.ts",
+    "test:report": "playwright show-report"
+  },
+  "keywords": [
+    "playwright",
+    "e2e",
+    "testing",
+    "wordpress",
+    "gca-intranet"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.58.0",
+    "@typescript-eslint/parser": "^8.54.0",
+    "baseline-browser-mapping": "^2.9.19",
+    "typescript": "^5.9.3"
+  }
+}
