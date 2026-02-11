@@ -2,14 +2,20 @@
   "name": "gca-intranet-project-e2e-tests",
   "version": "1.0.0",
   "private": true,
-  "description": "End-to-end test suite for the gsa wordpress application using Playwright.",
+  "description": "End-to-end test suite for the gsa intranet wordpress application using Playwright.",
   "main": "",
   "scripts": {
     "test": "playwright test",
     "test:ui": "playwright test --browser=chromium",
     "test:headed": "playwright test --headed",
     "test:smoke": "playwright test tests/smoke.spec.ts",
-    "test:report": "playwright show-report"
+    "test:report": "playwright show-report",
+    "test:dev": "dotenv -e .env.dev -- playwright test",
+    "test:dev:headed": "dotenv -e .env.dev -- playwright test --headed",
+    "test:dev:smoke": "dotenv -e .env.dev -- playwright test tests/a11y/accessibility.spec.ts",
+    "test:a11y": "playwright test tests/a11y",
+    "test:a11y:dev": "dotenv -e .env.dev -- playwright test tests/a11y",
+    "test:a11y:ci": "playwright test tests/a11y"
   },
   "keywords": [
     "playwright",
@@ -21,9 +27,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.1",
     "@playwright/test": "^1.58.0",
     "@typescript-eslint/parser": "^8.54.0",
     "baseline-browser-mapping": "^2.9.19",
+    "dotenv-cli": "^11.0.0",
     "typescript": "^5.9.3"
   }
 }
