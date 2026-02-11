@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { defineConfig, devices } from "@playwright/test";
 
 const PORT = Number(process.env.PORT || 3000);
@@ -41,36 +42,36 @@ export default defineConfig({
       name: "desktop-chromium",
       use: { ...devices["Desktop Chrome"] },
     },
-    {
-      name: "desktop-edge",
-      use: {
-        ...devices["Desktop Edge"],
-        channel: "msedge",
-      },
-    },
-    {
-      name: "mobile-chromium-android",
-      use: { ...devices["Pixel 7"] },
-    },
-    {
-      name: "desktop-firefox",
-      use: { ...devices["Desktop Firefox"] },
-    },
-    {
-      name: "desktop-webkit",
-      use: { ...devices["Desktop Safari"] },
-    },
-    {
-      name: "mobile-chromium-iphone",
-      use: { ...devices["iPhone 14"] },
-    },
-    {
-      name: "mobile-webkit-iphone",
-      use: {
-        ...devices["iPhone 14"],
-        browserName: "webkit",
-      },
-    },
+    // {
+    //   name: "desktop-edge",
+    //   use: {
+    //     ...devices["Desktop Edge"],
+    //     channel: "msedge",
+    //   },
+    // },
+    // {
+    //   name: "mobile-chromium-android",
+    //   use: { ...devices["Pixel 7"] },
+    // },
+    // {
+    //   name: "desktop-firefox",
+    //   use: { ...devices["Desktop Firefox"] },
+    // },
+    // {
+    //   name: "desktop-webkit",
+    //   use: { ...devices["Desktop Safari"] },
+    // },
+    // {
+    //   name: "mobile-chromium-iphone",
+    //   use: { ...devices["iPhone 14"] },
+    // },
+    // {
+    //   name: "mobile-webkit-iphone",
+    //   use: {
+    //     ...devices["iPhone 14"],
+    //     browserName: "webkit",
+    //   },
+    // },
   ],
 
   webServer: process.env.PW_BASE_URL

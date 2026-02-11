@@ -29,11 +29,15 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.11.1",
     "@playwright/test": "^1.58.0",
+    "@types/chance": "^1.1.7",
     "@types/node": "^25.2.3",
     "@typescript-eslint/parser": "^8.54.0",
     "baseline-browser-mapping": "^2.9.19",
     "dotenv-cli": "^11.0.0",
     "execa": "^9.6.1",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "chance": "^1.1.13"
   }
 }
