@@ -1,25 +1,20 @@
-import "dotenv/config";
+import dotenv from "dotenv";
 import { defineConfig, devices } from "@playwright/test";
 
-const PORT = Number(process.env.PORT || 3000);
-const BASE_URL = process.env.PW_BASE_URL || `http://localhost:${PORT}`;
-const NEXT_APP_DIR = process.env.NEXT_APP_DIR || "..";
+// Load local env first (WP_DOCKER_CWD, PW_BASE_URL)
+dotenv.config({ path: ".env.local" });
+dotenv.config();
 
-const commonEnv = {
-  ...process.env,
-  AUTH_STRATEGY: "stub",
-  API_STUB_ENABLED: "true",
-};
+const BASE_URL = process.env.PW_BASE_URL || "http://localhost:8080";
 
 export default defineConfig({
   testDir: "tests",
-
+  // Runs once before the suite (theme activation, etc)
+  globalSetup: require.resolve("./src/global-setup-wp"),
   timeout: 30_000,
   expect: { timeout: 10_000 },
-
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 2 : 4,
 
@@ -38,49 +33,11 @@ export default defineConfig({
   },
 
   projects: [
-    {
-      name: "desktop-chromium",
-      use: { ...devices["Desktop Chrome"] },
-    },
-    // {
-    //   name: "desktop-edge",
-    //   use: {
-    //     ...devices["Desktop Edge"],
-    //     channel: "msedge",
-    //   },
-    // },
-    // {
-    //   name: "mobile-chromium-android",
-    //   use: { ...devices["Pixel 7"] },
-    // },
-    // {
-    //   name: "desktop-firefox",
-    //   use: { ...devices["Desktop Firefox"] },
-    // },
-    // {
-    //   name: "desktop-webkit",
-    //   use: { ...devices["Desktop Safari"] },
-    // },
-    // {
-    //   name: "mobile-chromium-iphone",
-    //   use: { ...devices["iPhone 14"] },
-    // },
-    // {
-    //   name: "mobile-webkit-iphone",
-    //   use: {
-    //     ...devices["iPhone 14"],
-    //     browserName: "webkit",
-    //   },
-    // },
+    { name: "desktop-chromium", use: { ...devices["Desktop Chrome"] } },
+    // Add these back when you’re ready:
+    // { name: "desktop-firefox", use: { ...devices["Desktop Firefox"] } },
+    // { name: "desktop-webkit", use: { ...devices["Desktop Safari"] } },
+    // { name: "mobile-chromium", use: { ...devices["Pixel 7"] } },
+    // { name: "mobile-webkit", use: { ...devices["iPhone 14"] } },
   ],
-
-  webServer: process.env.PW_BASE_URL
-    ? undefined
-    : {
-        command: `npm --prefix ${NEXT_APP_DIR} run dev -- -p ${PORT}`,
-        url: BASE_URL,
-        reuseExistingServer: false,
-        timeout: 120_000,
-        env: commonEnv,
-      },
 });

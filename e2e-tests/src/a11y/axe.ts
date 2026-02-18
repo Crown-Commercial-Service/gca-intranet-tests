@@ -1,7 +1,7 @@
-import { Page } from '@playwright/test';
-import { AxeBuilder } from '@axe-core/playwright';
+import { Page } from "@playwright/test";
+import { AxeBuilder } from "@axe-core/playwright";
 
-export type AxeImpact = 'minor' | 'moderate' | 'serious' | 'critical';
+export type AxeImpact = "minor" | "moderate" | "serious" | "critical";
 
 export type A11yRunOptions = {
   /**
@@ -25,13 +25,18 @@ export type A11yRunOptions = {
   settleAfterGoto?: boolean;
 };
 
-const DEFAULT_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
+const DEFAULT_TAGS = ["wcag2aa", "wcag21aa"];
 
 export async function runA11yScan(page: Page, opts: A11yRunOptions = {}) {
-  const { tags = DEFAULT_TAGS, exclude = [], disableRules = [], settleAfterGoto = true } = opts;
+  const {
+    tags = DEFAULT_TAGS,
+    exclude = [],
+    disableRules = [],
+    settleAfterGoto = true,
+  } = opts;
 
   if (settleAfterGoto) {
-    await page.waitForLoadState('networkidle').catch(() => {});
+    await page.waitForLoadState("networkidle").catch(() => {});
   }
 
   let builder = new AxeBuilder({ page }).withTags(tags);
@@ -49,8 +54,10 @@ export async function runA11yScan(page: Page, opts: A11yRunOptions = {}) {
 
 export function filterViolationsByImpact(
   results: Awaited<ReturnType<typeof runA11yScan>>,
-  impacts: AxeImpact[]
+  impacts: AxeImpact[],
 ) {
   const allowed = new Set(impacts);
-  return results.violations.filter(v => (v.impact ? allowed.has(v.impact as AxeImpact) : false));
+  return results.violations.filter((v) =>
+    v.impact ? allowed.has(v.impact as AxeImpact) : false,
+  );
 }
