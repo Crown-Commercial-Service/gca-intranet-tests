@@ -44,6 +44,8 @@ export default class Post {
 }
 
 class PostBuilder {
+  private runId?: string;
+
   private props: PostProps = {
     title: this.randomTitleWithin(60),
     content: this.randomParagraphWithin(400),
@@ -52,13 +54,30 @@ class PostBuilder {
     createdAt: new Date(),
   };
 
+  private applyRunId(title: string): string {
+    const runId = this.runId || process.env.PW_RUN_ID;
+    if (!runId) return title;
+
+    // don't double-append
+    if (title.includes(runId)) return title;
+
+    return `${title} ${runId}`.trim();
+  }
+
+  withRunId(runId: string): this {
+    this.runId = runId;
+    // also apply immediately if title already set
+    this.props.title = this.applyRunId(this.props.title);
+    return this;
+  }
+
   withTitle(title: string): this {
-    this.props.title = title;
+    this.props.title = this.applyRunId(title);
     return this;
   }
 
   withFixedTitle(title: string): this {
-    this.props.title = title;
+    this.props.title = this.applyRunId(title);
     return this;
   }
 
@@ -94,17 +113,17 @@ class PostBuilder {
 
   // title helpers
   withTitleMaxChars(max: number): this {
-    this.props.title = this.randomTitleWithin(max);
+    this.props.title = this.applyRunId(this.randomTitleWithin(max));
     return this;
   }
 
   withTitleExactChars(exact: number): this {
-    this.props.title = this.randomTitleExact(exact);
+    this.props.title = this.applyRunId(this.randomTitleExact(exact));
     return this;
   }
 
   withTitleOverLimit(limit: number, overBy: number = 1): this {
-    this.props.title = this.randomTitleExact(limit + overBy);
+    this.props.title = this.applyRunId(this.randomTitleExact(limit + overBy));
     return this;
   }
 
@@ -147,7 +166,9 @@ class PostBuilder {
   }
 
   build(): Post {
-    return new Post(this.props);
+    const props: PostProps = { ...this.props };
+    props.title = this.applyRunId(props.title);
+    return new Post(props);
   }
 
   // helpers

@@ -6,16 +6,13 @@
   "main": "",
   "scripts": {
     "test": "playwright test",
-    "test:ui": "playwright test --browser=chromium",
+    "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
     "test:smoke": "playwright test tests/smoke.spec.ts",
     "test:report": "playwright show-report",
-    "test:dev": "dotenv -e .env.dev -- playwright test",
-    "test:dev:headed": "dotenv -e .env.dev -- playwright test --headed",
-    "test:dev:smoke": "dotenv -e .env.dev -- playwright test tests/a11y/accessibility.spec.ts",
-    "test:a11y": "playwright test tests/a11y",
-    "test:a11y:dev": "dotenv -e .env.dev -- playwright test tests/a11y",
-    "test:a11y:ci": "playwright test tests/a11y"
+    "test:a11y": "PW_TEST_SUITE=a11y playwright test -c playwright.a11y.config.ts",
+    "test:a11y:ui": "playwright test -c playwright.a11y.config.ts --ui",
+    "test:a11y:headed": "playwright test -c playwright.a11y.config.ts --headed"
   },
   "keywords": [
     "playwright",
@@ -35,10 +32,12 @@
     "baseline-browser-mapping": "^2.9.19",
     "dotenv-cli": "^11.0.0",
     "execa": "^9.6.1",
+    "pino-pretty": "^13.1.3",
     "typescript": "^5.9.3"
   },
   "dependencies": {
     "chance": "^1.1.13",
-    "dayjs": "^1.11.19"
+    "dayjs": "^1.11.19",
+    "pino": "^10.3.1"
   }
 }

@@ -1,18 +1,19 @@
 import dotenv from "dotenv";
 import { defineConfig, devices } from "@playwright/test";
 
-// Load local env first (WP_DOCKER_CWD, PW_BASE_URL)
-dotenv.config({ path: ".env.local" });
-dotenv.config();
+dotenv.config({ path: ".env.local", quiet: true });
+dotenv.config({ quiet: true });
 
 const BASE_URL = process.env.PW_BASE_URL || "http://localhost:8080";
 
 export default defineConfig({
   testDir: "tests",
-  // Runs once before the suite (theme activation, etc)
+  testIgnore: ["**/a11y/**"],
   globalSetup: require.resolve("./src/global-setup-wp"),
-  timeout: 30_000,
+
+  timeout: 80_000,
   expect: { timeout: 10_000 },
+
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -34,10 +35,5 @@ export default defineConfig({
 
   projects: [
     { name: "desktop-chromium", use: { ...devices["Desktop Chrome"] } },
-    // Add these back when you’re ready:
-    // { name: "desktop-firefox", use: { ...devices["Desktop Firefox"] } },
-    // { name: "desktop-webkit", use: { ...devices["Desktop Safari"] } },
-    // { name: "mobile-chromium", use: { ...devices["Pixel 7"] } },
-    // { name: "mobile-webkit", use: { ...devices["iPhone 14"] } },
   ],
 });

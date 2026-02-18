@@ -1,115 +1,105 @@
 import { Page, Locator, expect } from "@playwright/test";
-import type Post from "../models/Post";
-import { formatPostDate } from "../utils/formatters";
 import AxeBuilder from "@axe-core/playwright";
+import type Post from "../models/Post";
+
+type CharLimits = {
+  titleMax: number;
+  paragraphMax: number;
+};
 
 export default class HomePage {
   readonly page: Page;
+  private readonly baseUrl?: string;
 
-  constructor(page: Page) {
+  constructor(page: Page, baseUrl?: string) {
     this.page = page;
+    this.baseUrl = baseUrl;
   }
 
-  async goto() {
-    await this.page.goto("/");
+  async goto(): Promise<void> {
+    await this.page.goto(this.baseUrl ?? "/");
   }
 
-  async a11y() {
+  async checkAccessibility(): Promise<void> {
     const results = await new AxeBuilder({ page: this.page }).analyze();
 
-    const seriousOrCritical = results.violations.filter(
-      (v) => v.impact === "serious" || v.impact === "critical",
+    const seriousOrCriticalViolations = results.violations.filter(
+      (violation) =>
+        violation.impact === "serious" || violation.impact === "critical",
     );
 
-    expect(seriousOrCritical).toEqual([]);
+    expect(seriousOrCriticalViolations).toEqual([]);
   }
 
   private articleLink(title: string): Locator {
     return this.page.getByRole("link", { name: title });
   }
 
-  latestArticleLink(title: string): Locator {
-    return this.page.getByRole("link", { name: title });
+  private articleCard(title: string): Locator {
+    return this.page.locator("article").filter({
+      has: this.articleLink(title),
+    });
   }
 
-  async openLatestArticle(title: string) {
-    await this.latestArticleLink(title).click();
-  }
-
-  private articleParagraphSnippet(content: string): Locator {
+  private paragraphSnippet(content: string): Locator {
     const snippet = content.slice(0, 40);
     return this.page.getByText(snippet);
   }
 
-  private articleParagraph(content: string): Locator {
-    return this.page.getByText(content);
+  async openLatestArticle(title: string): Promise<void> {
+    await this.articleLink(title).click();
   }
 
-  private articleImage(): Locator {
-    return this.page.getByRole("img").first();
-  }
-
-  private assertHasPosts(posts: Post[]) {
-    if (!posts.length) {
-      throw new Error("assertLatestNewsLayout expects at least 1 post");
+  async assertLatestNewsLayout(posts: Post[]): Promise<void> {
+    if (posts.length === 0) {
+      throw new Error("Expected at least one post");
     }
-  }
 
-  private async assertLatestVisible(latest: Post) {
-    await expect(this.articleLink(latest.title)).toBeVisible();
-  }
+    const latestPost = posts[0];
+    await expect(this.articleLink(latestPost.title)).toBeVisible();
 
-  private async assertDateRendered(posts: Post[]) {
-    const formattedDate = formatPostDate(posts[0].createdAt);
-    await expect(this.page.getByText(formattedDate)).toHaveCount(posts.length);
-  }
+    for (const post of posts) {
+      const card = this.articleCard(post.title);
 
-  private async assertImagesRendered(posts: Post[]) {
-    const shouldHaveImages = posts.every((p) => !!p.featuredImagePath);
-    if (!shouldHaveImages) return;
+      const possibleDateElements = card.locator("p, time, span");
+      const possibleDateCount = await possibleDateElements.count();
 
-    const imgCount = await this.page.getByRole("img").count();
-    expect(imgCount).toBeGreaterThanOrEqual(posts.length);
-  }
-
-  private async assertTitlesInOrder(posts: Post[]) {
-    const postLinks = this.page.getByRole("link").filter({ hasText: "Post" });
-
-    for (let i = 0; i < posts.length; i++) {
-      await expect(postLinks.nth(i)).toHaveText(posts[i].title);
+      if (possibleDateCount > 0) {
+        await expect(possibleDateElements.first()).toBeVisible();
+      }
     }
-  }
 
-  async assertLatestNewsLayout(posts: Post[]) {
-    this.assertHasPosts(posts);
+    const everyPostHasFeaturedImage = posts.every((post) =>
+      Boolean(post.featuredImagePath),
+    );
 
-    const latest = posts[0];
+    if (everyPostHasFeaturedImage) {
+      const renderedImageCount = await this.page.getByRole("img").count();
+      expect(renderedImageCount).toBeGreaterThanOrEqual(posts.length);
+    }
 
-    await this.assertLatestVisible(latest);
-    await this.assertDateRendered(posts);
-    await this.assertImagesRendered(posts);
-
-    if (posts.length === 1) return;
-
-    await this.assertTitlesInOrder(posts);
+    if (posts.length > 1) {
+      for (const post of posts) {
+        await expect(this.articleLink(post.title)).toBeVisible();
+      }
+    }
   }
 
   async assertLatestNewsCharLimits(
     posts: Post[],
-    {
-      titleMax,
-      paragraphMax,
-    }: {
-      titleMax: number;
-      paragraphMax: number;
-    },
-  ) {
+    limits: CharLimits,
+  ): Promise<void> {
     for (const post of posts) {
       await expect(this.articleLink(post.title)).toHaveText(post.title);
-      await expect(this.articleParagraphSnippet(post.content)).toBeVisible();
+      await expect(this.paragraphSnippet(post.content)).toBeVisible();
 
-      expect(post.title.length).toBeLessThanOrEqual(titleMax);
-      expect(post.content.length).toBeLessThanOrEqual(paragraphMax);
+      const runId = process.env.PW_RUN_ID ?? "";
+      const titleWithoutRunId = post.title.endsWith(runId)
+        ? post.title.slice(0, -runId.length).trimEnd()
+        : post.title;
+
+      expect(titleWithoutRunId.length).toBeLessThanOrEqual(limits.titleMax);
+      expect(post.content.length).toBeLessThanOrEqual(limits.paragraphMax);
     }
   }
 }

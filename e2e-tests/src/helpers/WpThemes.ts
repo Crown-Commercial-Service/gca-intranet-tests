@@ -1,32 +1,39 @@
-export type WpRunner = (args: string[]) => Promise<{
+type WpResult = {
   exitCode: number;
   stdout: string;
   stderr: string;
-}>;
+};
+
+export type WpRunner = (args: string[]) => Promise<WpResult>;
+
+function formatWpCliError(message: string, result: WpResult): Error {
+  const details = (result.stderr || result.stdout || "").trim();
+  return new Error(message + (details ? `\n\nWP-CLI output:\n${details}` : ""));
+}
 
 export default class WpThemes {
   constructor(private readonly wp: WpRunner) {}
 
   async activate(theme: string): Promise<void> {
-    const res = await this.wp(["theme", "activate", theme]);
+    const result = await this.wp(["theme", "activate", theme]);
 
-    if (res.exitCode !== 0) {
-      throw new Error(`Unable to activate theme "${theme}"`);
+    if (result.exitCode !== 0) {
+      throw formatWpCliError(`Unable to activate theme "${theme}"`, result);
     }
   }
 
   async active(): Promise<string> {
-    const res = await this.wp([
+    const result = await this.wp([
       "theme",
       "list",
       "--status=active",
       "--field=name",
     ]);
 
-    if (res.exitCode !== 0) {
-      throw new Error("Unable to determine active theme");
+    if (result.exitCode !== 0) {
+      throw formatWpCliError("Unable to determine active theme", result);
     }
 
-    return res.stdout.trim();
+    return result.stdout.trim();
   }
 }
