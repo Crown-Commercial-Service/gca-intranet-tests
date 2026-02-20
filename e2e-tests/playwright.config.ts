@@ -9,7 +9,9 @@ const BASE_URL = process.env.PW_BASE_URL || "http://localhost:8080";
 export default defineConfig({
   testDir: "tests",
   testIgnore: ["**/a11y/**"],
-  globalSetup: require.resolve("./src/global-setup-wp"),
+  globalSetup: process.env.PW_BASE_URL
+    ? undefined
+    : require.resolve("./src/global-setup-wp"),
 
   timeout: 80_000,
   expect: { timeout: 10_000 },

@@ -17,7 +17,9 @@ export default class HomePage {
   }
 
   async goto(): Promise<void> {
-    await this.page.goto(this.baseUrl ?? "/");
+    await this.page.goto(this.baseUrl ?? "/", {
+      waitUntil: "networkidle",
+    });
   }
 
   async checkAccessibility(): Promise<void> {

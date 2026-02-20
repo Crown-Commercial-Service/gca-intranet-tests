@@ -68,30 +68,37 @@ function resolveLocalPath(inputPath: string): PathResolution {
 
   const triedPaths: string[] = [];
 
-  const assetsRoot = (process.env.WP_ASSETS_CWD || "").trim();
-  if (assetsRoot) {
-    const candidate = path.resolve(assetsRoot, inputPath);
+  function tryPath(candidate: string): string | undefined {
     triedPaths.push(candidate);
-    if (fs.existsSync(candidate))
-      return { resolvedPath: candidate, triedPaths };
+    return fs.existsSync(candidate) ? candidate : undefined;
   }
 
-  const fromCurrentRepo = path.resolve(process.cwd(), inputPath);
-  triedPaths.push(fromCurrentRepo);
-  if (fs.existsSync(fromCurrentRepo)) {
-    return { resolvedPath: fromCurrentRepo, triedPaths };
+  const assetsRoot = (process.env.WP_ASSETS_CWD || "").trim();
+  if (assetsRoot) {
+    const found = tryPath(path.resolve(assetsRoot, inputPath));
+    if (found) return { resolvedPath: found, triedPaths };
   }
+
+  const e2eTestsRoot = path.resolve(__dirname, "../../");
+
+  const foundFromAssets = tryPath(
+    path.resolve(e2eTestsRoot, "assets", inputPath),
+  );
+  if (foundFromAssets) return { resolvedPath: foundFromAssets, triedPaths };
+
+  const foundFromE2eRoot = tryPath(path.resolve(e2eTestsRoot, inputPath));
+  if (foundFromE2eRoot) return { resolvedPath: foundFromE2eRoot, triedPaths };
+
+  const foundFromCwd = tryPath(path.resolve(process.cwd(), inputPath));
+  if (foundFromCwd) return { resolvedPath: foundFromCwd, triedPaths };
 
   const wordpressRepo = (process.env.WP_DOCKER_CWD || "").trim();
   if (wordpressRepo) {
-    const fromWordpressRepo = path.resolve(wordpressRepo, inputPath);
-    triedPaths.push(fromWordpressRepo);
-    if (fs.existsSync(fromWordpressRepo)) {
-      return { resolvedPath: fromWordpressRepo, triedPaths };
-    }
+    const foundFromWpRepo = tryPath(path.resolve(wordpressRepo, inputPath));
+    if (foundFromWpRepo) return { resolvedPath: foundFromWpRepo, triedPaths };
   }
 
-  return { resolvedPath: fromCurrentRepo, triedPaths };
+  return { resolvedPath: path.resolve(e2eTestsRoot, inputPath), triedPaths };
 }
 
 function formatWpCliFailure(message: string, result: WpResult): Error {
@@ -99,10 +106,211 @@ function formatWpCliFailure(message: string, result: WpResult): Error {
   return new Error(message + (details ? `\n\nWP-CLI output:\n${details}` : ""));
 }
 
+/**
+ * Driver selection (must match wpCli.ts behaviour)
+ */
+function wpDriver(): "docker" | "remote" {
+  const driver = (process.env.WP_DRIVER || "").toLowerCase().trim();
+  if (driver === "remote") return "remote";
+  if (driver === "docker") return "docker";
+
+  if (process.env.WP_REMOTE === "true") return "remote";
+
+  // Legacy heuristic fallback (only if no explicit driver):
+  // If PW_BASE_URL is set but WP_DOCKER_CWD isn't, assume remote.
+  const hasBaseUrl = Boolean((process.env.PW_BASE_URL || "").trim());
+  const hasDockerCwd = Boolean((process.env.WP_DOCKER_CWD || "").trim());
+  return hasBaseUrl && !hasDockerCwd ? "remote" : "docker";
+}
+
+function requireEnv(name: string): string {
+  const v = (process.env[name] || "").trim();
+  if (!v) throw new Error(`Missing env var: ${name}`);
+  return v;
+}
+
+type RestConfig = { baseUrl: string; username: string; password: string };
+
+function normalizeBaseUrl(url: string): string {
+  return url.replace(/\/+$/, "");
+}
+
+function getRestConfig(): RestConfig {
+  const baseUrl = normalizeBaseUrl(
+    (process.env.WP_REMOTE_BASE_URL || process.env.PW_BASE_URL || "").trim(),
+  );
+
+  if (!baseUrl) {
+    throw new Error(
+      "Remote WP driver selected but base URL missing. Set WP_REMOTE_BASE_URL (or PW_BASE_URL).",
+    );
+  }
+
+  const username = (
+    process.env.WP_API_USER ||
+    process.env.WP_QA_ADMIN_USER ||
+    process.env.WP_ADMIN_USER ||
+    ""
+  ).trim();
+
+  const password = (
+    process.env.WP_API_PASSWORD ||
+    process.env.WP_QA_ADMIN_PASSWORD ||
+    process.env.WP_ADMIN_APP_PASSWORD ||
+    process.env.WP_ADMIN_PASSWORD ||
+    ""
+  ).trim();
+
+  if (!username) {
+    throw new Error(
+      "Remote WP driver selected but username missing. Set WP_API_USER (recommended) or WP_QA_ADMIN_USER/WP_ADMIN_USER.",
+    );
+  }
+
+  if (!password) {
+    throw new Error(
+      "Remote WP driver selected but password missing. Set WP_API_PASSWORD (recommended: Application Password) or WP_QA_ADMIN_PASSWORD/WP_ADMIN_APP_PASSWORD/WP_ADMIN_PASSWORD.",
+    );
+  }
+
+  return { baseUrl, username, password };
+}
+
+function basicAuthHeader(cfg: RestConfig): string {
+  const token = Buffer.from(`${cfg.username}:${cfg.password}`).toString(
+    "base64",
+  );
+  return `Basic ${token}`;
+}
+
+async function wpRest<T>(
+  cfg: RestConfig,
+  method: "GET" | "POST" | "DELETE",
+  urlPath: string,
+  body?: any,
+): Promise<T> {
+  const url = `${cfg.baseUrl}${urlPath.startsWith("/") ? "" : "/"}${urlPath}`;
+  const res = await fetch(url, {
+    method,
+    headers: {
+      Authorization: basicAuthHeader(cfg),
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+  const text = await res.text();
+  if (!res.ok) {
+    throw new Error(`WP REST ${method} ${url} failed (${res.status})\n${text}`);
+  }
+
+  return text ? (JSON.parse(text) as T) : (undefined as T);
+}
+
+function guessMimeType(filePath: string): string {
+  const ext = path.extname(filePath).toLowerCase();
+  switch (ext) {
+    case ".jpg":
+    case ".jpeg":
+      return "image/jpeg";
+    case ".png":
+      return "image/png";
+    case ".gif":
+      return "image/gif";
+    case ".webp":
+      return "image/webp";
+    case ".svg":
+      return "image/svg+xml";
+    default:
+      return "application/octet-stream";
+  }
+}
+
+async function uploadMedia(
+  cfg: RestConfig,
+  localFilePath: string,
+): Promise<number> {
+  const fileName = path.basename(localFilePath);
+  const bytes = await fs.promises.readFile(localFilePath);
+  const mime = guessMimeType(localFilePath);
+
+  const url = `${cfg.baseUrl}/wp-json/wp/v2/media`;
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: basicAuthHeader(cfg),
+      "Content-Disposition": `attachment; filename="${fileName}"`,
+      "Content-Type": mime,
+      Accept: "application/json",
+    },
+    body: bytes,
+  });
+
+  const text = await res.text();
+  if (!res.ok) {
+    throw new Error(`WP REST POST ${url} failed (${res.status})\n${text}`);
+  }
+
+  const json = text ? (JSON.parse(text) as any) : {};
+  const id = Number(json?.id);
+  if (!Number.isFinite(id)) {
+    throw new Error(`Failed to parse media id from response: ${text}`);
+  }
+  return id;
+}
+
 export default class WpPosts {
   constructor(private readonly wp: (args: string[]) => Promise<WpResult>) {}
 
   async create(post: Post): Promise<number> {
+    if (wpDriver() === "remote") {
+      const cfg = getRestConfig();
+
+      let featuredMediaId: number | undefined;
+
+      if (post.featuredImagePath) {
+        const { resolvedPath, triedPaths } = resolveLocalPath(
+          post.featuredImagePath,
+        );
+
+        if (!fs.existsSync(resolvedPath)) {
+          throw new Error(
+            [
+              `Featured image not found: ${post.featuredImagePath}`,
+              `Tried:`,
+              ...triedPaths.map((p) => `- ${p}`),
+              ``,
+              `Fix: set WP_ASSETS_CWD to the folder that contains the assets.`,
+            ].join("\n"),
+          );
+        }
+
+        featuredMediaId = await uploadMedia(cfg, resolvedPath);
+      }
+
+      const isPage = post.type === "page";
+      const endpoint = isPage ? "/wp-json/wp/v2/pages" : "/wp-json/wp/v2/posts";
+
+      const created = await wpRest<any>(cfg, "POST", endpoint, {
+        title: post.title,
+        content: post.content,
+        status: post.status,
+        ...(featuredMediaId ? { featured_media: featuredMediaId } : {}),
+      });
+
+      const id = Number(created?.id);
+      if (!Number.isFinite(id)) {
+        throw new Error(
+          `Failed to parse post id from REST response: ${JSON.stringify(created)}`,
+        );
+      }
+
+      return id;
+    }
+
+    // Local/Docker: WP-CLI
     const createResult = await this.wp([
       "post",
       "create",
@@ -132,11 +340,66 @@ export default class WpPosts {
   }
 
   async clearAll(): Promise<void> {
+    if (wpDriver() === "remote") {
+      // Intentionally NOT supported on QA (too risky to delete everything).
+      return;
+    }
+
     await this.deletePostsByType("post");
     await this.deletePostsByType("attachment");
   }
 
   async clearByRunId(runId: string): Promise<void> {
+    if (!runId) return;
+
+    if (wpDriver() === "remote") {
+      const cfg = getRestConfig();
+
+      // Posts
+      const posts = await wpRest<any[]>(
+        cfg,
+        "GET",
+        `/wp-json/wp/v2/posts?search=${encodeURIComponent(runId)}&per_page=100`,
+      );
+
+      for (const p of posts) {
+        const id = Number(p?.id);
+        if (Number.isFinite(id)) {
+          await wpRest(cfg, "DELETE", `/wp-json/wp/v2/posts/${id}?force=true`);
+        }
+      }
+
+      // Pages (in case tests ever seed pages)
+      const pages = await wpRest<any[]>(
+        cfg,
+        "GET",
+        `/wp-json/wp/v2/pages?search=${encodeURIComponent(runId)}&per_page=100`,
+      );
+
+      for (const p of pages) {
+        const id = Number(p?.id);
+        if (Number.isFinite(id)) {
+          await wpRest(cfg, "DELETE", `/wp-json/wp/v2/pages/${id}?force=true`);
+        }
+      }
+
+      // Attachments (best-effort: search by runId)
+      const media = await wpRest<any[]>(
+        cfg,
+        "GET",
+        `/wp-json/wp/v2/media?search=${encodeURIComponent(runId)}&per_page=100`,
+      );
+
+      for (const m of media) {
+        const id = Number(m?.id);
+        if (Number.isFinite(id)) {
+          await wpRest(cfg, "DELETE", `/wp-json/wp/v2/media/${id}?force=true`);
+        }
+      }
+
+      return;
+    }
+
     const listResult = await this.wp([
       "post",
       "list",
@@ -152,6 +415,18 @@ export default class WpPosts {
   }
 
   async getPublishedDate(postId: number): Promise<string> {
+    if (wpDriver() === "remote") {
+      const cfg = getRestConfig();
+      const post = await wpRest<any>(
+        cfg,
+        "GET",
+        `/wp-json/wp/v2/posts/${postId}?_fields=date`,
+      );
+      const date = String(post?.date || "").trim();
+      if (!date) throw new Error(`Missing date for post ${postId}`);
+      return date;
+    }
+
     const result = await this.wp([
       "post",
       "get",
@@ -211,7 +486,7 @@ export default class WpPosts {
           `Tried:`,
           ...triedPaths.map((p) => `- ${p}`),
           ``,
-          `Fix: set WP_ASSETS_CWD to the repo that contains the assets path.`,
+          `Fix: set WP_ASSETS_CWD to the folder that contains the assets.`,
         ].join("\n"),
       );
     }
