@@ -150,6 +150,7 @@ function getRestConfig(): RestConfig {
     process.env.WP_API_USER ||
     process.env.WP_QA_ADMIN_USER ||
     process.env.WP_ADMIN_USER ||
+    process.env.WP_USER ||
     ""
   ).trim();
 
@@ -158,18 +159,19 @@ function getRestConfig(): RestConfig {
     process.env.WP_QA_ADMIN_PASSWORD ||
     process.env.WP_ADMIN_APP_PASSWORD ||
     process.env.WP_ADMIN_PASSWORD ||
+    process.env.WP_PASSWORD ||
     ""
   ).trim();
 
   if (!username) {
     throw new Error(
-      "Remote WP driver selected but username missing. Set WP_API_USER (recommended) or WP_QA_ADMIN_USER/WP_ADMIN_USER.",
+      "Remote WP driver selected but username missing. Set WP_API_USER (recommended) or WP_QA_ADMIN_USER/WP_ADMIN_USER/WP_USER.",
     );
   }
 
   if (!password) {
     throw new Error(
-      "Remote WP driver selected but password missing. Set WP_API_PASSWORD (recommended: Application Password) or WP_QA_ADMIN_PASSWORD/WP_ADMIN_APP_PASSWORD/WP_ADMIN_PASSWORD.",
+      "Remote WP driver selected but password missing. Set WP_API_PASSWORD (recommended: Application Password) or WP_QA_ADMIN_PASSWORD/WP_ADMIN_APP_PASSWORD/WP_ADMIN_PASSWORD/WP_PASSWORD.",
     );
   }
 
@@ -202,7 +204,14 @@ async function wpRest<T>(
 
   const text = await res.text();
   if (!res.ok) {
-    throw new Error(`WP REST ${method} ${url} failed (${res.status})\n${text}`);
+    // Make auth/permission errors more actionable
+    const hint =
+      res.status === 401 || res.status === 403
+        ? `\n\nHint: For WP REST writes on QA, prefer a WordPress "Application Password" and set WP_API_USER + WP_API_PASSWORD. Also verify the user truly has the right role/capabilities in that environment.`
+        : "";
+    throw new Error(
+      `WP REST ${method} ${url} failed (${res.status})\n${text}${hint}`,
+    );
   }
 
   return text ? (JSON.parse(text) as T) : (undefined as T);
@@ -250,7 +259,13 @@ async function uploadMedia(
 
   const text = await res.text();
   if (!res.ok) {
-    throw new Error(`WP REST POST ${url} failed (${res.status})\n${text}`);
+    const hint =
+      res.status === 401 || res.status === 403
+        ? `\n\nHint: Media upload requires REST permissions. Use an Application Password (WP_API_PASSWORD) for an admin/editor user.`
+        : "";
+    throw new Error(
+      `WP REST POST ${url} failed (${res.status})\n${text}${hint}`,
+    );
   }
 
   const json = text ? (JSON.parse(text) as any) : {};
@@ -259,6 +274,28 @@ async function uploadMedia(
     throw new Error(`Failed to parse media id from response: ${text}`);
   }
   return id;
+}
+
+function toEnvKey(type: string): string {
+  return type.replace(/[^a-z0-9]+/gi, "_").toUpperCase();
+}
+
+/**
+ * REST endpoint mapping:
+ * - post => posts
+ * - page => pages
+ * - custom => default to the type itself (e.g. "work-update" => "work-update")
+ *   override via WP_REST_ENDPOINT_WORK_UPDATE=work-updates (example)
+ */
+function restEndpointForType(type: string): string {
+  if (type === "post") return "posts";
+  if (type === "page") return "pages";
+
+  const envKey = `WP_REST_ENDPOINT_${toEnvKey(type)}`;
+  const override = (process.env[envKey] || "").trim();
+  if (override) return override;
+
+  return type;
 }
 
 export default class WpPosts {
@@ -290,8 +327,7 @@ export default class WpPosts {
         featuredMediaId = await uploadMedia(cfg, resolvedPath);
       }
 
-      const isPage = post.type === "page";
-      const endpoint = isPage ? "/wp-json/wp/v2/pages" : "/wp-json/wp/v2/posts";
+      const endpoint = `/wp-json/wp/v2/${restEndpointForType(String(post.type))}`;
 
       const created = await wpRest<any>(cfg, "POST", endpoint, {
         title: post.title,
@@ -355,47 +391,41 @@ export default class WpPosts {
     if (wpDriver() === "remote") {
       const cfg = getRestConfig();
 
-      // Posts
-      const posts = await wpRest<any[]>(
-        cfg,
-        "GET",
-        `/wp-json/wp/v2/posts?search=${encodeURIComponent(runId)}&per_page=100`,
-      );
+      async function deleteBySearch(endpoint: string) {
+        const items = await wpRest<any[]>(
+          cfg,
+          "GET",
+          `${endpoint}?search=${encodeURIComponent(runId)}&per_page=100`,
+        );
 
-      for (const p of posts) {
-        const id = Number(p?.id);
-        if (Number.isFinite(id)) {
-          await wpRest(cfg, "DELETE", `/wp-json/wp/v2/posts/${id}?force=true`);
+        for (const item of items) {
+          const id = Number(item?.id);
+          if (Number.isFinite(id)) {
+            await wpRest(cfg, "DELETE", `${endpoint}/${id}?force=true`);
+          }
         }
       }
 
-      // Pages (in case tests ever seed pages)
-      const pages = await wpRest<any[]>(
-        cfg,
-        "GET",
-        `/wp-json/wp/v2/pages?search=${encodeURIComponent(runId)}&per_page=100`,
-      );
+      // Standard types
+      await deleteBySearch(`/wp-json/wp/v2/posts`);
+      await deleteBySearch(`/wp-json/wp/v2/pages`);
 
-      for (const p of pages) {
-        const id = Number(p?.id);
-        if (Number.isFinite(id)) {
-          await wpRest(cfg, "DELETE", `/wp-json/wp/v2/pages/${id}?force=true`);
+      // Optional custom types (comma-separated), e.g. WP_REST_CUSTOM_TYPES=work-update
+      const raw = (process.env.WP_REST_CUSTOM_TYPES || "").trim();
+      if (raw) {
+        const types = raw
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean);
+
+        for (const t of types) {
+          const endpoint = `/wp-json/wp/v2/${restEndpointForType(t)}`;
+          await deleteBySearch(endpoint);
         }
       }
 
       // Attachments (best-effort: search by runId)
-      const media = await wpRest<any[]>(
-        cfg,
-        "GET",
-        `/wp-json/wp/v2/media?search=${encodeURIComponent(runId)}&per_page=100`,
-      );
-
-      for (const m of media) {
-        const id = Number(m?.id);
-        if (Number.isFinite(id)) {
-          await wpRest(cfg, "DELETE", `/wp-json/wp/v2/media/${id}?force=true`);
-        }
-      }
+      await deleteBySearch(`/wp-json/wp/v2/media`);
 
       return;
     }

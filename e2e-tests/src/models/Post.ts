@@ -3,7 +3,11 @@ import Chance from "chance";
 const chance = new Chance();
 
 export type PostStatus = "draft" | "publish" | "private" | "pending";
-export type PostType = "post" | "page";
+
+/**
+ * Supports core types + custom post types (e.g. "work-update").
+ */
+export type PostType = "post" | "page" | (string & {});
 
 export type PostProps = {
   title: string;
@@ -40,6 +44,13 @@ export default class Post {
 
   static aPage(): PostBuilder {
     return new PostBuilder().withType("page");
+  }
+
+  /**
+   * Custom post type used by GCA.
+   */
+  static aWorkUpdate(): PostBuilder {
+    return new PostBuilder().withType("work-update");
   }
 }
 
