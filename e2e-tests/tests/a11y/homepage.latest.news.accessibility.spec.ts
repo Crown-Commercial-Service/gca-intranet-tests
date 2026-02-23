@@ -1,10 +1,12 @@
-import { test } from "../../src/wp.fixtures";
+import { test, expect } from "../../src/wp.fixtures";
+import AxeBuilder from "@axe-core/playwright";
 import Post from "../../src/models/Post";
 
 test.describe("Accessibility smoke", () => {
-  test.skip("homepage has no serious or critical violations", async ({
+  test("latest news column has no serious or critical violations", async ({
     homepage,
     wp,
+    page,
   }) => {
     const post1 = Post.aPost()
       .withFixedTitle("Post 1")
@@ -32,6 +34,15 @@ test.describe("Accessibility smoke", () => {
     await wp.posts.create(post4);
 
     await homepage.goto();
-    await homepage.a11y();
+
+    const results = await new AxeBuilder({ page })
+      .include('[data-testid="latest-news-column"]')
+      .analyze();
+
+    const seriousOrCritical = results.violations.filter(
+      (v) => v.impact === "serious" || v.impact === "critical",
+    );
+
+    expect(seriousOrCritical).toEqual([]);
   });
 });
