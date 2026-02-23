@@ -1,5 +1,6 @@
 import type { AxeResults } from "axe-core";
 import { createHtmlReport } from "axe-html-reporter";
+import fs from "fs";
 import path from "path";
 
 type ReportOpts = {
@@ -14,6 +15,8 @@ export function writeAxeHtmlReport(
 ): void {
   const outputDir =
     opts.outputDir ?? path.resolve(process.cwd(), "test-results/axe");
+
+  fs.mkdirSync(outputDir, { recursive: true });
 
   createHtmlReport({
     results,
