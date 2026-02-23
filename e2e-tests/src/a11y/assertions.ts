@@ -1,6 +1,7 @@
 import { expect, Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { runA11yScan } from "./axe";
+import { writeAxeHtmlReport } from "./axeReport";
 
 type AxeViolation = {
   id: string;
@@ -28,6 +29,8 @@ function getSeriousViolations(results: AxeResults): AxeViolation[] {
 export async function expectNoSeriousA11yViolations(page: Page) {
   const results = (await runA11yScan(page)) as AxeResults;
 
+  writeAxeHtmlReport(results as any, { fileName: "latest.html" });
+
   const critical = getCriticalViolations(results);
   const serious = getSeriousViolations(results);
 
@@ -42,6 +45,8 @@ export async function expectNoSeriousA11yViolationsForSelector(
   const results = (await new AxeBuilder({ page })
     .include(selector)
     .analyze()) as AxeResults;
+
+  writeAxeHtmlReport(results as any, { fileName: "latest.html" });
 
   const critical = getCriticalViolations(results);
   const serious = getSeriousViolations(results);
