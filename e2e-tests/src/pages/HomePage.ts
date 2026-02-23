@@ -1,6 +1,9 @@
 import { Page, Locator, expect } from "@playwright/test";
-import AxeBuilder from "@axe-core/playwright";
 import type Post from "../models/Post";
+import {
+  expectNoSeriousA11yViolations,
+  expectNoSeriousA11yViolationsForSelector,
+} from "../a11y/assertions";
 
 type CharLimits = {
   titleMax: number;
@@ -11,26 +14,27 @@ export default class HomePage {
   readonly page: Page;
   private readonly baseUrl?: string;
 
+  readonly latestNewsColumn: Locator;
+
   constructor(page: Page, baseUrl?: string) {
     this.page = page;
     this.baseUrl = baseUrl;
+    this.latestNewsColumn = this.page.getByTestId("latest-news-column");
   }
 
   async goto(): Promise<void> {
-    await this.page.goto(this.baseUrl ?? "/", {
-      waitUntil: "networkidle",
-    });
+    await this.page.goto(this.baseUrl ?? "/", { waitUntil: "networkidle" });
   }
 
   async checkAccessibility(): Promise<void> {
-    const results = await new AxeBuilder({ page: this.page }).analyze();
+    await expectNoSeriousA11yViolations(this.page);
+  }
 
-    const seriousOrCriticalViolations = results.violations.filter(
-      (violation) =>
-        violation.impact === "serious" || violation.impact === "critical",
+  async checkLatestNewsAccessibility(): Promise<void> {
+    await expectNoSeriousA11yViolationsForSelector(
+      this.page,
+      '[data-testid="latest-news-column"]',
     );
-
-    expect(seriousOrCriticalViolations).toEqual([]);
   }
 
   private articleLink(title: string): Locator {
