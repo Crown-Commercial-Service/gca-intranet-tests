@@ -50,7 +50,7 @@ export default class Post {
    * Custom post type used by GCA.
    */
   static aWorkUpdate(): PostBuilder {
-    return new PostBuilder().withType("work-update");
+    return new PostBuilder().withType("work_updates");
   }
 }
 
