@@ -14,6 +14,8 @@ import LatestNews from "../src/pages/LatestNews";
 import LatestNewsList from "../src/pages/LatestNewsList";
 import WorkUpdate from "../src/pages/WorkUpdate";
 import WorkUpdateList from "../src/pages/WorkUpdateList";
+import BlogPage from "../src/pages/BlogPage";
+import BlogListPage from "../src/pages/BlogListPage";
 
 type WpHelpers = {
   exec: typeof runWp;
@@ -33,6 +35,8 @@ type Fixtures = {
   latestNewsList: LatestNewsList;
   workUpdate: WorkUpdate;
   workUpdateList: WorkUpdateList;
+  blog: BlogPage;
+  blogList: BlogListPage;
 
   runId: string;
 };
@@ -187,6 +191,22 @@ export const test = base.extend<Fixtures>({
     const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
 
     await use(new WorkUpdateList(page, baseUrl));
+  },
+
+  blog: async ({ page }, use, testInfo) => {
+    const qaMode = isQaMode();
+    const parallel = qaMode ? false : await isParallelEnabled();
+    const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
+
+    await use(new BlogPage(page, baseUrl));
+  },
+
+  blogList: async ({ page }, use, testInfo) => {
+    const qaMode = isQaMode();
+    const parallel = qaMode ? false : await isParallelEnabled();
+    const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
+
+    await use(new BlogListPage(page, baseUrl));
   },
 });
 

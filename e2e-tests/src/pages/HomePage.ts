@@ -32,13 +32,26 @@ export default class HomePage {
   private readonly workUpdateDateTestId = "work-update-date";
   private readonly workUpdateSeeMoreLinkTestId = "work-updates-see-more-link";
 
+  private readonly blogsSectionTestId = "blogs-section";
+  private readonly blogCardTestId = "blogs-card";
+  private readonly blogAvatarTestId = "blogs-avatar";
+  private readonly blogLinkTestId = "blogs-link";
+  private readonly blogAuthorTestId = "blogs-author";
+  private readonly blogDateTestId = "blogs-date";
+  private readonly blogSeeMoreLinkTestId = "blogs-see-more-link";
+
   readonly latestNewsColumn: Locator;
   readonly workUpdatesSection: Locator;
   readonly workUpdateCards: Locator;
   readonly workUpdateSeeMoreLink: Locator;
 
+  readonly blogsSection: Locator;
+  readonly blogCard: Locator;
+  readonly blogSeeMoreLink: Locator;
+
   readonly latestNewsSectionSelector: string;
   readonly workUpdatesSectionSelector: string;
+  readonly blogsSectionSelector: string;
 
   private readonly latestNewsCardSelector: string;
 
@@ -60,8 +73,14 @@ export default class HomePage {
       this.workUpdateSeeMoreLinkTestId,
     );
 
+    this.blogsSection = this.page.getByTestId(this.blogsSectionTestId);
+    this.blogCard = this.blogsSection.getByTestId(this.blogCardTestId);
+
+    this.blogSeeMoreLink = this.page.getByRole("link", { name: "More blogs" });
+
     this.latestNewsSectionSelector = `[data-testid="${this.latestNewsColumnTestId}"]`;
     this.workUpdatesSectionSelector = `[data-testid="${this.workUpdatesSectionTestId}"]`;
+    this.blogsSectionSelector = `[data-testid="${this.blogsSectionTestId}"]`;
 
     this.latestNewsCardSelector = [
       `[data-testid="${this.latestNewsFeaturedCardTestId}"]`,
@@ -275,5 +294,68 @@ export default class HomePage {
       expectedAuthor ?? process.env.WP_USER ?? process.env.WP_API_USER;
 
     await expect(authorElement).toContainText(authorToAssert as string);
+  }
+
+  private blogCardByTitle(title: string): Locator {
+    return this.blogCard.filter({
+      has: this.page.getByRole("link", { name: title }),
+    });
+  }
+
+  private blogLinkByTitle(title: string): Locator {
+    return this.blogCardByTitle(title).getByTestId(this.blogLinkTestId);
+  }
+
+  async assertBlogsOnHomepage(post: Post): Promise<void> {
+    await expect(this.blogsSection).toBeVisible();
+    await expect(this.blogCard).toHaveCount(1);
+
+    const card = this.blogCardByTitle(post.title);
+
+    await expect(card).toHaveCount(1);
+    await expect(card).toBeVisible();
+
+    const link = card.getByTestId(this.blogLinkTestId);
+    await expect(link).toBeVisible();
+    await expect(link).toHaveText(post.title);
+
+    const avatar = card.getByTestId(this.blogAvatarTestId).locator("img");
+    await expect(avatar.first()).toBeVisible();
+
+    const expectedUser = (
+      process.env.WP_USER ||
+      process.env.WP_API_USER ||
+      ""
+    ).trim();
+
+    if (expectedUser) {
+      const author = card.getByTestId(this.blogAuthorTestId);
+      await expect(author).toContainText(expectedUser);
+    }
+
+    const date = card.getByTestId(this.blogDateTestId);
+    await expect(date).toBeVisible();
+
+    const uiDate = (await date.textContent())?.trim() ?? "";
+    const expectedDate = dayjs(post.createdAt).format("Do MMMM YYYY");
+    expect(uiDate).toBe(expectedDate);
+  }
+
+  async selectBlogLink(post: Post): Promise<void> {
+    const link = this.blogLinkByTitle(post.title);
+    await expect(link).toHaveCount(1);
+    await link.click();
+  }
+
+  async assertBlogCharLimits(post: Post, maxDisplayedChars: number) {
+    await expect(this.blogsSection).toBeVisible();
+
+    const link = this.blogLinkByTitle(post.title);
+    await expect(link).toHaveCount(1);
+
+    const uiTitle = await link.innerText();
+
+    expect(uiTitle.length).toBeLessThan(post.title.length);
+    expect(uiTitle.length).toBeLessThanOrEqual(maxDisplayedChars);
   }
 }
