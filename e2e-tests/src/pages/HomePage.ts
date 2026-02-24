@@ -20,6 +20,15 @@ export default class HomePage {
 
   readonly latestNewsColumn: Locator;
 
+  readonly workUpdatesColumn: Locator;
+  readonly workUpdatesSection: Locator;
+  readonly workUpdateCards: Locator;
+
+  readonly workUpdateAvatarImg: Locator;
+  readonly workUpdateLink: Locator;
+  readonly workUpdateAuthor: Locator;
+  readonly workUpdateDate: Locator;
+
   private readonly latestNewsColumnSelector =
     '[data-testid="latest-news-column"]';
   private readonly latestNewsCardSelector =
@@ -33,6 +42,23 @@ export default class HomePage {
     this.baseUrl = baseUrl;
 
     this.latestNewsColumn = this.page.getByTestId("latest-news-column");
+
+    this.workUpdatesColumn = this.page.getByTestId("work-updates-column");
+    this.workUpdatesSection = this.workUpdatesColumn.getByTestId(
+      "work-updates-section",
+    );
+    this.workUpdateCards =
+      this.workUpdatesSection.getByTestId("work-update-card");
+
+    const firstWorkUpdateCard = this.workUpdateCards.first();
+
+    this.workUpdateAvatarImg = firstWorkUpdateCard
+      .getByTestId("work-update-avatar")
+      .locator("img");
+    this.workUpdateLink = firstWorkUpdateCard.getByTestId("work-update-link");
+    this.workUpdateAuthor =
+      firstWorkUpdateCard.getByTestId("work-update-author");
+    this.workUpdateDate = firstWorkUpdateCard.getByTestId("work-update-date");
   }
 
   async goto(): Promise<void> {
@@ -48,6 +74,15 @@ export default class HomePage {
       this.page,
       this.latestNewsColumnSelector,
     );
+  }
+
+  private wpUser(): string {
+    return (
+      process.env.WP_USER ||
+      process.env.WP_API_USER ||
+      process.env.WP_QA_ADMIN_USER ||
+      ""
+    ).trim();
   }
 
   private articleLink(title: string): Locator {
@@ -105,9 +140,13 @@ export default class HomePage {
       expect(uiDate).toBe(expectedDate);
     }
 
-    const everyPostHasFeaturedImage = posts.every((post) =>
-      Boolean(post.featuredImagePath),
-    );
+    let everyPostHasFeaturedImage = true;
+    for (const post of posts) {
+      if (!post.featuredImagePath) {
+        everyPostHasFeaturedImage = false;
+        break;
+      }
+    }
 
     if (everyPostHasFeaturedImage) {
       const renderedImageCount = await this.page.getByRole("img").count();
@@ -119,6 +158,31 @@ export default class HomePage {
         await expect(this.articleLink(post.title)).toBeVisible();
       }
     }
+  }
+
+  async assertSingleWorkUpdateOnHomepage(post: Post): Promise<void> {
+    await expect(this.workUpdatesSection).toBeVisible();
+    await expect(this.workUpdateCards).toHaveCount(1);
+
+    await expect(this.workUpdateAvatarImg).toBeVisible();
+
+    await expect(this.workUpdateLink).toBeVisible();
+    await expect(this.workUpdateLink).toHaveText(post.title);
+
+    await expect(this.workUpdateAuthor).toBeVisible();
+
+    const wpUser = this.wpUser();
+    if (wpUser) {
+      await expect(this.workUpdateAuthor).toContainText(wpUser);
+    }
+
+    await expect(this.workUpdateDate).toBeVisible();
+    await expect(this.workUpdateDate).toHaveText(
+      dayjs(post.createdAt).format("Do MMMM YYYY"),
+    );
+
+    await this.workUpdateLink.click();
+    await expect(this.paragraphSnippet(post.content)).toBeVisible();
   }
 
   async assertLatestNewsCharLimits(

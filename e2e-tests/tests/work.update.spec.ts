@@ -8,7 +8,7 @@ test.describe("work updates", () => {
     homepage,
   }) => {
     const post = Post.aPost()
-      .withType("work_updates")
+      .withType("work_update")
       .withFixedTitle("E2E Work Update")
       .withParagraphMaxChars(180)
       .withStatus("publish");
@@ -17,9 +17,6 @@ test.describe("work updates", () => {
     expect(id).toBeGreaterThan(0);
 
     await homepage.goto();
-    await homepage.assertLatestNewsCharLimits([post], {
-      titleMax: 999,
-      paragraphMax: 999,
-    });
+    await homepage.assertSingleWorkUpdateOnHomepage(post);
   });
 });
