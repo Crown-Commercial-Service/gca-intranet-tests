@@ -1,5 +1,6 @@
 import { test, expect } from "../src/wp.fixtures";
 import Post from "../src/models/Post";
+import User from "../src/models/User";
 
 test.describe("work updates", () => {
   test("should display a single work update", async ({ wp, homepage }) => {
@@ -10,7 +11,6 @@ test.describe("work updates", () => {
       .withStatus("publish");
 
     await wp.posts.create(post);
-
     await homepage.goto();
     await homepage.assertWorkUpdateOnHomepage(post);
   });
@@ -26,7 +26,6 @@ test.describe("work updates", () => {
       .withStatus("publish");
 
     await wp.posts.create(post);
-
     await homepage.goto();
     await homepage.assertWorkUpdateCharLimits(post, 10);
   });
@@ -61,9 +60,7 @@ test.describe("work updates", () => {
     await wp.posts.create(post3);
     // latest post last
     await wp.posts.create(post4);
-
     await homepage.goto();
-
     await homepage.assertWorkUpdatesOrder([post4, post3]);
   });
 
@@ -74,9 +71,7 @@ test.describe("work updates", () => {
       .withStatus("publish");
 
     await wp.posts.create(post);
-
     await homepage.goto();
-
     await homepage.selectWorkItemLink(post);
 
     await expect(workUpdate.page).toHaveURL(/e2e-work-update-navigation/);
@@ -93,11 +88,37 @@ test.describe("work updates", () => {
       .withStatus("publish");
 
     await wp.posts.create(post);
-
     await homepage.goto();
-
     await homepage.workUpdateSeeMoreLink.click();
 
     await expect(workUpdate.page).toHaveURL(/work_update/);
+  });
+
+  test("can edit author details of a work update post", async ({
+    wp,
+    homepage,
+    runId,
+  }) => {
+    const post = Post.aPost()
+      .withType("work_updates")
+      .withFixedTitle("E2E Work Update Author Change")
+      .withStatus("publish");
+
+    const postId = await wp.posts.create(post);
+
+    await homepage.goto();
+    await homepage.assertWorkUpdateAuthor(post.title);
+
+    const newUser = User.anAdmin()
+      .withUsername(`e2e_author_${runId}`)
+      .withEmail(`e2e_author_${runId}@example.com`)
+      .withPassword("Password123!");
+
+    await wp.users.upsert(newUser);
+
+    await wp.posts.updatePostAuthor(postId, "work_updates", newUser.username);
+
+    await homepage.goto();
+    await homepage.assertWorkUpdateAuthor(post.title, newUser.username);
   });
 });

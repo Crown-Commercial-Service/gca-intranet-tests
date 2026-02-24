@@ -26,10 +26,17 @@ function getSeriousViolations(results: AxeResults): AxeViolation[] {
   );
 }
 
-export async function expectNoSeriousA11yViolations(page: Page) {
+export async function expectNoSeriousA11yViolations(
+  page: Page,
+  label: string = "full-page",
+) {
   const results = (await runA11yScan(page)) as AxeResults;
 
-  writeAxeHtmlReport(results as any, { fileName: "latest.html" });
+  writeAxeHtmlReport(results as any, {
+    fileName: `${label}.html`,
+    projectKey: label,
+    customSummary: `Accessibility scan for: ${label}`,
+  });
 
   const critical = getCriticalViolations(results);
   const serious = getSeriousViolations(results);
@@ -41,12 +48,17 @@ export async function expectNoSeriousA11yViolations(page: Page) {
 export async function expectNoSeriousA11yViolationsForSelector(
   page: Page,
   selector: string,
+  label: string,
 ) {
   const results = (await new AxeBuilder({ page })
     .include(selector)
     .analyze()) as AxeResults;
 
-  writeAxeHtmlReport(results as any, { fileName: "latest.html" });
+  writeAxeHtmlReport(results as any, {
+    fileName: `${label}.html`,
+    projectKey: label,
+    customSummary: `Accessibility scan for section: ${selector}`,
+  });
 
   const critical = getCriticalViolations(results);
   const serious = getSeriousViolations(results);
@@ -61,6 +73,6 @@ export async function expectNoSeriousA11yViolationsForPaths(
 ) {
   for (const path of paths) {
     await page.goto(path, { waitUntil: "domcontentloaded" });
-    await expectNoSeriousA11yViolations(page);
+    await expectNoSeriousA11yViolations(page, `path-${path}`);
   }
 }

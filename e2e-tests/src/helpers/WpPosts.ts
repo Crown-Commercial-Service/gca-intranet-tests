@@ -555,4 +555,74 @@ export default class WpPosts {
       throw formatWpCliFailure("Failed to set featured image", metaResult);
     }
   }
+
+  async updatePostAuthor(
+    postId: number,
+    postType: string,
+    username: string,
+  ): Promise<void> {
+    if (wpDriver() === "remote") {
+      await this.updatePostAuthorViaApi(postId, postType, username);
+    } else {
+      await this.updatePostAuthorViaCli(postId, username);
+    }
+  }
+
+  private async updatePostAuthorViaCli(
+    postId: number,
+    username: string,
+  ): Promise<void> {
+    const userIdResult = await this.wp(["user", "get", username, "--field=ID"]);
+
+    if (userIdResult.exitCode !== 0) {
+      throw formatWpCliFailure(
+        `Failed to get user id for ${username}`,
+        userIdResult,
+      );
+    }
+
+    const userId = userIdResult.stdout;
+
+    const updateResult = await this.wp([
+      "post",
+      "update",
+      String(postId),
+      `--post_author=${userId}`,
+    ]);
+
+    if (updateResult.exitCode !== 0) {
+      throw formatWpCliFailure(
+        `Failed to update post author for post ${postId}`,
+        updateResult,
+      );
+    }
+  }
+
+  private async updatePostAuthorViaApi(
+    postId: number,
+    postType: string,
+    username: string,
+  ): Promise<void> {
+    const restConfig = getRestConfig();
+
+    const users = await wpRest<any[]>(
+      restConfig,
+      "GET",
+      `/wp-json/wp/v2/users?search=${encodeURIComponent(username)}`,
+    );
+
+    const matchingUser = users.find(
+      (user) => user.slug === username || user.name === username,
+    );
+
+    if (!matchingUser) {
+      throw new Error(`User not found: ${username}`);
+    }
+
+    const endpoint = `/wp-json/wp/v2/${restEndpointForType(postType)}/${postId}`;
+
+    await wpRest(restConfig, "POST", endpoint, {
+      author: matchingUser.id,
+    });
+  }
 }

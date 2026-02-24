@@ -1,5 +1,4 @@
 import fs from "fs";
-import path from "path";
 import type { AxeResults } from "axe-core";
 import { createHtmlReport } from "axe-html-reporter";
 
@@ -7,6 +6,7 @@ type ReportOpts = {
   fileName: string;
   outputDir?: string;
   projectKey?: string;
+  customSummary?: string;
 };
 
 export function writeAxeHtmlReport(
@@ -21,6 +21,7 @@ export function writeAxeHtmlReport(
     results,
     options: {
       projectKey: opts.projectKey ?? "a11y",
+      customSummary: opts.customSummary,
       outputDir,
       reportFileName: opts.fileName,
     },

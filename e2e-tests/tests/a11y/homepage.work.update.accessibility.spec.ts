@@ -14,6 +14,9 @@ test.describe("Accessibility smoke", () => {
 
     await wp.posts.create(post);
     await homepage.goto();
-    await homepage.checkAccessibilityFor(homepage.workUpdatesSectionSelector);
+    await homepage.checkAccessibilityFor(
+      homepage.workUpdatesSectionSelector,
+      "Work Updates Section",
+    );
   });
 });

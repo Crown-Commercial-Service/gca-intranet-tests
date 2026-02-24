@@ -77,8 +77,8 @@ export default class HomePage {
     await expectNoSeriousA11yViolations(this.page);
   }
 
-  async checkAccessibilityFor(selector: string): Promise<void> {
-    await expectNoSeriousA11yViolationsForSelector(this.page, selector);
+  async checkAccessibilityFor(selector: string, label: string): Promise<void> {
+    await expectNoSeriousA11yViolationsForSelector(this.page, selector, label);
   }
 
   private articleLink(title: string): Locator {
@@ -259,5 +259,21 @@ export default class HomePage {
     const link = this.workUpdateLinkByTitle(post.title);
     await expect(link).toHaveCount(1);
     await link.click();
+  }
+
+  async assertWorkUpdateAuthor(
+    title: string,
+    expectedAuthor?: string,
+  ): Promise<void> {
+    const card = this.workUpdateCardByTitle(title);
+
+    await expect(card).toHaveCount(1);
+
+    const authorElement = card.getByTestId(this.workUpdateAuthorTestId);
+
+    const authorToAssert =
+      expectedAuthor ?? process.env.WP_USER ?? process.env.WP_API_USER;
+
+    await expect(authorElement).toContainText(authorToAssert as string);
   }
 }
