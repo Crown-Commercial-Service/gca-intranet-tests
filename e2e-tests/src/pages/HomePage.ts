@@ -18,13 +18,9 @@ export default class HomePage {
   readonly page: Page;
   private readonly baseUrl?: string;
 
-  readonly latestNewsColumn: Locator;
-
-  private readonly latestNewsColumnSelector =
-    '[data-testid="latest-news-column"]';
-  private readonly latestNewsCardSelector =
-    '[data-testid="latest-news-featured-card"], [data-testid="latest-news-secondary-card"]';
-
+  private readonly latestNewsColumnTestId = "latest-news-column";
+  private readonly latestNewsFeaturedCardTestId = "latest-news-featured-card";
+  private readonly latestNewsSecondaryCardTestId = "latest-news-secondary-card";
   private readonly latestNewsFeaturedDateTestId = "latest-news-featured-date";
   private readonly latestNewsSecondaryDateTestId = "latest-news-secondary-date";
 
@@ -35,16 +31,33 @@ export default class HomePage {
   private readonly workUpdateAuthorTestId = "work-update-author";
   private readonly workUpdateDateTestId = "work-update-date";
 
+  readonly latestNewsColumn: Locator;
   readonly workUpdatesSection: Locator;
+  readonly workUpdateCards: Locator;
+
+  private readonly latestNewsColumnSelector: string;
+  private readonly latestNewsCardSelector: string;
 
   constructor(page: Page, baseUrl?: string) {
     this.page = page;
     this.baseUrl = baseUrl;
 
-    this.latestNewsColumn = this.page.getByTestId("latest-news-column");
+    this.latestNewsColumn = this.page.getByTestId(this.latestNewsColumnTestId);
+
     this.workUpdatesSection = this.page.getByTestId(
       this.workUpdatesSectionTestId,
     );
+
+    this.workUpdateCards = this.workUpdatesSection.getByTestId(
+      this.workUpdateCardTestId,
+    );
+
+    this.latestNewsColumnSelector = `[data-testid="${this.latestNewsColumnTestId}"]`;
+
+    this.latestNewsCardSelector = [
+      `[data-testid="${this.latestNewsFeaturedCardTestId}"]`,
+      `[data-testid="${this.latestNewsSecondaryCardTestId}"]`,
+    ].join(", ");
   }
 
   async goto(): Promise<void> {
@@ -137,6 +150,30 @@ export default class HomePage {
     }
   }
 
+  async assertWorkUpdatesOrder(posts: Post[]): Promise<void> {
+    if (posts.length === 0) {
+      throw new Error("Expected at least one work update");
+    }
+
+    await expect(this.workUpdatesSection).toBeVisible();
+    await expect(this.workUpdateCards).toHaveCount(posts.length);
+
+    const linkTexts = await this.workUpdateCards
+      .getByTestId(this.workUpdateLinkTestId)
+      .allTextContents();
+
+    const titles: string[] = [];
+    for (const t of linkTexts) titles.push((t || "").trim());
+
+    for (let i = 0; i < posts.length; i++) {
+      expect(titles[i]).toBe(posts[i].title);
+
+      const card = this.workUpdateCards.nth(i);
+      await expect(card).toBeVisible();
+      await expect(card.getByTestId(this.workUpdateLinkTestId)).toBeVisible();
+    }
+  }
+
   async assertLatestNewsCharLimits(
     posts: Post[],
     limits: CharLimits,
@@ -155,10 +192,34 @@ export default class HomePage {
     }
   }
 
+  async assertWorkUpdateCharLimits(
+    post: Post,
+    limits: { titleMax: number; paragraphMax: number },
+  ): Promise<void> {
+    const card = this.workUpdateCardByTitle(post.title);
+
+    await expect(card).toHaveCount(1);
+    await expect(card).toBeVisible();
+
+    const link = card.getByTestId(this.workUpdateLinkTestId);
+    await expect(link).toHaveText(post.title);
+
+    const snippet = post.content.slice(0, 40);
+    await expect(card.getByText(snippet)).toBeVisible();
+
+    const runId = process.env.PW_RUN_ID ?? "";
+    const titleWithoutRunId = post.title.endsWith(runId)
+      ? post.title.slice(0, -runId.length).trimEnd()
+      : post.title;
+
+    expect(titleWithoutRunId.length).toBeLessThanOrEqual(limits.titleMax);
+    expect(post.content.length).toBeLessThanOrEqual(limits.paragraphMax);
+  }
+
   private workUpdateCardByTitle(title: string): Locator {
-    return this.workUpdatesSection
-      .getByTestId(this.workUpdateCardTestId)
-      .filter({ has: this.page.getByRole("link", { name: title }) });
+    return this.workUpdateCards.filter({
+      has: this.page.getByRole("link", { name: title }),
+    });
   }
 
   async assertWorkUpdateOnHomepage(post: Post): Promise<void> {
