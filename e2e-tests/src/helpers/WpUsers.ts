@@ -41,17 +41,16 @@ function baseUrl(): string {
 }
 
 function authHeader(): string {
-  // Prefer dedicated REST creds (ideally an Application Password)
-  const user = (
+  const user =
+    process.env.WP_API_USER ||
     process.env.WP_REST_USERNAME ||
     process.env.WP_ADMIN_USER ||
-    ""
-  ).trim();
-  const pass = (
+    "";
+  const pass =
+    process.env.WP_API_PASSWORD ||
     process.env.WP_REST_PASSWORD ||
     process.env.WP_ADMIN_PASSWORD ||
-    ""
-  ).trim();
+    "";
 
   if (!user || !pass) {
     throw new Error(
