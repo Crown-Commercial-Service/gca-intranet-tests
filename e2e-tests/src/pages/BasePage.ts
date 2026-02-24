@@ -29,7 +29,19 @@ export default abstract class BasePage {
     const items = this.breadcrumbs.locator("li");
 
     await expect(items.nth(0)).toContainText("Home");
-    await expect(items.nth(1)).toContainText(post.category!);
-    await expect(items.nth(2)).toContainText(post.title);
+
+    const type = String(post.type);
+
+    const shouldShowCategory = type !== "blogs" && Boolean(post.category);
+
+    if (shouldShowCategory) {
+      await expect(items).toHaveCount(3);
+      await expect(items.nth(1)).toContainText(post.category as string);
+      await expect(items.nth(2)).toContainText(post.title);
+      return;
+    }
+
+    await expect(items).toHaveCount(2);
+    await expect(items.nth(1)).toContainText(post.title);
   }
 }
