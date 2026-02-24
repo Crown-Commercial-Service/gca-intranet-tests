@@ -54,7 +54,7 @@ export default class HomePage {
     );
 
     this.workUpdateSeeMoreLink = this.workUpdatesSection.getByRole("link", {
-      name: "See work updates",
+      name: "More work updates",
     });
 
     this.latestNewsColumnSelector = `[data-testid="${this.latestNewsColumnTestId}"]`;

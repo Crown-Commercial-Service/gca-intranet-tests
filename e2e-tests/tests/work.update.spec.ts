@@ -98,6 +98,6 @@ test.describe("work updates", () => {
 
     await homepage.workUpdateSeeMoreLink.click();
 
-    await expect(workUpdate.page).toHaveURL(/work_updates/);
+    await expect(workUpdate.page).toHaveURL(/work_update/);
   });
 });
