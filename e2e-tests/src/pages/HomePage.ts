@@ -71,9 +71,11 @@ export default class HomePage {
   }
 
   private articleCard(title: string): Locator {
-    return this.page.locator("article").filter({
-      has: this.articleLink(title),
-    });
+    return this.latestNewsColumn
+      .locator(
+        '[data-testid="latest-news-featured-card"], [data-testid="latest-news-secondary-card"]',
+      )
+      .filter({ has: this.articleLink(title) });
   }
 
   private paragraphSnippet(content: string): Locator {
