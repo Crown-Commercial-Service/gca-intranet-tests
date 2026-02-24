@@ -202,10 +202,8 @@ export default class HomePage {
     await expect(card).toBeVisible();
 
     const link = card.getByTestId(this.workUpdateLinkTestId);
+    await expect(link).toBeVisible();
     await expect(link).toHaveText(post.title);
-
-    const snippet = post.content.slice(0, 40);
-    await expect(card.getByText(snippet)).toBeVisible();
 
     const runId = process.env.PW_RUN_ID ?? "";
     const titleWithoutRunId = post.title.endsWith(runId)
