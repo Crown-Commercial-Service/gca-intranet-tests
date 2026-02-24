@@ -1,5 +1,6 @@
 import { test, expect } from "../src/wp.fixtures";
 import Post from "../src/models/Post";
+import User from "../src/models/User";
 
 test.describe("blogs", () => {
   test("should display a single blog", async ({ wp, homepage }) => {
@@ -77,5 +78,33 @@ test.describe("blogs", () => {
 
     await homepage.goto();
     await homepage.assertBlogsOnHomepage(latest);
+  });
+
+  test("can edit author details of a blog post", async ({
+    wp,
+    homepage,
+    runId,
+  }) => {
+    const post = Post.aPost()
+      .withType("blogs")
+      .withFixedTitle("E2E Blog Author Change")
+      .withStatus("publish");
+
+    const postId = await wp.posts.create(post);
+
+    await homepage.goto();
+    await homepage.assertBlogAuthor(post.title);
+
+    const newUser = User.anAdmin()
+      .withUsername(`e2e_blog_author_${runId}`)
+      .withEmail(`e2e_blog_author_${runId}@example.com`)
+      .withPassword("Password123!");
+
+    await wp.users.upsert(newUser);
+
+    await wp.posts.updatePostAuthor(postId, "blogs", newUser.username);
+
+    await homepage.goto();
+    await homepage.assertBlogAuthor(post.title, newUser.username);
   });
 });

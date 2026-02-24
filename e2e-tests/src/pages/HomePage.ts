@@ -296,6 +296,22 @@ export default class HomePage {
     await expect(authorElement).toContainText(authorToAssert as string);
   }
 
+  async assertBlogAuthor(
+    title: string,
+    expectedAuthor?: string,
+  ): Promise<void> {
+    const card = this.blogCardByTitle(title);
+
+    await expect(card).toHaveCount(1);
+
+    const authorElement = card.getByTestId(this.blogAuthorTestId);
+
+    const authorToAssert =
+      expectedAuthor ?? process.env.WP_USER ?? process.env.WP_API_USER;
+
+    await expect(authorElement).toContainText(authorToAssert as string);
+  }
+
   private blogCardByTitle(title: string): Locator {
     return this.blogCard.filter({
       has: this.page.getByRole("link", { name: title }),
