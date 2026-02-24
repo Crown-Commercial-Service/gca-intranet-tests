@@ -4,7 +4,7 @@ import Post from "../src/models/Post";
 test.describe("work updates", () => {
   test("should display a single work update", async ({ wp, homepage }) => {
     const post = Post.aPost()
-      .withType("work_update")
+      .withType("work_updates")
       .withFixedTitle("E2E Work Update")
       .withParagraphMaxChars(180)
       .withStatus("publish");
@@ -20,7 +20,7 @@ test.describe("work updates", () => {
     homepage,
   }) => {
     const post = Post.aPost()
-      .withType("work_update")
+      .withType("work_updates")
       .withTitleOver100Chars()
       .withParagraphMaxChars(180)
       .withStatus("publish");
@@ -36,22 +36,22 @@ test.describe("work updates", () => {
     homepage,
   }) => {
     const post1 = Post.aPost()
-      .withType("work_update")
+      .withType("work_updates")
       .withFixedTitle("Work Update 1")
       .withStatus("publish");
 
     const post2 = Post.aPost()
-      .withType("work_update")
+      .withType("work_updates")
       .withFixedTitle("Work Update 2")
       .withStatus("publish");
 
     const post3 = Post.aPost()
-      .withType("work_update")
+      .withType("work_updates")
       .withFixedTitle("Work Update 3")
       .withStatus("publish");
 
     const post4 = Post.aPost()
-      .withType("work_update")
+      .withType("work_updates")
       .withFixedTitle("Work Update 4")
       .withStatus("publish");
 

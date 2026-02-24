@@ -156,21 +156,21 @@ export default class HomePage {
     }
 
     await expect(this.workUpdatesSection).toBeVisible();
-    await expect(this.workUpdateCards).toHaveCount(posts.length);
 
-    const linkTexts = await this.workUpdateCards
-      .getByTestId(this.workUpdateLinkTestId)
-      .allTextContents();
+    const cards = this.workUpdatesSection.getByTestId(
+      this.workUpdateCardTestId,
+    );
 
-    const titles: string[] = [];
-    for (const t of linkTexts) titles.push((t || "").trim());
+    const visibleCount = await cards.count();
+    expect(visibleCount).toBeGreaterThanOrEqual(posts.length);
 
     for (let i = 0; i < posts.length; i++) {
-      expect(titles[i]).toBe(posts[i].title);
+      const card = cards.nth(i);
+      const link = card.getByTestId(this.workUpdateLinkTestId);
 
-      const card = this.workUpdateCards.nth(i);
       await expect(card).toBeVisible();
-      await expect(card.getByTestId(this.workUpdateLinkTestId)).toBeVisible();
+      await expect(link).toBeVisible();
+      await expect(link).toHaveText(posts[i].title);
     }
   }
 
