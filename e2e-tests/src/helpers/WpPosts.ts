@@ -10,6 +10,8 @@ type PathResolution = {
   triedPaths: string[];
 };
 
+type RestConfig = { baseUrl: string; username: string; password: string };
+
 function isParallelLocal(): boolean {
   return process.env.PARALLEL_LOCAL === "true";
 }
@@ -29,14 +31,15 @@ function mapInitToWordpressService(serviceName: string): string {
 }
 
 function resolveWordpressServiceName(): string {
-  const configuredService = (process.env.WP_SERVICE || "").trim();
-  if (configuredService) return mapInitToWordpressService(configuredService);
+  const configuredServiceName = (process.env.WP_SERVICE || "").trim();
+  if (configuredServiceName)
+    return mapInitToWordpressService(configuredServiceName);
   return isParallelLocal() ? "wordpress0" : "wordpress";
 }
 
 function resolveComposeArgsForService(serviceName: string): string[] {
-  const envFile = (process.env.WP_ENV_FILE || ".env").trim();
-  const args = ["compose", "--env-file", envFile];
+  const envFileName = (process.env.WP_ENV_FILE || ".env").trim();
+  const args = ["compose", "--env-file", envFileName];
 
   const mustUseParallelCompose =
     isParallelLocal() || isParallelWordpressService(serviceName);
@@ -50,12 +53,12 @@ function resolveComposeArgsForService(serviceName: string): string[] {
 
 async function getComposeContainerId(
   serviceName: string,
-  dockerCwd: string,
+  dockerWorkingDirectory: string,
 ): Promise<string> {
   const result = await execa(
     "docker",
     [...resolveComposeArgsForService(serviceName), "ps", "-q", serviceName],
-    { cwd: dockerCwd, timeout: 60_000 },
+    { cwd: dockerWorkingDirectory, timeout: 60_000 },
   );
 
   return (result.stdout || "").trim();
@@ -106,30 +109,17 @@ function formatWpCliFailure(message: string, result: WpResult): Error {
   return new Error(message + (details ? `\n\nWP-CLI output:\n${details}` : ""));
 }
 
-/**
- * Driver selection (must match wpCli.ts behaviour)
- */
 function wpDriver(): "docker" | "remote" {
-  const driver = (process.env.WP_DRIVER || "").toLowerCase().trim();
-  if (driver === "remote") return "remote";
-  if (driver === "docker") return "docker";
+  const configuredDriver = (process.env.WP_DRIVER || "").toLowerCase().trim();
+  if (configuredDriver === "remote") return "remote";
+  if (configuredDriver === "docker") return "docker";
 
   if (process.env.WP_REMOTE === "true") return "remote";
 
-  // Legacy heuristic fallback (only if no explicit driver):
-  // If PW_BASE_URL is set but WP_DOCKER_CWD isn't, assume remote.
   const hasBaseUrl = Boolean((process.env.PW_BASE_URL || "").trim());
   const hasDockerCwd = Boolean((process.env.WP_DOCKER_CWD || "").trim());
   return hasBaseUrl && !hasDockerCwd ? "remote" : "docker";
 }
-
-function requireEnv(name: string): string {
-  const v = (process.env[name] || "").trim();
-  if (!v) throw new Error(`Missing env var: ${name}`);
-  return v;
-}
-
-type RestConfig = { baseUrl: string; username: string; password: string };
 
 function normalizeBaseUrl(url: string): string {
   return url.replace(/\/+$/, "");
@@ -178,78 +168,70 @@ function getRestConfig(): RestConfig {
   return { baseUrl, username, password };
 }
 
-function basicAuthHeader(cfg: RestConfig): string {
-  const token = Buffer.from(`${cfg.username}:${cfg.password}`).toString(
-    "base64",
-  );
+function basicAuthHeader(restConfig: RestConfig): string {
+  const token = Buffer.from(
+    `${restConfig.username}:${restConfig.password}`,
+  ).toString("base64");
   return `Basic ${token}`;
 }
 
-async function wpRest<T>(
-  cfg: RestConfig,
+async function wpRest(
+  restConfig: RestConfig,
   method: "GET" | "POST" | "DELETE",
   urlPath: string,
-  body?: any,
-): Promise<T> {
-  const url = `${cfg.baseUrl}${urlPath.startsWith("/") ? "" : "/"}${urlPath}`;
-  const res = await fetch(url, {
+  body?: unknown,
+): Promise<any> {
+  const url = `${restConfig.baseUrl}${urlPath.startsWith("/") ? "" : "/"}${urlPath}`;
+
+  const response = await fetch(url, {
     method,
     headers: {
-      Authorization: basicAuthHeader(cfg),
+      Authorization: basicAuthHeader(restConfig),
       "Content-Type": "application/json",
       Accept: "application/json",
     },
     body: body ? JSON.stringify(body) : undefined,
   });
 
-  const text = await res.text();
-  if (!res.ok) {
-    // Make auth/permission errors more actionable
+  const responseText = await response.text();
+
+  if (!response.ok) {
     const hint =
-      res.status === 401 || res.status === 403
-        ? `\n\nHint: For WP REST writes on QA, prefer a WordPress "Application Password" and set WP_API_USER + WP_API_PASSWORD. Also verify the user truly has the right role/capabilities in that environment.`
+      response.status === 401 || response.status === 403
+        ? `\n\nHint: For WP REST writes on QA, prefer a WordPress "Application Password" and set WP_API_USER + WP_API_PASSWORD.`
         : "";
     throw new Error(
-      `WP REST ${method} ${url} failed (${res.status})\n${text}${hint}`,
+      `WP REST ${method} ${url} failed (${response.status})\n${responseText}${hint}`,
     );
   }
 
-  return text ? (JSON.parse(text) as T) : (undefined as T);
+  return responseText ? JSON.parse(responseText) : undefined;
 }
 
 function guessMimeType(filePath: string): string {
   const ext = path.extname(filePath).toLowerCase();
-  switch (ext) {
-    case ".jpg":
-    case ".jpeg":
-      return "image/jpeg";
-    case ".png":
-      return "image/png";
-    case ".gif":
-      return "image/gif";
-    case ".webp":
-      return "image/webp";
-    case ".svg":
-      return "image/svg+xml";
-    default:
-      return "application/octet-stream";
-  }
+  if (ext === ".jpg" || ext === ".jpeg") return "image/jpeg";
+  if (ext === ".png") return "image/png";
+  if (ext === ".gif") return "image/gif";
+  if (ext === ".webp") return "image/webp";
+  if (ext === ".svg") return "image/svg+xml";
+  return "application/octet-stream";
 }
 
 async function uploadMedia(
-  cfg: RestConfig,
+  restConfig: RestConfig,
   localFilePath: string,
 ): Promise<number> {
   const fileName = path.basename(localFilePath);
   const bytes = await fs.promises.readFile(localFilePath);
   const mime = guessMimeType(localFilePath);
 
-  const url = `${cfg.baseUrl}/wp-json/wp/v2/media`;
+  const url = `${restConfig.baseUrl}/wp-json/wp/v2/media`;
 
-  const res = await fetch(url, {
+  const response = await fetch(url, {
     method: "POST",
     headers: {
-      Authorization: basicAuthHeader(cfg),
+      Authorization: basicAuthHeader(restConfig),
       "Content-Disposition": `attachment; filename="${fileName}"`,
       "Content-Type": mime,
       Accept: "application/json",
@@ -257,23 +239,16 @@ async function uploadMedia(
     body: bytes,
   });
 
-  const text = await res.text();
-  if (!res.ok) {
-    const hint =
-      res.status === 401 || res.status === 403
-        ? `\n\nHint: Media upload requires REST permissions. Use an Application Password (WP_API_PASSWORD) for an admin/editor user.`
-        : "";
+  const responseText = await response.text();
+
+  if (!response.ok) {
     throw new Error(
-      `WP REST POST ${url} failed (${res.status})\n${text}${hint}`,
+      `WP REST POST ${url} failed (${response.status})\n${responseText}`,
     );
   }
 
-  const json = text ? (JSON.parse(text) as any) : {};
-  const id = Number(json?.id);
-  if (!Number.isFinite(id)) {
-    throw new Error(`Failed to parse media id from response: ${text}`);
-  }
-  return id;
+  const json = responseText ? JSON.parse(responseText) : {};
+  return Number(json?.id);
 }
 
 function toEnvKey(type: string): string {
@@ -301,9 +276,15 @@ function restEndpointForType(type: string): string {
 export default class WpPosts {
   constructor(private readonly wp: (args: string[]) => Promise<WpResult>) {}
 
+  /**
+   * Creates a post (core or custom post type). If a featured image is provided, it will be uploaded/attached.
+   * If the post is a normal "post" and a category is provided, it will be applied.
+   */
   async create(post: Post): Promise<number> {
+    const shouldApplyCategory = post.type === "post" && Boolean(post.category);
+
     if (wpDriver() === "remote") {
-      const cfg = getRestConfig();
+      const restConfig = getRestConfig();
 
       let featuredMediaId: number | undefined;
 
@@ -317,37 +298,41 @@ export default class WpPosts {
             [
               `Featured image not found: ${post.featuredImagePath}`,
               `Tried:`,
-              ...triedPaths.map((p) => `- ${p}`),
-              ``,
-              `Fix: set WP_ASSETS_CWD to the folder that contains the assets.`,
+              ...triedPaths.map((candidate) => `- ${candidate}`),
             ].join("\n"),
           );
         }
 
-        featuredMediaId = await uploadMedia(cfg, resolvedPath);
+        featuredMediaId = await uploadMedia(restConfig, resolvedPath);
       }
 
       const endpoint = `/wp-json/wp/v2/${restEndpointForType(String(post.type))}`;
 
-      const created = await wpRest<any>(cfg, "POST", endpoint, {
+      let categoryId: number | undefined;
+      if (shouldApplyCategory) {
+        categoryId = await this.getCategoryIdViaApi(
+          restConfig,
+          post.category as string,
+        );
+      }
+
+      const created = await wpRest(restConfig, "POST", endpoint, {
         title: post.title,
         content: post.content,
         status: post.status,
         ...(featuredMediaId ? { featured_media: featuredMediaId } : {}),
+        ...(categoryId ? { categories: [categoryId] } : {}),
       });
 
-      const id = Number(created?.id);
-      if (!Number.isFinite(id)) {
-        throw new Error(
-          `Failed to parse post id from REST response: ${JSON.stringify(created)}`,
-        );
-      }
-
-      return id;
+      return Number(created?.id);
     }
 
-    // Local/Docker: WP-CLI
-    const createResult = await this.wp([
+    let categoryId: number | undefined;
+    if (shouldApplyCategory) {
+      categoryId = await this.getCategoryIdViaCli(post.category as string);
+    }
+
+    const args = [
       "post",
       "create",
       "--porcelain",
@@ -355,18 +340,19 @@ export default class WpPosts {
       `--post_title=${post.title}`,
       `--post_content=${post.content}`,
       `--post_status=${post.status}`,
-    ]);
+    ];
+
+    if (categoryId) {
+      args.push(`--post_category=${categoryId}`);
+    }
+
+    const createResult = await this.wp(args);
 
     if (createResult.exitCode !== 0) {
       throw formatWpCliFailure("Failed to create post", createResult);
     }
 
-    const postIdRaw = createResult.stdout.trim();
-    const postId = Number(postIdRaw);
-
-    if (!Number.isFinite(postId)) {
-      throw new Error(`Failed to parse post id from: ${postIdRaw}`);
-    }
+    const postId = Number(createResult.stdout.trim());
 
     if (post.featuredImagePath) {
       await this.setFeaturedImage(postId, post.featuredImagePath);
@@ -375,132 +361,132 @@ export default class WpPosts {
     return postId;
   }
 
-  async clearAll(): Promise<void> {
+  /**
+   * Updates the author of a post (core or custom post type) by username.
+   */
+  async updatePostAuthor(
+    postId: number,
+    postType: string,
+    username: string,
+  ): Promise<void> {
     if (wpDriver() === "remote") {
-      // Intentionally NOT supported on QA (too risky to delete everything).
-      return;
+      await this.updatePostAuthorViaApi(postId, postType, username);
+    } else {
+      await this.updatePostAuthorViaCli(postId, username);
     }
-
-    await this.deletePostsByType("post");
-    await this.deletePostsByType("attachment");
   }
 
-  async clearByRunId(runId: string): Promise<void> {
-    if (!runId) return;
+  private async updatePostAuthorViaCli(
+    postId: number,
+    username: string,
+  ): Promise<void> {
+    const userIdResult = await this.wp(["user", "get", username, "--field=ID"]);
 
-    if (wpDriver() === "remote") {
-      const cfg = getRestConfig();
-
-      async function deleteBySearch(endpoint: string) {
-        const items = await wpRest<any[]>(
-          cfg,
-          "GET",
-          `${endpoint}?search=${encodeURIComponent(runId)}&per_page=100`,
-        );
-
-        for (const item of items) {
-          const id = Number(item?.id);
-          if (Number.isFinite(id)) {
-            await wpRest(cfg, "DELETE", `${endpoint}/${id}?force=true`);
-          }
-        }
-      }
-
-      // Standard types
-      await deleteBySearch(`/wp-json/wp/v2/posts`);
-      await deleteBySearch(`/wp-json/wp/v2/pages`);
-
-      // Optional custom types (comma-separated), e.g. WP_REST_CUSTOM_TYPES=work-update
-      const raw = (process.env.WP_REST_CUSTOM_TYPES || "").trim();
-      if (raw) {
-        const types = raw
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean);
-
-        for (const t of types) {
-          const endpoint = `/wp-json/wp/v2/${restEndpointForType(t)}`;
-          await deleteBySearch(endpoint);
-        }
-      }
-
-      // Attachments (best-effort: search by runId)
-      await deleteBySearch(`/wp-json/wp/v2/media`);
-
-      return;
+    if (userIdResult.exitCode !== 0) {
+      throw formatWpCliFailure(
+        `Failed to get user id for ${username}`,
+        userIdResult,
+      );
     }
 
-    const listResult = await this.wp([
+    const updateResult = await this.wp([
       "post",
-      "list",
-      "--post_type=post",
-      "--format=ids",
-      `--search=${runId}`,
+      "update",
+      String(postId),
+      `--post_author=${userIdResult.stdout}`,
     ]);
 
-    const idsRaw = listResult.stdout.trim();
-    if (!idsRaw) return;
-
-    await this.wp(["post", "delete", ...idsRaw.split(/\s+/), "--force"]);
+    if (updateResult.exitCode !== 0) {
+      throw formatWpCliFailure(
+        `Failed to update post author for post ${postId}`,
+        updateResult,
+      );
+    }
   }
 
-  async getPublishedDate(postId: number): Promise<string> {
-    if (wpDriver() === "remote") {
-      const cfg = getRestConfig();
-      const post = await wpRest<any>(
-        cfg,
-        "GET",
-        `/wp-json/wp/v2/posts/${postId}?_fields=date`,
-      );
-      const date = String(post?.date || "").trim();
-      if (!date) throw new Error(`Missing date for post ${postId}`);
-      return date;
+  private async updatePostAuthorViaApi(
+    postId: number,
+    postType: string,
+    username: string,
+  ): Promise<void> {
+    const restConfig = getRestConfig();
+
+    const users = await wpRest(
+      restConfig,
+      "GET",
+      `/wp-json/wp/v2/users?search=${encodeURIComponent(username)}`,
+    );
+
+    const matchingUser = (users || []).find(
+      (user: any) => user?.slug === username || user?.name === username,
+    );
+
+    if (!matchingUser) {
+      throw new Error(`User not found: ${username}`);
     }
 
+    const endpoint = `/wp-json/wp/v2/${restEndpointForType(postType)}/${postId}`;
+
+    await wpRest(restConfig, "POST", endpoint, {
+      author: matchingUser.id,
+    });
+  }
+
+  private async getCategoryIdViaCli(categoryName: string): Promise<number> {
     const result = await this.wp([
-      "post",
-      "get",
-      String(postId),
-      "--field=post_date",
+      "term",
+      "list",
+      "category",
+      `--name=${categoryName}`,
+      "--field=term_id",
+      "--format=ids",
     ]);
 
     if (result.exitCode !== 0) {
-      throw formatWpCliFailure("Failed to read post_date", result);
+      throw formatWpCliFailure(
+        `Failed to find category: ${categoryName}`,
+        result,
+      );
     }
 
-    return result.stdout.trim();
+    const firstId = (result.stdout || "").split(/\s+/).filter(Boolean)[0];
+    return Number(firstId);
   }
 
-  private async deletePostsByType(postType: string): Promise<void> {
-    const listResult = await this.wp([
-      "post",
-      "list",
-      `--post_type=${postType}`,
-      "--format=ids",
-    ]);
+  private async getCategoryIdViaApi(
+    restConfig: RestConfig,
+    categoryName: string,
+  ): Promise<number> {
+    const categories = await wpRest(
+      restConfig,
+      "GET",
+      `/wp-json/wp/v2/categories?search=${encodeURIComponent(categoryName)}&per_page=100`,
+    );
 
-    const idsRaw = listResult.stdout.trim();
-    if (!idsRaw) return;
+    const exact = (categories || []).find(
+      (category: any) => category?.name === categoryName,
+    );
+    const match = exact ?? (categories || [])[0];
 
-    await this.wp(["post", "delete", ...idsRaw.split(/\s+/), "--force"]);
+    return Number(match?.id);
   }
 
   private async setFeaturedImage(
     postId: number,
     featuredImagePath: string,
   ): Promise<void> {
-    const dockerCwd = (process.env.WP_DOCKER_CWD || "").trim();
-    if (!dockerCwd) throw new Error("WP_DOCKER_CWD not set");
+    const dockerWorkingDirectory = (process.env.WP_DOCKER_CWD || "").trim();
+    if (!dockerWorkingDirectory) throw new Error("WP_DOCKER_CWD not set");
 
-    const wordpressService = resolveWordpressServiceName();
+    const wordpressServiceName = resolveWordpressServiceName();
     const containerId = await getComposeContainerId(
-      wordpressService,
-      dockerCwd,
+      wordpressServiceName,
+      dockerWorkingDirectory,
     );
 
     if (!containerId) {
       throw new Error(
-        `WordPress container not running (service: ${wordpressService})`,
+        `WordPress container not running (service: ${wordpressServiceName})`,
       );
     }
 
@@ -514,9 +500,7 @@ export default class WpPosts {
         [
           `Featured image not found: ${featuredImagePath}`,
           `Tried:`,
-          ...triedPaths.map((p) => `- ${p}`),
-          ``,
-          `Fix: set WP_ASSETS_CWD to the folder that contains the assets.`,
+          ...triedPaths.map((candidate) => `- ${candidate}`),
         ].join("\n"),
       );
     }
@@ -525,7 +509,7 @@ export default class WpPosts {
       "docker",
       ["cp", resolvedPath, `${containerId}:${containerTmpPath}`],
       {
-        cwd: dockerCwd,
+        cwd: dockerWorkingDirectory,
         timeout: 120_000,
       },
     );
@@ -554,75 +538,5 @@ export default class WpPosts {
     if (metaResult.exitCode !== 0) {
       throw formatWpCliFailure("Failed to set featured image", metaResult);
     }
-  }
-
-  async updatePostAuthor(
-    postId: number,
-    postType: string,
-    username: string,
-  ): Promise<void> {
-    if (wpDriver() === "remote") {
-      await this.updatePostAuthorViaApi(postId, postType, username);
-    } else {
-      await this.updatePostAuthorViaCli(postId, username);
-    }
-  }
-
-  private async updatePostAuthorViaCli(
-    postId: number,
-    username: string,
-  ): Promise<void> {
-    const userIdResult = await this.wp(["user", "get", username, "--field=ID"]);
-
-    if (userIdResult.exitCode !== 0) {
-      throw formatWpCliFailure(
-        `Failed to get user id for ${username}`,
-        userIdResult,
-      );
-    }
-
-    const userId = userIdResult.stdout;
-
-    const updateResult = await this.wp([
-      "post",
-      "update",
-      String(postId),
-      `--post_author=${userId}`,
-    ]);
-
-    if (updateResult.exitCode !== 0) {
-      throw formatWpCliFailure(
-        `Failed to update post author for post ${postId}`,
-        updateResult,
-      );
-    }
-  }
-
-  private async updatePostAuthorViaApi(
-    postId: number,
-    postType: string,
-    username: string,
-  ): Promise<void> {
-    const restConfig = getRestConfig();
-
-    const users = await wpRest<any[]>(
-      restConfig,
-      "GET",
-      `/wp-json/wp/v2/users?search=${encodeURIComponent(username)}`,
-    );
-
-    const matchingUser = users.find(
-      (user) => user.slug === username || user.name === username,
-    );
-
-    if (!matchingUser) {
-      throw new Error(`User not found: ${username}`);
-    }
-
-    const endpoint = `/wp-json/wp/v2/${restEndpointForType(postType)}/${postId}`;
-
-    await wpRest(restConfig, "POST", endpoint, {
-      author: matchingUser.id,
-    });
   }
 }
