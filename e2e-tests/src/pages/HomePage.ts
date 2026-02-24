@@ -194,7 +194,7 @@ export default class HomePage {
 
   async assertWorkUpdateCharLimits(
     post: Post,
-    limits: { titleMax: number; paragraphMax: number },
+    maxDisplayedChars: number,
   ): Promise<void> {
     const card = this.workUpdateCardByTitle(post.title);
 
@@ -202,16 +202,11 @@ export default class HomePage {
     await expect(card).toBeVisible();
 
     const link = card.getByTestId(this.workUpdateLinkTestId);
-    await expect(link).toBeVisible();
-    await expect(link).toHaveText(post.title);
 
-    const runId = process.env.PW_RUN_ID ?? "";
-    const titleWithoutRunId = post.title.endsWith(runId)
-      ? post.title.slice(0, -runId.length).trimEnd()
-      : post.title;
+    const uiTitle = await link.innerText();
 
-    expect(titleWithoutRunId.length).toBeLessThanOrEqual(limits.titleMax);
-    expect(post.content.length).toBeLessThanOrEqual(limits.paragraphMax);
+    expect(uiTitle.length).toBeLessThan(post.title.length);
+    expect(uiTitle.length).toBeLessThanOrEqual(maxDisplayedChars);
   }
 
   private workUpdateCardByTitle(title: string): Locator {
