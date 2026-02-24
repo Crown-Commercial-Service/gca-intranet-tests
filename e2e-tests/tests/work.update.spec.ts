@@ -8,7 +8,7 @@ test.describe("work updates", () => {
     homepage,
   }) => {
     const post = Post.aPost()
-      .withType("work_update")
+      .withType("work_updates")
       .withFixedTitle("E2E Work Update")
       .withParagraphMaxChars(180)
       .withStatus("publish");
@@ -17,6 +17,6 @@ test.describe("work updates", () => {
     expect(id).toBeGreaterThan(0);
 
     await homepage.goto();
-    await homepage.assertSingleWorkUpdateOnHomepage(post);
+    await homepage.assertWorkUpdateOnHomepage(post);
   });
 });

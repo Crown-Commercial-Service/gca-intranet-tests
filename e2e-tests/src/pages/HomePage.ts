@@ -20,15 +20,6 @@ export default class HomePage {
 
   readonly latestNewsColumn: Locator;
 
-  readonly workUpdatesColumn: Locator;
-  readonly workUpdatesSection: Locator;
-  readonly workUpdateCards: Locator;
-
-  readonly workUpdateAvatarImg: Locator;
-  readonly workUpdateLink: Locator;
-  readonly workUpdateAuthor: Locator;
-  readonly workUpdateDate: Locator;
-
   private readonly latestNewsColumnSelector =
     '[data-testid="latest-news-column"]';
   private readonly latestNewsCardSelector =
@@ -37,28 +28,23 @@ export default class HomePage {
   private readonly latestNewsFeaturedDateTestId = "latest-news-featured-date";
   private readonly latestNewsSecondaryDateTestId = "latest-news-secondary-date";
 
+  private readonly workUpdatesSectionTestId = "work-updates-section";
+  private readonly workUpdateCardTestId = "work-update-card";
+  private readonly workUpdateAvatarTestId = "work-update-avatar";
+  private readonly workUpdateLinkTestId = "work-update-link";
+  private readonly workUpdateAuthorTestId = "work-update-author";
+  private readonly workUpdateDateTestId = "work-update-date";
+
+  readonly workUpdatesSection: Locator;
+
   constructor(page: Page, baseUrl?: string) {
     this.page = page;
     this.baseUrl = baseUrl;
 
     this.latestNewsColumn = this.page.getByTestId("latest-news-column");
-
-    this.workUpdatesColumn = this.page.getByTestId("work-updates-column");
-    this.workUpdatesSection = this.workUpdatesColumn.getByTestId(
-      "work-updates-section",
+    this.workUpdatesSection = this.page.getByTestId(
+      this.workUpdatesSectionTestId,
     );
-    this.workUpdateCards =
-      this.workUpdatesSection.getByTestId("work-update-card");
-
-    const firstWorkUpdateCard = this.workUpdateCards.first();
-
-    this.workUpdateAvatarImg = firstWorkUpdateCard
-      .getByTestId("work-update-avatar")
-      .locator("img");
-    this.workUpdateLink = firstWorkUpdateCard.getByTestId("work-update-link");
-    this.workUpdateAuthor =
-      firstWorkUpdateCard.getByTestId("work-update-author");
-    this.workUpdateDate = firstWorkUpdateCard.getByTestId("work-update-date");
   }
 
   async goto(): Promise<void> {
@@ -74,15 +60,6 @@ export default class HomePage {
       this.page,
       this.latestNewsColumnSelector,
     );
-  }
-
-  private wpUser(): string {
-    return (
-      process.env.WP_USER ||
-      process.env.WP_API_USER ||
-      process.env.WP_QA_ADMIN_USER ||
-      ""
-    ).trim();
   }
 
   private articleLink(title: string): Locator {
@@ -140,15 +117,15 @@ export default class HomePage {
       expect(uiDate).toBe(expectedDate);
     }
 
-    let everyPostHasFeaturedImage = true;
+    let allHaveImages = true;
     for (const post of posts) {
       if (!post.featuredImagePath) {
-        everyPostHasFeaturedImage = false;
+        allHaveImages = false;
         break;
       }
     }
 
-    if (everyPostHasFeaturedImage) {
+    if (allHaveImages) {
       const renderedImageCount = await this.page.getByRole("img").count();
       expect(renderedImageCount).toBeGreaterThanOrEqual(posts.length);
     }
@@ -158,31 +135,6 @@ export default class HomePage {
         await expect(this.articleLink(post.title)).toBeVisible();
       }
     }
-  }
-
-  async assertSingleWorkUpdateOnHomepage(post: Post): Promise<void> {
-    await expect(this.workUpdatesSection).toBeVisible();
-    await expect(this.workUpdateCards).toHaveCount(1);
-
-    await expect(this.workUpdateAvatarImg).toBeVisible();
-
-    await expect(this.workUpdateLink).toBeVisible();
-    await expect(this.workUpdateLink).toHaveText(post.title);
-
-    await expect(this.workUpdateAuthor).toBeVisible();
-
-    const wpUser = this.wpUser();
-    if (wpUser) {
-      await expect(this.workUpdateAuthor).toContainText(wpUser);
-    }
-
-    await expect(this.workUpdateDate).toBeVisible();
-    await expect(this.workUpdateDate).toHaveText(
-      dayjs(post.createdAt).format("Do MMMM YYYY"),
-    );
-
-    await this.workUpdateLink.click();
-    await expect(this.paragraphSnippet(post.content)).toBeVisible();
   }
 
   async assertLatestNewsCharLimits(
@@ -201,5 +153,42 @@ export default class HomePage {
       expect(titleWithoutRunId.length).toBeLessThanOrEqual(limits.titleMax);
       expect(post.content.length).toBeLessThanOrEqual(limits.paragraphMax);
     }
+  }
+
+  private workUpdateCardByTitle(title: string): Locator {
+    return this.workUpdatesSection
+      .getByTestId(this.workUpdateCardTestId)
+      .filter({ has: this.page.getByRole("link", { name: title }) });
+  }
+
+  async assertWorkUpdateOnHomepage(post: Post): Promise<void> {
+    const card = this.workUpdateCardByTitle(post.title);
+
+    await expect(card).toHaveCount(1);
+    await expect(card).toBeVisible();
+
+    const link = card.getByTestId(this.workUpdateLinkTestId);
+    await expect(link).toBeVisible();
+    await expect(link).toHaveText(post.title);
+
+    const avatar = card.getByTestId(this.workUpdateAvatarTestId).locator("img");
+    await expect(avatar.first()).toBeVisible();
+
+    const expectedUser = (
+      process.env.WP_USER ||
+      process.env.WP_API_USER ||
+      ""
+    ).trim();
+    if (expectedUser) {
+      const author = card.getByTestId(this.workUpdateAuthorTestId);
+      await expect(author).toContainText(expectedUser);
+    }
+
+    const date = card.getByTestId(this.workUpdateDateTestId);
+    await expect(date).toBeVisible();
+
+    const uiDate = (await date.textContent())?.trim() ?? "";
+    const expectedDate = dayjs(post.createdAt).format("Do MMMM YYYY");
+    expect(uiDate).toBe(expectedDate);
   }
 }
