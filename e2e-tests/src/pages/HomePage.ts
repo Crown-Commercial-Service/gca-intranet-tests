@@ -1,9 +1,13 @@
 import { Page, Locator, expect } from "@playwright/test";
+import dayjs from "dayjs";
+import advancedFormat from "dayjs/plugin/advancedFormat";
 import type Post from "../models/Post";
 import {
   expectNoSeriousA11yViolations,
   expectNoSeriousA11yViolationsForSelector,
 } from "../a11y/assertions";
+
+dayjs.extend(advancedFormat);
 
 type CharLimits = {
   titleMax: number;
@@ -16,10 +20,22 @@ export default class HomePage {
 
   readonly latestNewsColumn: Locator;
 
+  readonly latestNewsFeaturedCard: Locator;
+  readonly latestNewsFeaturedDate: Locator;
+
   constructor(page: Page, baseUrl?: string) {
     this.page = page;
     this.baseUrl = baseUrl;
+
     this.latestNewsColumn = this.page.getByTestId("latest-news-column");
+
+    this.latestNewsFeaturedCard = this.latestNewsColumn.getByTestId(
+      "latest-news-featured-card",
+    );
+
+    this.latestNewsFeaturedDate = this.latestNewsFeaturedCard.getByTestId(
+      "latest-news-featured-date",
+    );
   }
 
   async goto(): Promise<void> {
@@ -35,6 +51,19 @@ export default class HomePage {
       this.page,
       '[data-testid="latest-news-column"]',
     );
+  }
+
+  async assertLatestNewsFeaturedDate(
+    publishedDate: string | Date,
+  ): Promise<void> {
+    await expect(this.latestNewsFeaturedCard).toBeVisible();
+    await expect(this.latestNewsFeaturedDate).toBeVisible();
+
+    const uiText =
+      (await this.latestNewsFeaturedDate.textContent())?.trim() ?? "";
+    const expected = dayjs(publishedDate).format("Do MMMM YYYY");
+
+    expect(uiText).toBe(expected);
   }
 
   private articleLink(title: string): Locator {
@@ -67,12 +96,22 @@ export default class HomePage {
     for (const post of posts) {
       const card = this.articleCard(post.title);
 
-      const possibleDateElements = card.locator("p, time, span");
-      const possibleDateCount = await possibleDateElements.count();
+      await expect(card).toBeVisible();
+      await expect(this.articleLink(post.title)).toBeVisible();
 
-      if (possibleDateCount > 0) {
-        await expect(possibleDateElements.first()).toBeVisible();
-      }
+      const dateLocator = card.getByTestId("latest-news-featured-date");
+      const hasFeaturedDate = (await dateLocator.count()) > 0;
+
+      const dateEl = hasFeaturedDate
+        ? dateLocator.first()
+        : card.getByTestId("latest-news-secondary-date").first();
+
+      await expect(dateEl).toBeVisible();
+
+      const uiDate = (await dateEl.textContent())?.trim() ?? "";
+      const expectedDate = dayjs(post.createdAt).format("Do MMMM YYYY");
+
+      expect(uiDate).toBe(expectedDate);
     }
 
     const everyPostHasFeaturedImage = posts.every((post) =>
