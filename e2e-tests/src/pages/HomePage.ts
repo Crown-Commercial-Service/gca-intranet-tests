@@ -30,13 +30,16 @@ export default class HomePage {
   private readonly workUpdateLinkTestId = "work-update-link";
   private readonly workUpdateAuthorTestId = "work-update-author";
   private readonly workUpdateDateTestId = "work-update-date";
+  private readonly workUpdateSeeMoreLinkTestId = "work-updates-see-more-link";
 
   readonly latestNewsColumn: Locator;
   readonly workUpdatesSection: Locator;
   readonly workUpdateCards: Locator;
   readonly workUpdateSeeMoreLink: Locator;
 
-  private readonly latestNewsColumnSelector: string;
+  readonly latestNewsSectionSelector: string;
+  readonly workUpdatesSectionSelector: string;
+
   private readonly latestNewsCardSelector: string;
 
   constructor(page: Page, baseUrl?: string) {
@@ -53,11 +56,12 @@ export default class HomePage {
       this.workUpdateCardTestId,
     );
 
-    this.workUpdateSeeMoreLink = this.workUpdatesSection.getByRole("link", {
-      name: "More work updates",
-    });
+    this.workUpdateSeeMoreLink = this.workUpdatesSection.getByTestId(
+      this.workUpdateSeeMoreLinkTestId,
+    );
 
-    this.latestNewsColumnSelector = `[data-testid="${this.latestNewsColumnTestId}"]`;
+    this.latestNewsSectionSelector = `[data-testid="${this.latestNewsColumnTestId}"]`;
+    this.workUpdatesSectionSelector = `[data-testid="${this.workUpdatesSectionTestId}"]`;
 
     this.latestNewsCardSelector = [
       `[data-testid="${this.latestNewsFeaturedCardTestId}"]`,
@@ -73,11 +77,8 @@ export default class HomePage {
     await expectNoSeriousA11yViolations(this.page);
   }
 
-  async checkLatestNewsAccessibility(): Promise<void> {
-    await expectNoSeriousA11yViolationsForSelector(
-      this.page,
-      this.latestNewsColumnSelector,
-    );
+  async checkAccessibilityFor(selector: string): Promise<void> {
+    await expectNoSeriousA11yViolationsForSelector(this.page, selector);
   }
 
   private articleLink(title: string): Locator {
@@ -162,10 +163,7 @@ export default class HomePage {
 
     await expect(this.workUpdatesSection).toBeVisible();
 
-    const cards = this.workUpdatesSection.getByTestId(
-      this.workUpdateCardTestId,
-    );
-
+    const cards = this.workUpdateCards;
     const visibleCount = await cards.count();
     expect(visibleCount).toBeGreaterThanOrEqual(posts.length);
 
@@ -207,7 +205,6 @@ export default class HomePage {
     await expect(card).toBeVisible();
 
     const link = card.getByTestId(this.workUpdateLinkTestId);
-
     const uiTitle = await link.innerText();
 
     expect(uiTitle.length).toBeLessThan(post.title.length);
@@ -238,6 +235,7 @@ export default class HomePage {
       process.env.WP_API_USER ||
       ""
     ).trim();
+
     if (expectedUser) {
       const author = card.getByTestId(this.workUpdateAuthorTestId);
       await expect(author).toContainText(expectedUser);

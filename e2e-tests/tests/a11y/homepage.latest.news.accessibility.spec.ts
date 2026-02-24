@@ -30,9 +30,7 @@ test.describe("Accessibility smoke", () => {
     await wp.posts.create(post2);
     await wp.posts.create(post3);
     await wp.posts.create(post4);
-
     await homepage.goto();
-
-    await homepage.checkLatestNewsAccessibility();
+    await homepage.checkAccessibilityFor(homepage.latestNewsSectionSelector);
   });
 });
