@@ -32,7 +32,7 @@ export default class HomePage {
   private readonly workUpdateDateTestId = "work-update-date";
   private readonly workUpdateSeeMoreLinkTestId = "work-updates-see-more-link";
 
-  private readonly blogsSectionTestId = "blogs-section";
+  private readonly blogsSectionTestId = "blogs-column";
   private readonly blogCardTestId = "blogs-card";
   private readonly blogAvatarTestId = "blogs-avatar";
   private readonly blogLinkTestId = "blogs-link";

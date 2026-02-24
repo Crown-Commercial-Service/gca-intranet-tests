@@ -57,4 +57,25 @@ test.describe("blogs", () => {
 
     await expect(blogList.page).toHaveURL(/blog/);
   });
+
+  test("should show the latest blog on the homepage", async ({
+    wp,
+    homepage,
+  }) => {
+    const older = Post.aPost()
+      .withType("blogs")
+      .withFixedTitle("E2E Blog Older")
+      .withStatus("publish");
+
+    const latest = Post.aPost()
+      .withType("blogs")
+      .withFixedTitle("E2E Blog Latest")
+      .withStatus("publish");
+
+    await wp.posts.create(older);
+    await wp.posts.create(latest);
+
+    await homepage.goto();
+    await homepage.assertBlogsOnHomepage(latest);
+  });
 });
