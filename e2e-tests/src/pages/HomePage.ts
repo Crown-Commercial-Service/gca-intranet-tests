@@ -20,22 +20,19 @@ export default class HomePage {
 
   readonly latestNewsColumn: Locator;
 
-  readonly latestNewsFeaturedCard: Locator;
-  readonly latestNewsFeaturedDate: Locator;
+  private readonly latestNewsColumnSelector =
+    '[data-testid="latest-news-column"]';
+  private readonly latestNewsCardSelector =
+    '[data-testid="latest-news-featured-card"], [data-testid="latest-news-secondary-card"]';
+
+  private readonly latestNewsFeaturedDateTestId = "latest-news-featured-date";
+  private readonly latestNewsSecondaryDateTestId = "latest-news-secondary-date";
 
   constructor(page: Page, baseUrl?: string) {
     this.page = page;
     this.baseUrl = baseUrl;
 
     this.latestNewsColumn = this.page.getByTestId("latest-news-column");
-
-    this.latestNewsFeaturedCard = this.latestNewsColumn.getByTestId(
-      "latest-news-featured-card",
-    );
-
-    this.latestNewsFeaturedDate = this.latestNewsFeaturedCard.getByTestId(
-      "latest-news-featured-date",
-    );
   }
 
   async goto(): Promise<void> {
@@ -49,33 +46,32 @@ export default class HomePage {
   async checkLatestNewsAccessibility(): Promise<void> {
     await expectNoSeriousA11yViolationsForSelector(
       this.page,
-      '[data-testid="latest-news-column"]',
+      this.latestNewsColumnSelector,
     );
-  }
-
-  async assertLatestNewsFeaturedDate(
-    publishedDate: string | Date,
-  ): Promise<void> {
-    await expect(this.latestNewsFeaturedCard).toBeVisible();
-    await expect(this.latestNewsFeaturedDate).toBeVisible();
-
-    const uiText =
-      (await this.latestNewsFeaturedDate.textContent())?.trim() ?? "";
-    const expected = dayjs(publishedDate).format("Do MMMM YYYY");
-
-    expect(uiText).toBe(expected);
   }
 
   private articleLink(title: string): Locator {
     return this.page.getByRole("link", { name: title });
   }
 
-  private articleCard(title: string): Locator {
+  private latestNewsCard(title: string): Locator {
     return this.latestNewsColumn
-      .locator(
-        '[data-testid="latest-news-featured-card"], [data-testid="latest-news-secondary-card"]',
-      )
+      .locator(this.latestNewsCardSelector)
       .filter({ has: this.articleLink(title) });
+  }
+
+  private latestNewsFeaturedDate(card: Locator): Locator {
+    return card.getByTestId(this.latestNewsFeaturedDateTestId);
+  }
+
+  private latestNewsSecondaryDate(card: Locator): Locator {
+    return card.getByTestId(this.latestNewsSecondaryDateTestId);
+  }
+
+  private async latestNewsDateElement(card: Locator): Promise<Locator> {
+    const featured = this.latestNewsFeaturedDate(card);
+    if ((await featured.count()) > 0) return featured.first();
+    return this.latestNewsSecondaryDate(card).first();
   }
 
   private paragraphSnippet(content: string): Locator {
@@ -96,23 +92,16 @@ export default class HomePage {
     await expect(this.articleLink(latestPost.title)).toBeVisible();
 
     for (const post of posts) {
-      const card = this.articleCard(post.title);
+      const card = this.latestNewsCard(post.title);
 
       await expect(card).toBeVisible();
       await expect(this.articleLink(post.title)).toBeVisible();
 
-      const dateLocator = card.getByTestId("latest-news-featured-date");
-      const hasFeaturedDate = (await dateLocator.count()) > 0;
-
-      const dateEl = hasFeaturedDate
-        ? dateLocator.first()
-        : card.getByTestId("latest-news-secondary-date").first();
-
+      const dateEl = await this.latestNewsDateElement(card);
       await expect(dateEl).toBeVisible();
 
       const uiDate = (await dateEl.textContent())?.trim() ?? "";
       const expectedDate = dayjs(post.createdAt).format("Do MMMM YYYY");
-
       expect(uiDate).toBe(expectedDate);
     }
 
