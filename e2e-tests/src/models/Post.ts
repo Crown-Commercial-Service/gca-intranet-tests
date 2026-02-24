@@ -92,6 +92,11 @@ class PostBuilder {
     return this;
   }
 
+  withTitleOver100Chars(): this {
+    this.props.title = this.applyRunId(this.randomTitleExact(120));
+    return this;
+  }
+
   withContent(content: string): this {
     this.props.content = content;
     return this;

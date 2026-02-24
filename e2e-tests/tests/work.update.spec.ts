@@ -21,7 +21,7 @@ test.describe("work updates", () => {
   }) => {
     const post = Post.aPost()
       .withType("work_update")
-      .withFixedTitle("E2E Work Update Char Limit")
+      .withTitleOver100Chars()
       .withParagraphMaxChars(180)
       .withStatus("publish");
 
