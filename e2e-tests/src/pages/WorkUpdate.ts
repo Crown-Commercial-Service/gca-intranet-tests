@@ -1,13 +1,13 @@
 import { Page, Locator, expect } from "@playwright/test";
+import BasePage from "./BasePage";
 
-export default class WorkUpdate {
-  readonly page: Page;
+export default class WorkUpdate extends BasePage {
   private readonly baseUrl?: string;
 
   readonly title: Locator;
 
   constructor(page: Page, baseUrl?: string) {
-    this.page = page;
+    super(page);
     this.baseUrl = baseUrl;
 
     this.title = this.page.getByRole("heading").first();

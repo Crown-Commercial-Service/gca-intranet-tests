@@ -74,7 +74,8 @@ test.describe("work updates", () => {
     await homepage.goto();
     await homepage.selectWorkItemLink(post);
 
-    await expect(workUpdate.page).toHaveURL(/e2e-work-update-navigation/);
+    await workUpdate.expectUrlToMatch(/e2e-work-update-navigation/);
+    await workUpdate.assertBreadcrumbs(post);
   });
 
   test("should open work update list page", async ({
@@ -91,7 +92,7 @@ test.describe("work updates", () => {
     await homepage.goto();
     await homepage.workUpdateSeeMoreLink.click();
 
-    await expect(workUpdate.page).toHaveURL(/work_update/);
+    await workUpdate.expectUrlToMatch(/work_update/);
   });
 
   test("can edit author details of a work update post", async ({

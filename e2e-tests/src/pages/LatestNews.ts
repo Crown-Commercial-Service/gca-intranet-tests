@@ -1,13 +1,13 @@
 import { Page, Locator, expect } from "@playwright/test";
+import BasePage from "./BasePage";
 
-export default class LatestNews {
-  readonly page: Page;
+export default class LatestNews extends BasePage {
   private readonly baseUrl?: string;
 
   readonly title: Locator;
 
   constructor(page: Page, baseUrl?: string) {
-    this.page = page;
+    super(page);
     this.baseUrl = baseUrl;
 
     this.title = this.page.getByRole("heading").first();
@@ -24,8 +24,10 @@ export default class LatestNews {
 
   private resolve(pathname: string): string {
     if (!this.baseUrl) return pathname;
+
     const base = this.baseUrl.replace(/\/+$/, "");
     const path = pathname.startsWith("/") ? pathname : `/${pathname}`;
+
     return `${base}${path}`;
   }
 }

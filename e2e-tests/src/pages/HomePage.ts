@@ -249,11 +249,7 @@ export default class HomePage {
     const avatar = card.getByTestId(this.workUpdateAvatarTestId).locator("img");
     await expect(avatar.first()).toBeVisible();
 
-    const expectedUser = (
-      process.env.WP_USER ||
-      process.env.WP_API_USER ||
-      ""
-    ).trim();
+    const expectedUser = process.env.WP_USER || process.env.WP_API_USER || "";
 
     if (expectedUser) {
       const author = card.getByTestId(this.workUpdateAuthorTestId);
@@ -263,9 +259,10 @@ export default class HomePage {
     const date = card.getByTestId(this.workUpdateDateTestId);
     await expect(date).toBeVisible();
 
-    const uiDate = (await date.textContent())?.trim() ?? "";
+    const uiDate = (await date.textContent()) ?? "";
     const expectedDate = dayjs(post.createdAt).format("Do MMMM YYYY");
-    expect(uiDate).toBe(expectedDate);
+
+    expect(uiDate.trim()).toBe(expectedDate);
   }
 
   private workUpdateLinkByTitle(title: string): Locator {

@@ -17,6 +17,7 @@ export type PostProps = {
   author?: string;
   featuredImagePath?: string;
   createdAt: Date;
+  category?: string;
 };
 
 export default class Post {
@@ -27,6 +28,7 @@ export default class Post {
   readonly author?: string;
   readonly featuredImagePath?: string;
   readonly createdAt: Date;
+  readonly category?: string;
 
   constructor(props: PostProps) {
     this.title = props.title;
@@ -36,6 +38,7 @@ export default class Post {
     this.author = props.author;
     this.featuredImagePath = props.featuredImagePath;
     this.createdAt = props.createdAt;
+    this.category = props.category;
   }
 
   static aPost(): PostBuilder {
@@ -63,13 +66,13 @@ class PostBuilder {
     status: "draft",
     type: "post",
     createdAt: new Date(),
+    category: "Uncategorized",
   };
 
   private applyRunId(title: string): string {
     const runId = this.runId || process.env.PW_RUN_ID;
     if (!runId) return title;
 
-    // don't double-append
     if (title.includes(runId)) return title;
 
     return `${title} ${runId}`.trim();
@@ -77,7 +80,6 @@ class PostBuilder {
 
   withRunId(runId: string): this {
     this.runId = runId;
-    // also apply immediately if title already set
     this.props.title = this.applyRunId(this.props.title);
     return this;
   }
@@ -124,6 +126,11 @@ class PostBuilder {
 
   withCreatedAt(date: Date): this {
     this.props.createdAt = date;
+    return this;
+  }
+
+  withCategory(category: string): this {
+    this.props.category = category;
     return this;
   }
 

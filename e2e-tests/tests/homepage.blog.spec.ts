@@ -42,7 +42,8 @@ test.describe("blogs", () => {
     await homepage.goto();
     await homepage.selectBlogLink(post);
 
-    await expect(blog.page).toHaveURL(/e2e-blog-navigation/);
+    await blog.expectUrlToMatch(/e2e-blog-navigation/);
+    await blog.assertBreadcrumbs(post);
   });
 
   test("should open blog list page", async ({ wp, homepage, blogList }) => {
