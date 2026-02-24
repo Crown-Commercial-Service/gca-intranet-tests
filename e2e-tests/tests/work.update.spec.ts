@@ -1,4 +1,4 @@
-import { test } from "../src/wp.fixtures";
+import { test, expect } from "../src/wp.fixtures";
 import Post from "../src/models/Post";
 
 test.describe("work updates", () => {
@@ -65,5 +65,39 @@ test.describe("work updates", () => {
     await homepage.goto();
 
     await homepage.assertWorkUpdatesOrder([post4, post3]);
+  });
+
+  test("should open work update page", async ({ wp, homepage, workUpdate }) => {
+    const post = Post.aPost()
+      .withType("work_updates")
+      .withFixedTitle("E2E Work Update Navigation")
+      .withStatus("publish");
+
+    await wp.posts.create(post);
+
+    await homepage.goto();
+
+    await homepage.selectWorkItemLink(post);
+
+    await expect(workUpdate.page).toHaveURL(/e2e-work-update-navigation/);
+  });
+
+  test("should open work update list page", async ({
+    wp,
+    homepage,
+    workUpdate,
+  }) => {
+    const post = Post.aPost()
+      .withType("work_updates")
+      .withFixedTitle("E2E Work Update List Page Navigation")
+      .withStatus("publish");
+
+    await wp.posts.create(post);
+
+    await homepage.goto();
+
+    await homepage.workUpdateSeeMoreLink.click();
+
+    await expect(workUpdate.page).toHaveURL(/work_updates/);
   });
 });

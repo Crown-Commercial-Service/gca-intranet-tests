@@ -34,6 +34,7 @@ export default class HomePage {
   readonly latestNewsColumn: Locator;
   readonly workUpdatesSection: Locator;
   readonly workUpdateCards: Locator;
+  readonly workUpdateSeeMoreLink: Locator;
 
   private readonly latestNewsColumnSelector: string;
   private readonly latestNewsCardSelector: string;
@@ -51,6 +52,10 @@ export default class HomePage {
     this.workUpdateCards = this.workUpdatesSection.getByTestId(
       this.workUpdateCardTestId,
     );
+
+    this.workUpdateSeeMoreLink = this.workUpdatesSection.getByRole("link", {
+      name: "See work updates",
+    });
 
     this.latestNewsColumnSelector = `[data-testid="${this.latestNewsColumnTestId}"]`;
 
@@ -244,5 +249,17 @@ export default class HomePage {
     const uiDate = (await date.textContent())?.trim() ?? "";
     const expectedDate = dayjs(post.createdAt).format("Do MMMM YYYY");
     expect(uiDate).toBe(expectedDate);
+  }
+
+  private workUpdateLinkByTitle(title: string): Locator {
+    return this.workUpdateCards
+      .filter({ has: this.page.getByRole("link", { name: title }) })
+      .getByTestId(this.workUpdateLinkTestId);
+  }
+
+  async selectWorkItemLink(post: Post): Promise<void> {
+    const link = this.workUpdateLinkByTitle(post.title);
+    await expect(link).toHaveCount(1);
+    await link.click();
   }
 }

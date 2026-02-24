@@ -113,7 +113,7 @@ test.describe("homepage - latest news", () => {
     });
   });
 
-  test("should open news details page", async ({ wp, homepage, page }) => {
+  test("should open news details page", async ({ wp, homepage, latestNews }) => {
     const post = Post.aPost()
       .withFixedTitle("E2E Latest Article")
       .withParagraphMaxChars(120)
@@ -126,6 +126,6 @@ test.describe("homepage - latest news", () => {
 
     await homepage.openLatestArticle(post.title);
 
-    await expect(page).toHaveURL(/e2e-latest-article/);
+    await expect(latestNews.page).toHaveURL(/e2e-latest-article/);
   });
 });

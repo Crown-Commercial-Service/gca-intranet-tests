@@ -10,6 +10,10 @@ import WpUsers from "../src/helpers/WpUsers";
 import WpThemes from "../src/helpers/WpThemes";
 import WpPosts from "./helpers/WpPosts";
 import HomePage from "../src/pages/HomePage";
+import LatestNews from "../src/pages/LatestNews";
+import LatestNewsList from "../src/pages/LatestNewsList";
+import WorkUpdate from "../src/pages/WorkUpdate";
+import WorkUpdateList from "../src/pages/WorkUpdateList";
 
 type WpHelpers = {
   exec: typeof runWp;
@@ -24,13 +28,18 @@ type WpHelpers = {
 type Fixtures = {
   wp: WpHelpers;
   homepage: HomePage;
+
+  latestNews: LatestNews;
+  latestNewsList: LatestNewsList;
+  workUpdate: WorkUpdate;
+  workUpdateList: WorkUpdateList;
+
   runId: string;
 };
 
 const PARALLEL_STACK_COUNT = 4;
 
 function isQaMode(): boolean {
-  // If baseURL is provided externally, we assume we're targeting QA (or any remote env)
   return Boolean(process.env.PW_BASE_URL);
 }
 
@@ -87,7 +96,6 @@ function baseUrlForWorker(
   workerIndex: number,
   parallel: boolean,
 ): string | undefined {
-  // For QA/remote, always use PW_BASE_URL directly (and do not compute per-worker base URLs)
   if (isQaMode()) return process.env.PW_BASE_URL;
 
   if (!parallel) return undefined;
@@ -108,8 +116,6 @@ export const test = base.extend<Fixtures>({
 
   wp: async ({ runId }, use, testInfo) => {
     const qaMode = isQaMode();
-
-    // For QA we don't try to detect docker compose stacks or set per-worker services.
     const parallel = qaMode ? false : await isParallelEnabled();
 
     process.env.PARALLEL_LOCAL = parallel ? "true" : "false";
@@ -136,7 +142,6 @@ export const test = base.extend<Fixtures>({
       expectUserToHaveRole,
     };
 
-    // Local only: ensure theme is active. QA should already be configured.
     if (!qaMode) {
       await themes.activate(process.env.WP_THEME || "gca-intranet");
     }
@@ -149,14 +154,44 @@ export const test = base.extend<Fixtures>({
     const parallel = qaMode ? false : await isParallelEnabled();
     const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
 
-    const homePage = new HomePage(page, baseUrl);
-    await use(homePage);
+    await use(new HomePage(page, baseUrl));
+  },
+
+  latestNews: async ({ page }, use, testInfo) => {
+    const qaMode = isQaMode();
+    const parallel = qaMode ? false : await isParallelEnabled();
+    const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
+
+    await use(new LatestNews(page, baseUrl));
+  },
+
+  latestNewsList: async ({ page }, use, testInfo) => {
+    const qaMode = isQaMode();
+    const parallel = qaMode ? false : await isParallelEnabled();
+    const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
+
+    await use(new LatestNewsList(page, baseUrl));
+  },
+
+  workUpdate: async ({ page }, use, testInfo) => {
+    const qaMode = isQaMode();
+    const parallel = qaMode ? false : await isParallelEnabled();
+    const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
+
+    await use(new WorkUpdate(page, baseUrl));
+  },
+
+  workUpdateList: async ({ page }, use, testInfo) => {
+    const qaMode = isQaMode();
+    const parallel = qaMode ? false : await isParallelEnabled();
+    const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
+
+    await use(new WorkUpdateList(page, baseUrl));
   },
 });
 
 export const expect = test.expect;
 
 test.beforeEach(async ({ wp, runId }) => {
-  // QA note: this currently still calls wp-cli via docker exec.
   await wp.posts.clearByRunId(runId);
 });
