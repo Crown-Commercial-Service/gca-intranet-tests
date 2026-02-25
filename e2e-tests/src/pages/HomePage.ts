@@ -6,6 +6,7 @@ import {
   expectNoSeriousA11yViolations,
   expectNoSeriousA11yViolationsForSelector,
 } from "../a11y/assertions";
+import { htmlToPlainText } from "../utils/formatters";
 
 dayjs.extend(advancedFormat);
 
@@ -125,7 +126,8 @@ export default class HomePage {
   }
 
   private paragraphSnippet(content: string): Locator {
-    const snippet = content.slice(0, 40);
+    const plainText = htmlToPlainText(content);
+    const snippet = plainText.slice(0, 40);
     return this.page.getByText(snippet);
   }
 
