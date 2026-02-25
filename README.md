@@ -6,6 +6,35 @@ End‑to‑end Playwright test suite for the GCA Intranet WordPress application.
 
 ## Installation
 
+## pre-req
+Assuming your on a mac and have brew installed, run the following to install node
+
+```bash
+brew install nvm
+
+mkdir -p ~/.nvm
+
+echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.zshrc
+echo '[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"' >> ~/.zshrc
+echo '[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"' >> ~/.zshrc
+
+source ~/.zshrc
+
+nvm install --lts
+
+nvm alias default node
+
+node -v
+
+npm -v
+
+nvm use default
+
+node -v
+
+npm -v
+```
+
 ```bash
 npm install
 npx playwright install
