@@ -5,14 +5,14 @@
   "description": "End-to-end test suite for the gsa intranet wordpress application using Playwright.",
   "main": "",
   "scripts": {
-    "test": "playwright test",
+    "test": "npx dotenv -e .env.qa -- playwright test --workers=1",
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
     "test:smoke": "playwright test tests/smoke.spec.ts",
     "test:report": "playwright show-report",
-    "test:a11y": "PW_TEST_SUITE=a11y playwright test -c playwright.a11y.config.ts",
-    "test:a11y:ui": "playwright test -c playwright.a11y.config.ts --ui",
-    "test:a11y:headed": "playwright test -c playwright.a11y.config.ts --headed"
+    "test:a11y": "npx dotenv -e .env.qa -- sh -c 'PW_TEST_SUITE=a11y playwright test -c playwright.a11y.config.ts --workers=1'",
+    "test:a11y:ui": "npx dotenv -e .env.qa -- sh -c 'PW_TEST_SUITE=a11y playwright test -c playwright.a11y.config.ts --ui --workers=1'",
+    "test:a11y:headed": "npx dotenv -e .env.qa -- sh -c 'PW_TEST_SUITE=a11y playwright test -c playwright.a11y.config.ts --headed --workers=1'"
   },
   "keywords": [
     "playwright",

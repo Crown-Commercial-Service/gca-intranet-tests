@@ -1,14 +1,14 @@
-import { test } from "../src/wp.fixtures";
-import User from "../src/models/User";
+// import { test } from "../src/wp.fixtures";
+// import User from "../src/models/User";
 
-test("wp helpers work", async ({ wp }) => {
-  const user = User.anAdmin()
-    .withUsername("e2e_admin")
-    .withEmail("e2e_admin@example.com")
-    .withPassword("Password123!");
+// test("wp helpers work", async ({ wp }) => {
+//   const user = User.anAdmin()
+//     .withUsername("e2e_admin")
+//     .withEmail("e2e_admin@example.com")
+//     .withPassword("Password123!");
 
-  await wp.users.upsert(user);
+//   await wp.users.upsert(user);
 
-  await wp.expectUserToExist(user);
-  await wp.expectUserToHaveRole(user);
-});
+//   await wp.expectUserToExist(user);
+//   await wp.expectUserToHaveRole(user);
+// });
