@@ -215,3 +215,7 @@ export const expect = test.expect;
 test.beforeEach(async ({ wp, runId }) => {
   await wp.posts.clearByRunId(runId);
 });
+
+test.afterEach(async ({ wp, runId }) => {
+  await wp.posts.clearByRunId(runId);
+});
