@@ -18,6 +18,7 @@ export type PostProps = {
   featuredImagePath?: string;
   createdAt: Date;
   category?: string;
+  template?: string;
 };
 
 export default class Post {
@@ -29,6 +30,7 @@ export default class Post {
   readonly featuredImagePath?: string;
   readonly createdAt: Date;
   readonly category?: string;
+  readonly template?: string;
 
   constructor(props: PostProps) {
     this.title = props.title;
@@ -39,6 +41,7 @@ export default class Post {
     this.featuredImagePath = props.featuredImagePath;
     this.createdAt = props.createdAt;
     this.category = props.category;
+    this.template = props.template;
   }
 
   static aPost(): PostBuilder {
@@ -66,7 +69,8 @@ class PostBuilder {
     status: "draft",
     type: "post",
     createdAt: new Date(),
-    category: "Uncategorized",
+    category: undefined,
+    template: undefined,
   };
 
   private applyRunId(title: string): string {
@@ -134,6 +138,11 @@ class PostBuilder {
     return this;
   }
 
+  withTemplate(template: string): this {
+    this.props.template = template;
+    return this;
+  }
+
   // title helpers
   withTitleMaxChars(max: number): this {
     this.props.title = this.applyRunId(this.randomTitleWithin(max));
@@ -187,6 +196,9 @@ class PostBuilder {
   get createdAt() {
     return this.props.createdAt;
   }
+  get category() {
+    return this.props.category;
+  }
 
   build(): Post {
     const props: PostProps = { ...this.props };
@@ -216,16 +228,18 @@ class PostBuilder {
 
   private randomParagraphWithin(max: number): string {
     if (max <= 0) return "";
-    const p = chance.paragraph({ sentences: 3 }).trim();
-    return p.length <= max ? p : p.slice(0, max).trimEnd();
+    const paragraph = chance.paragraph({ sentences: 3 }).trim();
+    return paragraph.length <= max
+      ? paragraph
+      : paragraph.slice(0, max).trimEnd();
   }
 
   private randomParagraphExact(exact: number): string {
     if (exact <= 0) return "";
-    let p = chance.paragraph({ sentences: 5 }).trim();
-    while (p.length < exact) {
-      p += " " + chance.sentence({ words: 5 });
+    let paragraph = chance.paragraph({ sentences: 5 }).trim();
+    while (paragraph.length < exact) {
+      paragraph += " " + chance.sentence({ words: 5 });
     }
-    return p.slice(0, exact);
+    return paragraph.slice(0, exact);
   }
 }
