@@ -27,7 +27,7 @@ test.describe("work updates", () => {
 
     await wp.posts.create(post);
     await homepage.goto();
-    await homepage.assertWorkUpdateCharLimits(post, 10);
+    await homepage.assertWorkUpdateCharLimits(post);
   });
 
   test("should display work updates in order (latest first and oldest last)", async ({

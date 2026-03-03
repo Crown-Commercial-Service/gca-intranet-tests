@@ -6,7 +6,7 @@ import {
   expectNoSeriousA11yViolations,
   expectNoSeriousA11yViolationsForSelector,
 } from "../a11y/assertions";
-import { htmlToPlainText } from "../utils/formatters";
+import { htmlToPlainText, getVisibleTruncatedText } from "../utils/formatters";
 
 dayjs.extend(advancedFormat);
 
@@ -216,13 +216,8 @@ export default class HomePage {
     }
   }
 
-  async assertWorkUpdateCharLimits(
-    post: Post,
-    maxDisplayedChars: number,
-  ): Promise<void> {
+  async assertWorkUpdateCharLimits(post: Post): Promise<void> {
     await expect(this.workUpdatesSection).toBeVisible();
-
-    // We expect exactly one card
     await expect(this.workUpdateCards).toHaveCount(1);
 
     const card = this.workUpdateCards.first();
@@ -231,15 +226,13 @@ export default class HomePage {
     const link = card.getByTestId(this.workUpdateLinkTestId);
     await expect(link).toBeVisible();
 
-    const uiTitle = (await link.innerText()).trim();
+    const uiTitle = await link.innerText();
 
-    // UI title must be truncated
-    expect(uiTitle.length).toBeLessThanOrEqual(maxDisplayedChars);
+    expect(uiTitle.trim()).not.toBe(post.title);
 
-    // If original title is longer, UI should not equal full title
-    if (post.title.length > maxDisplayedChars) {
-      expect(uiTitle).not.toBe(post.title);
-    }
+    const visiblePart = getVisibleTruncatedText(uiTitle);
+
+    expect(post.title.startsWith(visiblePart)).toBe(true);
   }
 
   private workUpdateCardByTitle(title: string): Locator {

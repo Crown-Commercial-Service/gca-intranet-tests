@@ -37,3 +37,17 @@ export function htmlToPlainText(html: string): string {
 
   return plainText.replace(/\s+/g, " ").trim();
 }
+
+/**
+ * Returns the visible portion of a truncated string
+ * (removes trailing "..." if present).
+ */
+export function getVisibleTruncatedText(text: string): string {
+  const trimmed = text.trim();
+
+  if (trimmed.endsWith("...")) {
+    return trimmed.slice(0, trimmed.length - 3);
+  }
+
+  return trimmed;
+}
