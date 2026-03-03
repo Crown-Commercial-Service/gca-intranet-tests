@@ -3,10 +3,6 @@ import Post from "../src/models/Post";
 import User from "../src/models/User";
 
 test.describe("work updates", () => {
-  test.beforeEach(async ({ wp, runId }) => {
-    await wp.posts.clearByRunIdForType("work_updates", runId);
-  });
-
   test("should display a single work update", async ({ wp, homepage }) => {
     const post = Post.aPost()
       .withType("work_updates")
