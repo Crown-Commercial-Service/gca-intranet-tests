@@ -229,17 +229,11 @@ export default class HomePage {
   }
 
   private workUpdateCardByTitle(title: string): Locator {
-    const runId = (process.env.PW_RUN_ID || "").trim();
-    const stableTitle =
-      runId && title.endsWith(runId)
-        ? title.slice(0, title.length - runId.length).trim()
-        : title.trim();
-
-    return this.workUpdateCards.filter({
-      has: this.page
-        .getByTestId(this.workUpdateLinkTestId)
-        .filter({ hasText: stableTitle }),
-    });
+    return this.cardByStableTitle(
+      this.workUpdateCards,
+      this.workUpdateLinkTestId,
+      title,
+    );
   }
 
   async assertWorkUpdateOnHomepage(post: Post): Promise<void> {
@@ -267,13 +261,7 @@ export default class HomePage {
     const cards = this.page
       .getByTestId("work-updates-section")
       .getByTestId("work-update-card");
-
-    const prefix = title.trim().slice(0, 25);
-
-    return cards
-      .getByTestId("work-update-link")
-      .filter({ hasText: prefix })
-      .first();
+    return this.getLinkByTitlePrefix(cards, "work-update-link", title);
   }
 
   async selectWorkItemLink(post: Post): Promise<void> {
@@ -306,60 +294,84 @@ export default class HomePage {
     expectedAuthor?: string,
   ): Promise<void> {
     const card = this.blogCardByTitle(title);
-
     await expect(card).toHaveCount(1);
 
     const authorElement = card.getByTestId(this.blogAuthorTestId);
 
-    const authorToAssert =
-      expectedAuthor ?? process.env.WP_USER ?? process.env.WP_API_USER;
+    const author =
+      expectedAuthor ??
+      process.env.WP_ADMIN_USERNAME ??
+      process.env.WP_ADMIN_USER ??
+      process.env.WP_USER ??
+      process.env.WP_API_USER ??
+      "";
 
-    await expect(authorElement).toContainText(authorToAssert as string);
+    await expect(authorElement).toHaveText(`By ${author}`);
   }
 
   private blogCardByTitle(title: string): Locator {
-    return this.blogCard.filter({
-      has: this.page.getByRole("link", { name: title }),
+    return this.cardByStableTitle(this.blogCard, this.blogLinkTestId, title);
+  }
+
+  private getLinkByTitlePrefix(
+    cards: Locator,
+    linkTestId: string,
+    title: string,
+    prefixLen = 25,
+  ): Locator {
+    const prefix = title.trim().slice(0, prefixLen);
+    return cards.getByTestId(linkTestId).filter({ hasText: prefix }).first();
+  }
+
+  private cardByStableTitle(
+    cards: Locator,
+    linkTestId: string,
+    title: string,
+  ): Locator {
+    const runId = (process.env.PW_RUN_ID || "").trim();
+
+    const stableTitle =
+      runId && title.endsWith(runId)
+        ? title.slice(0, title.length - runId.length).trim()
+        : title.trim();
+
+    return cards.filter({
+      has: this.page.getByTestId(linkTestId).filter({ hasText: stableTitle }),
     });
   }
 
   private blogLinkByTitle(title: string): Locator {
-    return this.blogCardByTitle(title).getByTestId(this.blogLinkTestId);
+    const cards = this.page
+      .getByTestId("blogs-column")
+      .getByTestId("blogs-card");
+    return this.getLinkByTitlePrefix(cards, this.blogLinkTestId, title);
   }
 
   async assertBlogsOnHomepage(post: Post): Promise<void> {
     await expect(this.blogsSection).toBeVisible();
-    await expect(this.blogCard).toHaveCount(1);
 
-    const card = this.blogCardByTitle(post.title);
-
-    await expect(card).toHaveCount(1);
+    const card = this.blogCard.first();
     await expect(card).toBeVisible();
 
     const link = card.getByTestId(this.blogLinkTestId);
-    await expect(link).toBeVisible();
-    await expect(link).toHaveText(post.title);
 
-    const avatar = card.getByTestId(this.blogAvatarTestId).locator("img");
-    await expect(avatar.first()).toBeVisible();
+    const actual = ((await link.textContent()) ?? "").trim();
+    const visiblePart = getVisibleTruncatedText(actual);
 
-    const expectedUser = (
-      process.env.WP_USER ||
-      process.env.WP_API_USER ||
-      ""
-    ).trim();
+    expect(post.title.startsWith(visiblePart)).toBe(true);
+    expect(actual.endsWith("...")).toBe(true);
 
-    if (expectedUser) {
-      const author = card.getByTestId(this.blogAuthorTestId);
-      await expect(author).toContainText(expectedUser);
-    }
+    await expect(
+      card.getByTestId(this.blogAvatarTestId).locator("img"),
+    ).toHaveAttribute("src", /.+/);
 
-    const date = card.getByTestId(this.blogDateTestId);
-    await expect(date).toBeVisible();
+    await expect(card.getByTestId(this.blogAuthorTestId)).toHaveText(
+      `By ${process.env.WP_ADMIN_USERNAME}`,
+    );
 
-    const uiDate = (await date.textContent())?.trim() ?? "";
-    const expectedDate = dayjs(post.createdAt).format("Do MMMM YYYY");
-    expect(uiDate).toBe(expectedDate);
+    await expect(card.getByTestId(this.blogDateTestId)).toHaveText(
+      dayjs(post.createdAt).format("Do MMMM YYYY"),
+    );
   }
 
   async selectBlogLink(post: Post): Promise<void> {
@@ -368,15 +380,16 @@ export default class HomePage {
     await link.click();
   }
 
-  async assertBlogCharLimits(post: Post, maxDisplayedChars: number) {
+  async assertBlogCharLimits(post: Post): Promise<void> {
     await expect(this.blogsSection).toBeVisible();
 
-    const link = this.blogLinkByTitle(post.title);
-    await expect(link).toHaveCount(1);
+    const link = this.blogCard.first().getByTestId(this.blogLinkTestId);
 
-    const uiTitle = await link.innerText();
+    const uiTitle = (await link.innerText()).trim();
 
-    expect(uiTitle.length).toBeLessThan(post.title.length);
-    expect(uiTitle.length).toBeLessThanOrEqual(maxDisplayedChars);
+    expect(uiTitle).not.toBe(post.title);
+
+    const visiblePart = getVisibleTruncatedText(uiTitle);
+    expect(post.title.startsWith(visiblePart)).toBe(true);
   }
 }

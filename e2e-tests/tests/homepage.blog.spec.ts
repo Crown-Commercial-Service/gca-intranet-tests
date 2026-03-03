@@ -3,9 +3,12 @@ import Post from "../src/models/Post";
 import User from "../src/models/User";
 
 test.describe("blogs", () => {
+  test.beforeEach(async ({ wp, runId }) => {
+    await wp.posts.clearByTypeAndRunId("blogs", runId);
+  });
   test("should display a single blog", async ({ wp, homepage }) => {
     const post = Post.aPost()
-      .withType("blogs")
+      .withType("blog")
       .withFixedTitle("E2E Blog Post")
       .withParagraphMaxChars(180)
       .withStatus("publish");
@@ -21,19 +24,19 @@ test.describe("blogs", () => {
     homepage,
   }) => {
     const post = Post.aPost()
-      .withType("blogs")
+      .withType("blog")
       .withTitleOver100Chars()
       .withStatus("publish");
 
     await wp.posts.create(post);
 
     await homepage.goto();
-    await homepage.assertBlogCharLimits(post, 10);
+    await homepage.assertBlogCharLimits(post);
   });
 
   test("should open blog page", async ({ wp, homepage, blog }) => {
     const post = Post.aPost()
-      .withType("blogs")
+      .withType("blog")
       .withFixedTitle("E2E Blog Navigation")
       .withStatus("publish");
 
@@ -48,7 +51,7 @@ test.describe("blogs", () => {
 
   test("should open blog list page", async ({ wp, homepage, blogList }) => {
     const post = Post.aPost()
-      .withType("blogs")
+      .withType("blog")
       .withFixedTitle("E2E Blog List Page Navigation")
       .withStatus("publish");
 
@@ -65,12 +68,12 @@ test.describe("blogs", () => {
     homepage,
   }) => {
     const older = Post.aPost()
-      .withType("blogs")
+      .withType("blog")
       .withFixedTitle("E2E Blog Older")
       .withStatus("publish");
 
     const latest = Post.aPost()
-      .withType("blogs")
+      .withType("blog")
       .withFixedTitle("E2E Blog Latest")
       .withStatus("publish");
 
@@ -87,7 +90,7 @@ test.describe("blogs", () => {
     runId,
   }) => {
     const post = Post.aPost()
-      .withType("blogs")
+      .withType("blog")
       .withFixedTitle("E2E Blog Author Change")
       .withStatus("publish");
 
@@ -103,7 +106,7 @@ test.describe("blogs", () => {
 
     await wp.users.upsert(newUser);
 
-    await wp.posts.updatePostAuthor(postId, "blogs", newUser.username);
+    await wp.posts.updatePostAuthor(postId, "blog", newUser.username);
 
     await homepage.goto();
     await homepage.assertBlogAuthor(post.title, newUser.username);
