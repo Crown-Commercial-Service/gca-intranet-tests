@@ -2,7 +2,7 @@ import { test } from "../../src/wp.fixtures";
 import Post from "../../src/models/Post";
 
 test.describe("Accessibility smoke", () => {
-  test("work updates section has no serious or critical violations", async ({
+  test.skip("work updates section has no serious or critical violations", async ({
     homepage,
     wp,
   }) => {

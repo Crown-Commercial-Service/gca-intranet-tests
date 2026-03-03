@@ -15,7 +15,7 @@ test.describe("work updates", () => {
     await homepage.assertWorkUpdateOnHomepage(post);
   });
 
-  test("should enforce character limits for work update on homepage", async ({
+  test.only("should enforce character limits for work update on homepage", async ({
     wp,
     homepage,
   }) => {

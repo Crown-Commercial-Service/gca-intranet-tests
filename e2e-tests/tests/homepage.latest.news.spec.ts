@@ -4,6 +4,7 @@ import Post from "../src/models/Post";
 test.describe("homepage - latest news", () => {
   test("should display article in single column", async ({ wp, homepage }) => {
     const post = Post.aPost()
+      .withType("news")
       .withFixedTitle("E2E Latest Article")
       .withParagraphMaxChars(120)
       .withStatus("publish")
@@ -20,21 +21,25 @@ test.describe("homepage - latest news", () => {
     homepage,
   }) => {
     const post1 = Post.aPost()
+      .withType("news")
       .withFixedTitle("Post 1")
       .withFeaturedImage("img-1.jpg")
       .withStatus("publish");
 
     const post2 = Post.aPost()
+      .withType("news")
       .withFixedTitle("Post 2")
       .withFeaturedImage("img-2.jpg")
       .withStatus("publish");
 
     const post3 = Post.aPost()
+      .withType("news")
       .withFixedTitle("Post 3")
       .withFeaturedImage("img-3.jpg")
       .withStatus("publish");
 
     const post4 = Post.aPost()
+      .withType("news")
       .withFixedTitle("Post 4")
       .withFeaturedImage("featured.jpg")
       .withStatus("publish");
@@ -57,6 +62,7 @@ test.describe("homepage - latest news", () => {
     homepage,
   }) => {
     const post = Post.aPost()
+      .withType("news")
       .withFixedTitle("E2E Latest Article")
       .withParagraphMaxChars(120)
       .withStatus("publish")
@@ -77,24 +83,28 @@ test.describe("homepage - latest news", () => {
     homepage,
   }) => {
     const post1 = Post.aPost()
+      .withType("news")
       .withTitleMaxChars(40)
       .withParagraphMaxChars(120)
       .withFeaturedImage("img-1.jpg")
       .withStatus("publish");
 
     const post2 = Post.aPost()
+      .withType("news")
       .withTitleMaxChars(40)
       .withParagraphMaxChars(120)
       .withFeaturedImage("img-2.jpg")
       .withStatus("publish");
 
     const post3 = Post.aPost()
+      .withType("news")
       .withTitleMaxChars(40)
       .withParagraphMaxChars(120)
       .withFeaturedImage("img-3.jpg")
       .withStatus("publish");
 
     const post4 = Post.aPost()
+      .withType("news")
       .withTitleMaxChars(40)
       .withParagraphMaxChars(120)
       .withFeaturedImage("featured.jpg")
@@ -119,6 +129,7 @@ test.describe("homepage - latest news", () => {
     latestNews,
   }) => {
     const post = Post.aPost()
+      .withType("news")
       .withFixedTitle("E2E Latest Article")
       .withParagraphMaxChars(120)
       .withStatus("publish")
