@@ -6,6 +6,9 @@
   "main": "",
   "scripts": {
     "test": "npx dotenv -e .env.qa -- playwright test --workers=1",
+    "test:docker": "npx dotenv -e .env.docker -- playwright test",
+    "test:docker:headed": "npx dotenv -e .env.docker -- playwright test --headed",
+    "test:docker:ui": "npx dotenv -e .env.docker -- playwright test --ui",
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
     "test:smoke": "playwright test tests/smoke.spec.ts",
