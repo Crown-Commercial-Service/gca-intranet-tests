@@ -184,10 +184,12 @@ async function wpRest<ResponseType>(
     urlPath.startsWith("/") ? "" : "/"
   }${urlPath}`;
 
+  const authHeader = basicAuthHeader(restConfig);
+
   const response = await fetch(url, {
     method,
     headers: {
-      Authorization: basicAuthHeader(restConfig),
+      Authorization: authHeader,
       "Content-Type": "application/json",
       Accept: "application/json",
     },
@@ -195,7 +197,16 @@ async function wpRest<ResponseType>(
   });
 
   const text = await response.text();
+
   if (!response.ok) {
+    console.error("---- WP REST FAILURE ----");
+    console.error("URL:", url);
+    console.error("Method:", method);
+    console.error("Status:", response.status);
+    console.error("Auth header sent:", authHeader);
+    console.error("Response body:", text);
+    console.error("-------------------------");
+
     throw new Error(
       `WP REST ${method} ${url} failed (${response.status})\n${text}`,
     );
