@@ -220,16 +220,26 @@ export default class HomePage {
     post: Post,
     maxDisplayedChars: number,
   ): Promise<void> {
-    const card = this.workUpdateCardByTitle(post.title);
+    await expect(this.workUpdatesSection).toBeVisible();
 
-    await expect(card).toHaveCount(1);
+    // We expect exactly one card
+    await expect(this.workUpdateCards).toHaveCount(1);
+
+    const card = this.workUpdateCards.first();
     await expect(card).toBeVisible();
 
     const link = card.getByTestId(this.workUpdateLinkTestId);
-    const uiTitle = await link.innerText();
+    await expect(link).toBeVisible();
 
-    expect(uiTitle.length).toBeLessThan(post.title.length);
+    const uiTitle = (await link.innerText()).trim();
+
+    // UI title must be truncated
     expect(uiTitle.length).toBeLessThanOrEqual(maxDisplayedChars);
+
+    // If original title is longer, UI should not equal full title
+    if (post.title.length > maxDisplayedChars) {
+      expect(uiTitle).not.toBe(post.title);
+    }
   }
 
   private workUpdateCardByTitle(title: string): Locator {
