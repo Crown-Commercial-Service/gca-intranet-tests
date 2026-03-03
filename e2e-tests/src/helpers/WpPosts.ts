@@ -511,6 +511,41 @@ export default class WpPosts {
     await this.wp(["post", "delete", ...idsRaw.split(/\s+/), "--force"]);
   }
 
+  async clearByRunIdForType(postType: string, runId: string): Promise<void> {
+    if (!runId) return;
+
+    if (wpDriver() === "remote") {
+      const restConfig = getRestConfig();
+      const endpoint = `/wp-json/wp/v2/${restEndpointForType(postType)}`;
+
+      const items = await wpRest<any[]>(
+        restConfig,
+        "GET",
+        `${endpoint}?search=${encodeURIComponent(runId)}&per_page=100`,
+      );
+
+      for (const item of items) {
+        await wpRest(restConfig, "DELETE", `${endpoint}/${item.id}?force=true`);
+      }
+
+      return;
+    }
+
+    // CLI mode
+    const listResult = await this.wp([
+      "post",
+      "list",
+      `--post_type=${postType}`,
+      "--format=ids",
+      `--search=${runId}`,
+    ]);
+
+    const idsRaw = listResult.stdout.trim();
+    if (!idsRaw) return;
+
+    await this.wp(["post", "delete", ...idsRaw.split(/\s+/), "--force"]);
+  }
+
   async getPublishedDate(postId: number): Promise<string> {
     if (wpDriver() === "remote") {
       const restConfig = getRestConfig();
