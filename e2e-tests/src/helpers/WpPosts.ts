@@ -281,123 +281,125 @@ export default class WpPosts {
   constructor(private readonly wp: (args: string[]) => Promise<WpResult>) {}
 
   async create(post: Post): Promise<number> {
-  const shouldApplyCategory = Boolean(post.category);
+    const shouldApplyCategory = Boolean(post.category);
 
-  const isPage = String(post.type) === "page";
-  const shouldApplyTemplate = isPage && Boolean(post.template);
+    const isPage = String(post.type) === "page";
+    const shouldApplyTemplate = isPage && Boolean(post.template);
 
-  const resolveTemplateValue = (templateInput: string): string => {
-    const template = String(templateInput || "").trim();
-    if (!template) return "";
+    const resolveTemplateValue = (templateInput: string): string => {
+      const template = String(templateInput || "").trim();
+      if (!template) return "";
 
-    if (template.toLowerCase().endsWith(".php")) return template;
+      if (template.toLowerCase().endsWith(".php")) return template;
 
-    const envKey = `WP_TEMPLATE_${toEnvKey(template)}`;
-    const override = String(process.env[envKey] || "").trim();
-    if (override) return override;
+      const envKey = `WP_TEMPLATE_${toEnvKey(template)}`;
+      const override = String(process.env[envKey] || "").trim();
+      if (override) return override;
 
-    if (template === "Three Column Template (Category)") {
-      return "three-column-template-category.php";
+      if (template === "Three Column Template (Category)") {
+        return "three-column-template-category.php";
+      }
+
+      throw new Error(
+        `Unknown page template "${template}". Provide the template file name (e.g. "three-column-template-category.php") or set ${envKey}.`,
+      );
+    };
+
+    const templateValue = shouldApplyTemplate
+      ? resolveTemplateValue(post.template as string)
+      : undefined;
+
+    if (wpDriver() === "remote") {
+      const restConfig = getRestConfig();
+
+      let featuredMediaId: number | undefined;
+
+      if (post.featuredImagePath) {
+        const { resolvedPath } = resolveLocalPath(post.featuredImagePath);
+        featuredMediaId = await uploadMedia(restConfig, resolvedPath);
+      }
+
+      const endpoint = `/wp-json/wp/v2/${restEndpointForType(String(post.type))}`;
+
+      let categoryId: number | undefined;
+      if (shouldApplyCategory) {
+        categoryId = await this.getCategoryIdViaApi(
+          restConfig,
+          post.category as string,
+        );
+      }
+
+      const created = await wpRest<any>(restConfig, "POST", endpoint, {
+        title: post.title,
+        content: post.content,
+        status: post.status,
+        ...(featuredMediaId ? { featured_media: featuredMediaId } : {}),
+        ...(categoryId ? { categories: [categoryId] } : {}),
+        ...(templateValue ? { template: templateValue } : {}),
+      });
+
+      const createdId = Number(created?.id);
+      if (!Number.isFinite(createdId)) {
+        throw new Error(
+          `Failed to parse created id from response: ${JSON.stringify(created)}`,
+        );
+      }
+
+      return createdId;
     }
-
-    throw new Error(
-      `Unknown page template "${template}". Provide the template file name (e.g. "three-column-template-category.php") or set ${envKey}.`,
-    );
-  };
-
-  const templateValue = shouldApplyTemplate
-    ? resolveTemplateValue(post.template as string)
-    : undefined;
-
-  if (wpDriver() === "remote") {
-    const restConfig = getRestConfig();
-
-    let featuredMediaId: number | undefined;
-
-    if (post.featuredImagePath) {
-      const { resolvedPath } = resolveLocalPath(post.featuredImagePath);
-      featuredMediaId = await uploadMedia(restConfig, resolvedPath);
-    }
-
-    const endpoint = `/wp-json/wp/v2/${restEndpointForType(String(post.type))}`;
 
     let categoryId: number | undefined;
     if (shouldApplyCategory) {
-      categoryId = await this.getCategoryIdViaApi(
-        restConfig,
-        post.category as string,
-      );
+      categoryId = await this.getCategoryIdViaCli(post.category as string);
     }
 
-    const created = await wpRest<any>(restConfig, "POST", endpoint, {
-      title: post.title,
-      content: post.content,
-      status: post.status,
-      ...(featuredMediaId ? { featured_media: featuredMediaId } : {}),
-      ...(categoryId ? { categories: [categoryId] } : {}),
-      ...(templateValue ? { template: templateValue } : {}),
-    });
-
-    const createdId = Number(created?.id);
-    if (!Number.isFinite(createdId)) {
-      throw new Error(`Failed to parse created id from response: ${JSON.stringify(created)}`);
-    }
-
-    return createdId;
-  }
-
-  let categoryId: number | undefined;
-  if (shouldApplyCategory) {
-    categoryId = await this.getCategoryIdViaCli(post.category as string);
-  }
-
-  const args = [
-    "post",
-    "create",
-    "--porcelain",
-    `--post_type=${post.type}`,
-    `--post_title=${post.title}`,
-    `--post_content=${post.content}`,
-    `--post_status=${post.status}`,
-  ];
-
-  if (categoryId) {
-    args.push(`--post_category=${categoryId}`);
-  }
-
-  const createResult = await this.wp(args);
-
-  if (createResult.exitCode !== 0) {
-    throw formatWpCliFailure("Failed to create post", createResult);
-  }
-
-  const postId = Number(createResult.stdout.trim());
-
-  if (!Number.isFinite(postId)) {
-    throw new Error(`Failed to parse post id from: ${createResult.stdout}`);
-  }
-
-  if (post.featuredImagePath) {
-    await this.setFeaturedImage(postId, post.featuredImagePath);
-  }
-
-  if (templateValue) {
-    const templateResult = await this.wp([
+    const args = [
       "post",
-      "meta",
-      "update",
-      String(postId),
-      "_wp_page_template",
-      templateValue,
-    ]);
+      "create",
+      "--porcelain",
+      `--post_type=${post.type}`,
+      `--post_title=${post.title}`,
+      `--post_content=${post.content}`,
+      `--post_status=${post.status}`,
+    ];
 
-    if (templateResult.exitCode !== 0) {
-      throw formatWpCliFailure("Failed to set page template", templateResult);
+    if (categoryId) {
+      args.push(`--post_category=${categoryId}`);
     }
-  }
 
-  return postId;
-}
+    const createResult = await this.wp(args);
+
+    if (createResult.exitCode !== 0) {
+      throw formatWpCliFailure("Failed to create post", createResult);
+    }
+
+    const postId = Number(createResult.stdout.trim());
+
+    if (!Number.isFinite(postId)) {
+      throw new Error(`Failed to parse post id from: ${createResult.stdout}`);
+    }
+
+    if (post.featuredImagePath) {
+      await this.setFeaturedImage(postId, post.featuredImagePath);
+    }
+
+    if (templateValue) {
+      const templateResult = await this.wp([
+        "post",
+        "meta",
+        "update",
+        String(postId),
+        "_wp_page_template",
+        templateValue,
+      ]);
+
+      if (templateResult.exitCode !== 0) {
+        throw formatWpCliFailure("Failed to set page template", templateResult);
+      }
+    }
+
+    return postId;
+  }
 
   private async getCategoryIdViaCli(categoryName: string): Promise<number> {
     const result = await this.wp([
@@ -446,16 +448,31 @@ export default class WpPosts {
   }
 
   async clearByRunId(runId: string): Promise<void> {
-    if (!runId) return;
-
     if (wpDriver() === "remote") {
       const restConfig = getRestConfig();
 
-      async function deleteBySearch(endpoint: string) {
+      // Get author id for the API user
+      const users = await wpRest<any[]>(
+        restConfig,
+        "GET",
+        `/wp-json/wp/v2/users?search=${encodeURIComponent(
+          restConfig.username,
+        )}`,
+      );
+
+      const user = users.find(
+        (u) => u.slug === restConfig.username || u.name === restConfig.username,
+      );
+
+      if (!user) return;
+
+      const authorId = user.id;
+
+      async function deleteByAuthor(endpoint: string) {
         const items = await wpRest<any[]>(
           restConfig,
           "GET",
-          `${endpoint}?search=${encodeURIComponent(runId)}&per_page=100`,
+          `${endpoint}?author=${authorId}&per_page=100`,
         );
 
         for (const item of items) {
@@ -467,24 +484,18 @@ export default class WpPosts {
         }
       }
 
-      await deleteBySearch(`/wp-json/wp/v2/posts`);
-      await deleteBySearch(`/wp-json/wp/v2/pages`);
+      await deleteByAuthor(`/wp-json/wp/v2/posts`);
+      await deleteByAuthor(`/wp-json/wp/v2/pages`);
+      await deleteByAuthor(`/wp-json/wp/v2/work_updates`);
+      await deleteByAuthor(`/wp-json/wp/v2/blogs`);
+      await deleteByAuthor(`/wp-json/wp/v2/news`);
+      await deleteByAuthor(`/wp-json/wp/v2/media`);
 
-      const raw = (process.env.WP_REST_CUSTOM_TYPES || "").trim();
-      if (raw) {
-        const types = raw
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean);
-
-        for (const type of types) {
-          await deleteBySearch(`/wp-json/wp/v2/${restEndpointForType(type)}`);
-        }
-      }
-
-      await deleteBySearch(`/wp-json/wp/v2/media`);
       return;
     }
+
+    // Docker / CLI mode (unchanged)
+    if (!runId) return;
 
     const listResult = await this.wp([
       "post",
