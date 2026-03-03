@@ -448,55 +448,28 @@ export default class WpPosts {
   }
 
   async clearByRunId(runId: string): Promise<void> {
+    if (!runId) return;
+
     if (wpDriver() === "remote") {
       const restConfig = getRestConfig();
 
-      // Get author id for the API user
-      const users = await wpRest<any[]>(
-        restConfig,
-        "GET",
-        `/wp-json/wp/v2/users?search=${encodeURIComponent(
-          restConfig.username,
-        )}`,
+      // Only delete what we can access on QA.
+      // If an endpoint is blocked (403), we skip it.
+      await this.clearByRunIdForType("posts", runId).catch(() => undefined);
+      await this.clearByRunIdForType("pages", runId).catch(() => undefined);
+      await this.clearByRunIdForType("media", runId).catch(() => undefined);
+
+      // Optional: try custom types, but QA may block them (403)
+      await this.clearByRunIdForType("work_updates", runId).catch(
+        () => undefined,
       );
-
-      const user = users.find(
-        (u) => u.slug === restConfig.username || u.name === restConfig.username,
-      );
-
-      if (!user) return;
-
-      const authorId = user.id;
-
-      async function deleteByAuthor(endpoint: string) {
-        const items = await wpRest<any[]>(
-          restConfig,
-          "GET",
-          `${endpoint}?author=${authorId}&per_page=100`,
-        );
-
-        for (const item of items) {
-          await wpRest(
-            restConfig,
-            "DELETE",
-            `${endpoint}/${item.id}?force=true`,
-          );
-        }
-      }
-
-      await deleteByAuthor(`/wp-json/wp/v2/posts`);
-      await deleteByAuthor(`/wp-json/wp/v2/pages`);
-      await deleteByAuthor(`/wp-json/wp/v2/work_updates`);
-      await deleteByAuthor(`/wp-json/wp/v2/blogs`);
-      await deleteByAuthor(`/wp-json/wp/v2/news`);
-      await deleteByAuthor(`/wp-json/wp/v2/media`);
+      await this.clearByRunIdForType("blogs", runId).catch(() => undefined);
+      await this.clearByRunIdForType("news", runId).catch(() => undefined);
 
       return;
     }
 
     // Docker / CLI mode (unchanged)
-    if (!runId) return;
-
     const listResult = await this.wp([
       "post",
       "list",
@@ -516,16 +489,36 @@ export default class WpPosts {
 
     if (wpDriver() === "remote") {
       const restConfig = getRestConfig();
-      const endpoint = `/wp-json/wp/v2/${restEndpointForType(postType)}`;
 
-      const items = await wpRest<any[]>(
-        restConfig,
-        "GET",
-        `${endpoint}?search=${encodeURIComponent(runId)}&per_page=100`,
-      );
+      // postType can be "posts", "pages", "media", or your CPT route name
+      const endpoint = `/wp-json/wp/v2/${postType}`;
+
+      let items: any[] = [];
+      try {
+        items = await wpRest<any[]>(
+          restConfig,
+          "GET",
+          `${endpoint}?search=${encodeURIComponent(runId)}&per_page=100`,
+        );
+      } catch (e: any) {
+        const msg = String(e?.message || "");
+        // QA blocks some endpoints (403). Skip instead of failing the run.
+        if (msg.includes("(403)")) return;
+        throw e;
+      }
 
       for (const item of items) {
-        await wpRest(restConfig, "DELETE", `${endpoint}/${item.id}?force=true`);
+        try {
+          await wpRest(
+            restConfig,
+            "DELETE",
+            `${endpoint}/${item.id}?force=true`,
+          );
+        } catch (e: any) {
+          const msg = String(e?.message || "");
+          if (msg.includes("(403)")) return;
+          throw e;
+        }
       }
 
       return;
