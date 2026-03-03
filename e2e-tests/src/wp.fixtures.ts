@@ -44,7 +44,9 @@ type Fixtures = {
 const PARALLEL_STACK_COUNT = 4;
 
 function isQaMode(): boolean {
-  return Boolean(process.env.PW_BASE_URL);
+  // QA mode = we're using the remote WP driver (REST against qa.intranet...)
+  const driver = (process.env.WP_DRIVER || "").toLowerCase().trim();
+  return driver === "remote" || process.env.WP_REMOTE === "true";
 }
 
 function workerStackIndex(workerIndex: number): number {
@@ -54,41 +56,7 @@ function workerStackIndex(workerIndex: number): number {
 let parallelEnabledPromise: Promise<boolean> | undefined;
 
 async function isParallelEnabled(): Promise<boolean> {
-  if (parallelEnabledPromise) return parallelEnabledPromise;
-
-  parallelEnabledPromise = (async () => {
-    const composeCwd = process.env.WP_DOCKER_CWD;
-    if (!composeCwd) return false;
-
-    try {
-      const envFile = process.env.WP_ENV_FILE || ".env";
-
-      const result = await execa(
-        "docker",
-        [
-          "compose",
-          "--env-file",
-          envFile,
-          "-f",
-          "docker-compose.parallel.local.yml",
-          "config",
-          "--services",
-        ],
-        { cwd: composeCwd, timeout: 30_000 },
-      );
-
-      const services = (result.stdout || "")
-        .split("\n")
-        .map((value) => value.trim())
-        .filter(Boolean);
-
-      return services.includes("wordpress0") && services.includes("wordpress3");
-    } catch {
-      return false;
-    }
-  })();
-
-  return parallelEnabledPromise;
+  return false;
 }
 
 function wpServiceForWorker(workerIndex: number, parallel: boolean): string {
@@ -213,13 +181,13 @@ export const test = base.extend<Fixtures>({
 export const expect = test.expect;
 
 test.beforeEach(async ({ wp, runId }) => {
-  if (!process.env.PW_BASE_URL) {
+  if (!isQaMode()) {
     await wp.posts.clearByRunId(runId);
   }
 });
 
 test.afterEach(async ({ wp, runId }) => {
-  if (!process.env.PW_BASE_URL) {
+  if (!isQaMode()) {
     await wp.posts.clearByRunId(runId);
   }
 });

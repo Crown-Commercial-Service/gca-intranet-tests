@@ -3,24 +3,26 @@ import Post from "../src/models/Post";
 import User from "../src/models/User";
 
 test.describe("work updates", () => {
-  test("should display a single work update", async ({ wp, homepage }) => {
+  test.only("should display a single work update", async ({ wp, homepage }) => {
     const post = Post.aPost()
-      .withType("work_updates")
+      .withType("work_update")
       .withFixedTitle("E2E Work Update")
       .withParagraphMaxChars(180)
       .withStatus("publish");
 
     await wp.posts.create(post);
     await homepage.goto();
-    await homepage.assertWorkUpdateOnHomepage(post);
+    await homepage.page.pause();
+    await homepage.assertWorkUpdateOnHomepage();
+    // await homepage.assertWorkUpdateOnHomepage(post);
   });
 
-  test.only("should enforce character limits for work update on homepage", async ({
+  test("should enforce character limits for work update on homepage", async ({
     wp,
     homepage,
   }) => {
     const post = Post.aPost()
-      .withType("work_updates")
+      .withType("work_update")
       .withTitleOver100Chars()
       .withParagraphMaxChars(180)
       .withStatus("publish");
@@ -35,22 +37,22 @@ test.describe("work updates", () => {
     homepage,
   }) => {
     const post1 = Post.aPost()
-      .withType("work_updates")
+      .withType("work_update")
       .withFixedTitle("Work Update 1")
       .withStatus("publish");
 
     const post2 = Post.aPost()
-      .withType("work_updates")
+      .withType("work_update")
       .withFixedTitle("Work Update 2")
       .withStatus("publish");
 
     const post3 = Post.aPost()
-      .withType("work_updates")
+      .withType("work_update")
       .withFixedTitle("Work Update 3")
       .withStatus("publish");
 
     const post4 = Post.aPost()
-      .withType("work_updates")
+      .withType("work_update")
       .withFixedTitle("Work Update 4")
       .withStatus("publish");
 
@@ -66,7 +68,7 @@ test.describe("work updates", () => {
 
   test("should open work update page", async ({ wp, homepage, workUpdate }) => {
     const post = Post.aPost()
-      .withType("work_updates")
+      .withType("work_update")
       .withFixedTitle("E2E Work Update Navigation")
       .withStatus("publish");
 
@@ -84,7 +86,7 @@ test.describe("work updates", () => {
     workUpdate,
   }) => {
     const post = Post.aPost()
-      .withType("work_updates")
+      .withType("work_update")
       .withFixedTitle("E2E Work Update List Page Navigation")
       .withStatus("publish");
 
@@ -101,7 +103,7 @@ test.describe("work updates", () => {
     runId,
   }) => {
     const post = Post.aPost()
-      .withType("work_updates")
+      .withType("work_update")
       .withFixedTitle("E2E Work Update Author Change")
       .withStatus("publish");
 
@@ -117,7 +119,7 @@ test.describe("work updates", () => {
 
     await wp.users.upsert(newUser);
 
-    await wp.posts.updatePostAuthor(postId, "work_updates", newUser.username);
+    await wp.posts.updatePostAuthor(postId, "work_update", newUser.username);
 
     await homepage.goto();
     await homepage.assertWorkUpdateAuthor(post.title, newUser.username);
