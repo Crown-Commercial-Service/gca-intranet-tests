@@ -67,6 +67,34 @@ export default class WpPosts {
       categoryId = await this.getCategoryIdViaCli(post.category as string);
     }
 
+    const expectedUser = (
+      post.author ||
+      process.env.WP_ADMIN_USER ||
+      process.env.WP_ADMIN_USERNAME ||
+      process.env.WP_USER ||
+      process.env.WP_API_USER ||
+      ""
+    ).trim();
+
+    if (!expectedUser) {
+      throw new Error(
+        "Missing author username. Set post.author or one of: WP_ADMIN_USER, WP_ADMIN_USERNAME, WP_USER, WP_API_USER",
+      );
+    }
+
+    const userRes = await this.wp(["user", "get", expectedUser, "--field=ID"]);
+    if (userRes.exitCode !== 0) {
+      throw utils.formatWpCliFailure(
+        `Failed to resolve author id for "${expectedUser}"`,
+        userRes,
+      );
+    }
+
+    const authorId = (userRes.stdout || "").trim();
+    if (!authorId) {
+      throw new Error(`Author id not found for "${expectedUser}"`);
+    }
+
     const args = [
       "post",
       "create",
@@ -75,6 +103,7 @@ export default class WpPosts {
       `--post_title=${post.title}`,
       `--post_content=${post.content}`,
       `--post_status=${post.status}`,
+      `--post_author=${authorId}`,
     ];
 
     if (categoryId) args.push(`--post_category=${categoryId}`);
@@ -169,6 +198,25 @@ export default class WpPosts {
     }
   }
 
+  async clearByTypeAndRunId(postType: string, runId: string): Promise<void> {
+    if (!runId) return;
+
+    if (docker.wpDriver() === "remote") return;
+
+    const list = await this.wp([
+      "post",
+      "list",
+      `--post_type=${postType}`,
+      "--format=ids",
+      `--search=${runId}`,
+    ]);
+
+    const ids = (list.stdout || "").trim();
+    if (!ids) return;
+
+    await this.wp(["post", "delete", ...ids.split(/\s+/), "--force"]);
+  }
+  
   async getPublishedDate(postId: number): Promise<string> {
     if (docker.wpDriver() === "remote") {
       const post = await rest.wpRest<any>(

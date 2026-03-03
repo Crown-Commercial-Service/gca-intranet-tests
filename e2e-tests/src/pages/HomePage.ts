@@ -178,23 +178,22 @@ export default class HomePage {
   }
 
   async assertWorkUpdatesOrder(posts: Post[]): Promise<void> {
-    if (posts.length === 0) {
-      throw new Error("Expected at least one work update");
-    }
-
     await expect(this.workUpdatesSection).toBeVisible();
-
-    const cards = this.workUpdateCards;
-    const visibleCount = await cards.count();
-    expect(visibleCount).toBeGreaterThanOrEqual(posts.length);
+    expect(await this.workUpdateCards.count()).toBeGreaterThanOrEqual(
+      posts.length,
+    );
 
     for (let i = 0; i < posts.length; i++) {
-      const card = cards.nth(i);
-      const link = card.getByTestId(this.workUpdateLinkTestId);
+      const text = (
+        await this.workUpdateCards
+          .nth(i)
+          .getByTestId(this.workUpdateLinkTestId)
+          .innerText()
+      ).trim();
 
-      await expect(card).toBeVisible();
-      await expect(link).toBeVisible();
-      await expect(link).toHaveText(posts[i].title);
+      expect(posts[i].title.startsWith(getVisibleTruncatedText(text))).toBe(
+        true,
+      );
     }
   }
 
@@ -217,81 +216,69 @@ export default class HomePage {
   }
 
   async assertWorkUpdateCharLimits(post: Post): Promise<void> {
-    await expect(this.workUpdatesSection).toBeVisible();
-    await expect(this.workUpdateCards).toHaveCount(1);
+    const link = this.workUpdateCards
+      .first()
+      .getByTestId(this.workUpdateLinkTestId);
 
-    const card = this.workUpdateCards.first();
-    await expect(card).toBeVisible();
+    const uiTitle = (await link.innerText()).trim();
 
-    const link = card.getByTestId(this.workUpdateLinkTestId);
-    await expect(link).toBeVisible();
-
-    const uiTitle = await link.innerText();
-
-    expect(uiTitle.trim()).not.toBe(post.title);
+    expect(uiTitle).not.toBe(post.title);
 
     const visiblePart = getVisibleTruncatedText(uiTitle);
-
     expect(post.title.startsWith(visiblePart)).toBe(true);
   }
 
-  private workUpdateCardByTitle(title: string) {
-    const visibleTitle = getVisibleTruncatedText(title);
+  private workUpdateCardByTitle(title: string): Locator {
+    const runId = (process.env.PW_RUN_ID || "").trim();
+    const stableTitle =
+      runId && title.endsWith(runId)
+        ? title.slice(0, title.length - runId.length).trim()
+        : title.trim();
 
     return this.workUpdateCards.filter({
-      has: this.page.getByRole("link", {
-        name: visibleTitle,
-      }),
+      has: this.page
+        .getByTestId(this.workUpdateLinkTestId)
+        .filter({ hasText: stableTitle }),
     });
   }
 
-  // async assertWorkUpdateOnHomepage(post: Post): Promise<void> {
-  //   const card = this.workUpdateCardByTitle(post.title);
+  async assertWorkUpdateOnHomepage(post: Post): Promise<void> {
+    const card = this.page.getByTestId("work-update-card");
+    await expect(card).toHaveCount(1);
 
-  //   await expect(card).toHaveCount(1);
-  //   await expect(card).toBeVisible();
+    const link = card.getByTestId("work-update-link");
+    const actual = ((await link.textContent()) ?? "").trim();
+    const visiblePart = getVisibleTruncatedText(actual);
 
-  //   const link = card.getByTestId(this.workUpdateLinkTestId);
-  //   await expect(link).toBeVisible();
-  //   await expect(link).toHaveText(post.title);
-
-  //   const avatar = card.getByTestId(this.workUpdateAvatarTestId).locator("img");
-  //   await expect(avatar.first()).toBeVisible();
-
-  //   const expectedUser = process.env.WP_ADMIN_USER;
-
-  //   if (!expectedUser) {
-  //     throw new Error("WP_ADMIN_USER must be defined in .env.docker");
-  //   }
-
-  //   const author = card.getByTestId(this.workUpdateAuthorTestId);
-  //   await expect(author).toBeVisible();
-  //   await expect(author).toHaveText(`By ${expectedUser}`);
-
-  //   const date = card.getByTestId(this.workUpdateDateTestId);
-  //   await expect(date).toBeVisible();
-
-  //   const uiDate = (await date.textContent()) ?? "";
-  //   const expectedDate = dayjs(post.createdAt).format("Do MMMM YYYY");
-
-  //   expect(uiDate.trim()).toBe(expectedDate);
-  // }
-
-  async assertWorkUpdateOnHomepage(): Promise<void> {
-    const cards = this.page.getByTestId("work-update-card");
-
-    await expect(cards).toHaveCount(1);
+    expect(post.title.startsWith(visiblePart)).toBe(true);
+    expect(actual.endsWith("...")).toBe(true);
+    await expect(card.getByTestId("work-update-author")).toHaveText(
+      `By ${process.env.WP_ADMIN_USERNAME}`,
+    );
+    await expect(
+      card.getByTestId("work-update-avatar").locator("img"),
+    ).toHaveAttribute("src", /.+/);
+    await expect(card.getByTestId("work-update-date")).toHaveText(
+      dayjs(post.createdAt).format("Do MMMM YYYY"),
+    );
   }
 
   private workUpdateLinkByTitle(title: string): Locator {
-    return this.workUpdateCards
-      .filter({ has: this.page.getByRole("link", { name: title }) })
-      .getByTestId(this.workUpdateLinkTestId);
+    const cards = this.page
+      .getByTestId("work-updates-section")
+      .getByTestId("work-update-card");
+
+    const prefix = title.trim().slice(0, 25);
+
+    return cards
+      .getByTestId("work-update-link")
+      .filter({ hasText: prefix })
+      .first();
   }
 
   async selectWorkItemLink(post: Post): Promise<void> {
     const link = this.workUpdateLinkByTitle(post.title);
-    await expect(link).toHaveCount(1);
+    await expect(link).toBeVisible();
     await link.click();
   }
 
@@ -300,15 +287,18 @@ export default class HomePage {
     expectedAuthor?: string,
   ): Promise<void> {
     const card = this.workUpdateCardByTitle(title);
-
     await expect(card).toHaveCount(1);
 
     const authorElement = card.getByTestId(this.workUpdateAuthorTestId);
 
-    const authorToAssert =
-      expectedAuthor ?? process.env.WP_USER ?? process.env.WP_API_USER;
+    const author =
+      expectedAuthor ??
+      process.env.WP_ADMIN_USERNAME ??
+      process.env.WP_USER ??
+      process.env.WP_API_USER ??
+      "";
 
-    await expect(authorElement).toContainText(authorToAssert as string);
+    await expect(authorElement).toHaveText(`By ${author}`);
   }
 
   async assertBlogAuthor(

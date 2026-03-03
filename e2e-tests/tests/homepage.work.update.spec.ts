@@ -3,7 +3,10 @@ import Post from "../src/models/Post";
 import User from "../src/models/User";
 
 test.describe("work updates", () => {
-  test.only("should display a single work update", async ({ wp, homepage }) => {
+  test.beforeEach(async ({ wp, runId }) => {
+    await wp.posts.clearByTypeAndRunId("work_update", runId);
+  });
+  test("should display a single work update", async ({ wp, homepage }) => {
     const post = Post.aPost()
       .withType("work_update")
       .withFixedTitle("E2E Work Update")
@@ -12,9 +15,7 @@ test.describe("work updates", () => {
 
     await wp.posts.create(post);
     await homepage.goto();
-    await homepage.page.pause();
-    await homepage.assertWorkUpdateOnHomepage();
-    // await homepage.assertWorkUpdateOnHomepage(post);
+    await homepage.assertWorkUpdateOnHomepage(post);
   });
 
   test("should enforce character limits for work update on homepage", async ({

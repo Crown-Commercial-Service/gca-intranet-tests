@@ -179,15 +179,3 @@ export const test = base.extend<Fixtures>({
 });
 
 export const expect = test.expect;
-
-test.beforeEach(async ({ wp, runId }) => {
-  if (!isQaMode()) {
-    await wp.posts.clearByRunId(runId);
-  }
-});
-
-test.afterEach(async ({ wp, runId }) => {
-  if (!isQaMode()) {
-    await wp.posts.clearByRunId(runId);
-  }
-});

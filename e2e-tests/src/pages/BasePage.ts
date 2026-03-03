@@ -31,11 +31,13 @@ export default abstract class BasePage {
     await expect(items.nth(0)).toContainText("Home");
 
     const shouldShowCategory =
-      post.type === "post" || (post.type === "work_updates" && !!post.category);
+      post.type === "post" || (post.type === "work_update" && !!post.category);
 
     if (shouldShowCategory) {
       await expect(items).toHaveCount(3);
-      await expect(items.nth(1)).toContainText(post.category || "Uncategorized");
+      await expect(items.nth(1)).toContainText(
+        post.category || "Uncategorized",
+      );
       await expect(items.nth(2)).toContainText(post.title);
       return;
     }
