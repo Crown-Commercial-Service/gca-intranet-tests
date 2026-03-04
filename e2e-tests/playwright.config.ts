@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { defineConfig, devices } from "@playwright/test";
 
-dotenv.config({ path: ".env.local", quiet: true });
+dotenv.config({ path: ".env", quiet: true });
 dotenv.config({ quiet: true });
 
 const BASE_URL = process.env.PW_BASE_URL || "http://localhost:8080";
@@ -9,6 +9,7 @@ const BASE_URL = process.env.PW_BASE_URL || "http://localhost:8080";
 export default defineConfig({
   testDir: "tests",
   testIgnore: ["**/a11y/**"],
+  globalSetup: undefined,
 
   timeout: 80_000,
   expect: { timeout: 10_000 },
