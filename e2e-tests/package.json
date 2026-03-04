@@ -6,16 +6,23 @@
   "main": "",
   "scripts": {
     "test": "npx dotenv -e .env.qa -- playwright test --workers=1",
+
     "test:docker": "npx dotenv -e .env.docker -- playwright test",
     "test:docker:headed": "npx dotenv -e .env.docker -- playwright test --headed",
     "test:docker:ui": "npx dotenv -e .env.docker -- playwright test --ui",
+
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
     "test:smoke": "playwright test tests/smoke.spec.ts",
     "test:report": "playwright show-report",
-    "test:a11y": "npx dotenv -e .env.qa -- sh -c 'PW_TEST_SUITE=a11y playwright test -c playwright.a11y.config.ts --workers=1'",
-    "test:a11y:ui": "npx dotenv -e .env.qa -- sh -c 'PW_TEST_SUITE=a11y playwright test -c playwright.a11y.config.ts --ui --workers=1'",
-    "test:a11y:headed": "npx dotenv -e .env.qa -- sh -c 'PW_TEST_SUITE=a11y playwright test -c playwright.a11y.config.ts --headed --workers=1'"
+
+    "test:a11y": "npx dotenv -e .env.qa -- playwright test -c playwright.a11y.config.ts --workers=1",
+    "test:a11y:ui": "npx dotenv -e .env.qa -- playwright test -c playwright.a11y.config.ts --ui --workers=1",
+    "test:a11y:headed": "npx dotenv -e .env.qa -- playwright test -c playwright.a11y.config.ts --headed --workers=1",
+
+    "test:docker:a11y": "npx dotenv -e .env.docker -- playwright test -c playwright.a11y.config.ts --workers=1",
+    "test:docker:a11y:headed": "npx dotenv -e .env.docker -- playwright test -c playwright.a11y.config.ts --headed --workers=1",
+    "test:docker:a11y:ui": "npx dotenv -e .env.docker -- playwright test -c playwright.a11y.config.ts --ui --workers=1"
   },
   "keywords": [
     "playwright",
