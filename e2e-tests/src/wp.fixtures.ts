@@ -114,10 +114,6 @@ export const test = base.extend<Fixtures>({
       expectUserToHaveRole,
     };
 
-    if (!qaMode) {
-      await themes.activate(process.env.WP_THEME || "gca-intranet");
-    }
-
     await use(helpers);
   },
 

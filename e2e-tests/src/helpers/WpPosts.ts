@@ -14,7 +14,15 @@ export default class WpPosts {
   /**
    * Main entry point for creating posts, pages, or custom types.
    */
-  async create(post: Post): Promise<number> {
+  async create(post: Post | Post[]): Promise<number | number[]> {
+    if (Array.isArray(post)) {
+      return Promise.all(post.map((p) => this.createOne(p)));
+    }
+
+    return this.createOne(post);
+  }
+
+  private async createOne(post: Post): Promise<number> {
     const shouldApplyCategory = Boolean(post.category);
     const isPage = String(post.type) === "page";
     const shouldApplyTemplate = isPage && Boolean(post.template);
@@ -216,7 +224,7 @@ export default class WpPosts {
 
     await this.wp(["post", "delete", ...ids.split(/\s+/), "--force"]);
   }
-  
+
   async getPublishedDate(postId: number): Promise<string> {
     if (docker.wpDriver() === "remote") {
       const post = await rest.wpRest<any>(

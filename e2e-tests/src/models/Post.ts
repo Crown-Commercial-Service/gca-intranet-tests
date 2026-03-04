@@ -2,6 +2,12 @@ import Chance from "chance";
 
 const chance = new Chance();
 
+export type HomepageContent = {
+  news: Post;
+  workUpdates: [Post, Post];
+  blog: Post;
+};
+
 export type PostStatus = "draft" | "publish" | "private" | "pending";
 
 /**
@@ -57,6 +63,87 @@ export default class Post {
    */
   static aWorkUpdate(): PostBuilder {
     return new PostBuilder().withType("work_updates");
+  }
+
+  /**
+   * Convenience builder for homepage scenario:
+   * - 1 News
+   * - 2 Work Updates
+   * - 1 Blog
+   */
+  static homepageSet(runId?: string) {
+    const applyRunId = (builder: PostBuilder) => {
+      if (runId) builder.withRunId(runId);
+      return builder;
+    };
+
+    const news = [
+      applyRunId(
+        Post.aPost()
+          .withType("news")
+          .withFixedTitle("E2E News Post 1")
+          .withParagraphMaxChars(180)
+          .withStatus("publish")
+          .withFeaturedImage("img-1.jpg"),
+      ).build(),
+
+      applyRunId(
+        Post.aPost()
+          .withType("news")
+          .withFixedTitle("E2E News Post 2")
+          .withParagraphMaxChars(180)
+          .withStatus("publish")
+          .withFeaturedImage("img-2.jpg"),
+      ).build(),
+
+      applyRunId(
+        Post.aPost()
+          .withType("news")
+          .withFixedTitle("E2E News Post 3")
+          .withParagraphMaxChars(180)
+          .withStatus("publish")
+          .withFeaturedImage("img-3.jpg"),
+      ).build(),
+
+      applyRunId(
+        Post.aPost()
+          .withType("news")
+          .withFixedTitle("E2E News Post 4")
+          .withParagraphMaxChars(180)
+          .withStatus("publish")
+          .withFeaturedImage("img-4.jpg"),
+      ).build(),
+    ];
+
+    const workUpdates = [
+      applyRunId(
+        Post.aPost()
+          .withType("work_update")
+          .withFixedTitle("E2E Work Update 1")
+          .withParagraphMaxChars(180)
+          .withStatus("publish"),
+      ).build(),
+
+      applyRunId(
+        Post.aPost()
+          .withType("work_update")
+          .withFixedTitle("E2E Work Update 2")
+          .withParagraphMaxChars(180)
+          .withStatus("publish"),
+      ).build(),
+    ];
+
+    const blog = applyRunId(Post.aPost().withType("blog"))
+      .withFixedTitle("E2E Blog Post")
+      .withParagraphMaxChars(180)
+      .withStatus("publish")
+      .build();
+
+    return {
+      news,
+      workUpdates,
+      blog,
+    };
   }
 }
 
