@@ -1,5 +1,3 @@
-import { execa } from "execa";
-
 type WpResult = {
   exitCode: number;
   stdout: string;
@@ -289,8 +287,8 @@ export async function wp(args: string[], opts?: WpOpts): Promise<WpResult> {
   if (wpDriver() === "remote") {
     return remoteWp(args);
   }
-
   // DOCKER DRIVER (existing behaviour)
+  const { execa } = await import("execa");
   const timeout = opts?.timeoutMs ?? 120_000;
   const cwd = process.env.WP_DOCKER_CWD;
 

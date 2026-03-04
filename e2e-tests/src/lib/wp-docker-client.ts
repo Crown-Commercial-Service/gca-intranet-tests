@@ -1,4 +1,3 @@
-import { execa } from "execa";
 import {
   isParallelLocal,
   isParallelWordpressService,
@@ -58,6 +57,7 @@ export async function getComposeContainerId(
   serviceName: string,
   dockerCwd: string,
 ): Promise<string> {
+  const { execa } = await import("execa");
   const args = [
     ...resolveComposeArgsForService(serviceName),
     "ps",

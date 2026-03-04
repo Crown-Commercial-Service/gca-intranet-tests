@@ -1,4 +1,3 @@
-import { execa } from "execa";
 import path from "path";
 import type Post from "../models/Post";
 
@@ -282,6 +281,7 @@ export default class WpPosts {
     postId: number,
     imgPath: string,
   ): Promise<void> {
+    const { execa } = await import("execa");
     const dockerCwd = (process.env.WP_DOCKER_CWD || "").trim();
     const containerId = await docker.getComposeContainerId(
       docker.resolveWordpressServiceName(),

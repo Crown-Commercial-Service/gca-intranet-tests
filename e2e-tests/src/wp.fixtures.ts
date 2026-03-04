@@ -1,5 +1,4 @@
 import { test as base } from "@playwright/test";
-import { execa } from "execa";
 import { wp as runWp } from "../src/utils/wpCli";
 import {
   expectUserToExist,
