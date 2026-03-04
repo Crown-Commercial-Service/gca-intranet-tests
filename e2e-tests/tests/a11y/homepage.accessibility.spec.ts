@@ -13,8 +13,8 @@ test.describe("Accessibility - Homepage", () => {
   }) => {
     const contentType = Post.homepageSet(runId);
 
-    await wp.posts.create(contentType.news);
-    await wp.posts.create(contentType.workUpdates);
+    await wp.posts.createMany(contentType.news);
+    await wp.posts.createMany(contentType.workUpdates);
     await wp.posts.create(contentType.blog);
 
     await homepage.goto();

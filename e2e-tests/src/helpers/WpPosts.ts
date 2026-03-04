@@ -14,12 +14,12 @@ export default class WpPosts {
   /**
    * Main entry point for creating posts, pages, or custom types.
    */
-  async create(post: Post | Post[]): Promise<number | number[]> {
-    if (Array.isArray(post)) {
-      return Promise.all(post.map((p) => this.createOne(p)));
-    }
-
+  async create(post: Post): Promise<number> {
     return this.createOne(post);
+  }
+
+  async createMany(posts: Post[]): Promise<number[]> {
+    return Promise.all(posts.map((p) => this.createOne(p)));
   }
 
   private async createOne(post: Post): Promise<number> {
