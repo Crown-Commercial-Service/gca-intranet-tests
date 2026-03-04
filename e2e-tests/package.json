@@ -20,9 +20,9 @@
     "test:a11y:ui": "npx dotenv -e .env.qa -- playwright test -c playwright.a11y.config.ts --ui --workers=1",
     "test:a11y:headed": "npx dotenv -e .env.qa -- playwright test -c playwright.a11y.config.ts --headed --workers=1",
 
-    "test:docker:a11y": "npx dotenv -e .env.docker -- playwright test -c playwright.a11y.config.ts --workers=1",
-    "test:docker:a11y:headed": "npx dotenv -e .env.docker -- playwright test -c playwright.a11y.config.ts --headed --workers=1",
-    "test:docker:a11y:ui": "npx dotenv -e .env.docker -- playwright test -c playwright.a11y.config.ts --ui --workers=1"
+    "test:docker:a11y": "npx dotenv -e .env.docker -- playwright test -c playwright.a11y.config.ts",
+    "test:docker:a11y:headed": "npx dotenv -e .env.docker -- playwright test -c playwright.a11y.config.ts --headed",
+    "test:docker:a11y:ui": "npx dotenv -e .env.docker -- playwright test -c playwright.a11y.config.ts --ui"
   },
   "keywords": [
     "playwright",
