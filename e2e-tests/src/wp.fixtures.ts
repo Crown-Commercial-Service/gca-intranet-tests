@@ -15,12 +15,14 @@ import WorkUpdate from "../src/pages/WorkUpdate";
 import WorkUpdateList from "../src/pages/WorkUpdateList";
 import BlogPage from "../src/pages/BlogPage";
 import BlogListPage from "../src/pages/BlogListPage";
+import WpCustomizer from "../src/helpers/WpCustomizer";
 
 type WpHelpers = {
   exec: typeof runWp;
   users: WpUsers;
   themes: WpThemes;
   posts: WpPosts;
+  customizer: WpCustomizer;
 
   expectUserToExist: (user: User) => Promise<void>;
   expectUserToHaveRole: (user: User) => Promise<void>;
@@ -85,7 +87,7 @@ export const test = base.extend<Fixtures>({
     await use(id);
   },
 
-  wp: async ({ runId }, use, testInfo) => {
+  wp: async ({}, use, testInfo) => {
     const qaMode = isQaMode();
     const parallel = qaMode ? false : await isParallelEnabled();
 
@@ -103,12 +105,14 @@ export const test = base.extend<Fixtures>({
     const users = new WpUsers(exec);
     const themes = new WpThemes(exec);
     const posts = new WpPosts(exec);
+    const customizer = new WpCustomizer(exec);
 
     const helpers: WpHelpers = {
       exec,
       users,
       themes,
       posts,
+      customizer,
       expectUserToExist,
       expectUserToHaveRole,
     };
