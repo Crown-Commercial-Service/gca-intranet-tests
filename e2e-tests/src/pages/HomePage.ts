@@ -296,28 +296,26 @@ export default class HomePage {
     const card = this.blogCardByTitle(title);
     await expect(card).toHaveCount(1);
 
-    const authorElement = card.getByTestId(this.blogAuthorTestId);
+    const author = expectedAuthor ?? process.env.WP_ADMIN_USERNAME;
+    expect(author).toBeTruthy();
 
-    const author =
-      expectedAuthor ??
-      process.env.WP_ADMIN_USERNAME ??
-      process.env.WP_ADMIN_USER ??
-      process.env.WP_USER ??
-      process.env.WP_API_USER ??
-      "";
-
-    await this.assertTextPossiblyTruncated(authorElement, `By ${author}`);
+    await this.assertAuthorPossiblyTruncated(
+      card.getByTestId(this.blogAuthorTestId),
+      `By ${author}`,
+    );
   }
 
-  private async assertTextPossiblyTruncated(
-    element: import("@playwright/test").Locator,
+  private async assertAuthorPossiblyTruncated(
+    authorElement: Locator,
     expectedFullText: string,
   ): Promise<void> {
-    await expect(element).toBeVisible();
+    await expect(authorElement).toBeVisible();
 
-    const actual = ((await element.textContent()) ?? "").trim();
+    const actual = ((await authorElement.textContent()) ?? "").trim();
+
+    if (actual === expectedFullText) return;
+
     const visiblePart = getVisibleTruncatedText(actual);
-
     expect(expectedFullText.startsWith(visiblePart)).toBe(true);
     expect(actual.endsWith("...")).toBe(true);
   }
