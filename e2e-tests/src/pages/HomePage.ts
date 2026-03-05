@@ -306,18 +306,24 @@ export default class HomePage {
   }
 
   private async assertAuthorPossiblyTruncated(
-    authorElement: Locator,
+    authorEl: Locator,
     expectedFullText: string,
   ): Promise<void> {
-    await expect(authorElement).toBeVisible();
+    await expect(authorEl).toBeVisible();
 
-    const actual = ((await authorElement.textContent()) ?? "").trim();
+    const normalize = (s: string) => s.replace(/\s+/g, " ").trim();
 
-    if (actual === expectedFullText) return;
+    const actualRaw = (await authorEl.textContent()) ?? "";
+    const actual = normalize(actualRaw);
+    const expected = normalize(expectedFullText);
 
-    const visiblePart = getVisibleTruncatedText(actual);
-    expect(expectedFullText.startsWith(visiblePart)).toBe(true);
-    expect(actual.endsWith("...")).toBe(true);
+    if (actual === expected) return;
+
+    const hasEllipsis = actual.endsWith("...") || actual.endsWith("…");
+    expect(hasEllipsis).toBe(true);
+
+    const visiblePart = actual.replace(/(\.\.\.|…)\s*$/, "").trimEnd();
+    expect(expected.startsWith(visiblePart)).toBe(true);
   }
 
   private blogCardByTitle(title: string): Locator {
