@@ -306,7 +306,20 @@ export default class HomePage {
       process.env.WP_API_USER ??
       "";
 
-    await expect(authorElement).toHaveText(`By ${author}`);
+    await this.assertTextPossiblyTruncated(authorElement, `By ${author}`);
+  }
+
+  private async assertTextPossiblyTruncated(
+    element: import("@playwright/test").Locator,
+    expectedFullText: string,
+  ): Promise<void> {
+    await expect(element).toBeVisible();
+
+    const actual = ((await element.textContent()) ?? "").trim();
+    const visiblePart = getVisibleTruncatedText(actual);
+
+    expect(expectedFullText.startsWith(visiblePart)).toBe(true);
+    expect(actual.endsWith("...")).toBe(true);
   }
 
   private blogCardByTitle(title: string): Locator {
