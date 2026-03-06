@@ -3,6 +3,7 @@ import {
   isParallelWordpressService,
   isInitService,
 } from "../utils/wp-utils";
+import logger from "../utils/logger";
 
 /**
  * Resolves the correct WordPress service name based on environment config.
@@ -85,6 +86,16 @@ export function wpDriver(): "docker" | "remote" {
 
   const hasBaseUrl = Boolean((process.env.PW_BASE_URL || "").trim());
   const hasDockerCwd = Boolean((process.env.WP_DOCKER_CWD || "").trim());
+
+  logger.info(
+    {
+      configuredDriver: driver || undefined,
+      hasRemoteFlag: process.env.WP_REMOTE === "true",
+      hasBaseUrl,
+      hasDockerCwd,
+    },
+    "Resolving WordPress driver",
+  );
 
   // If we have a URL but no local Docker path, assume remote.
   return hasBaseUrl && !hasDockerCwd ? "remote" : "docker";

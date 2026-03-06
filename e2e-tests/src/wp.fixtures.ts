@@ -18,6 +18,7 @@ import BlogListPage from "../src/pages/BlogListPage";
 import WpCustomizer from "../src/helpers/WpCustomizer";
 import WordpressLoginPage from "./pages/WordpressLoginPage";
 import CustomizerPage from "../src/pages/CustomizerPage";
+import logger from "../src/utils/logger";
 
 type WpHelpers = {
   exec: typeof runWp;
@@ -102,6 +103,17 @@ export const test = base.extend<Fixtures>({
       : wpServiceForWorker(testInfo.workerIndex, parallel);
 
     process.env.WP_SERVICE = service;
+
+    logger.info(
+      {
+        qaMode,
+        parallel,
+        service,
+        baseUrl: process.env.PW_BASE_URL,
+        wpDriver: process.env.WP_DRIVER,
+      },
+      "Initialising WordPress test helpers",
+    );
 
     const exec: typeof runWp = (args: string[], opts?: any) =>
       runWp(args, { ...(opts ?? {}), service });

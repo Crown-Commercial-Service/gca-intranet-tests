@@ -54,6 +54,10 @@ export function getRestConfig(): RestConfig {
 /**
  * Generates the Basic Auth header string.
  */
+
+const wordpressRestUserAgent =
+  "gca-intranet-e2e-tests/1.0 (+Playwright WP REST client)";
+
 export function basicAuthHeader(restConfig: RestConfig): string {
   const token = Buffer.from(
     `${restConfig.username}:${restConfig.password}`,
@@ -79,6 +83,7 @@ export async function wpRest<ResponseType>(
       Authorization: authHeader,
       "Content-Type": "application/json",
       Accept: "application/json",
+      "User-Agent": wordpressRestUserAgent,
     },
     body: body ? JSON.stringify(body) : undefined,
   });
@@ -122,6 +127,7 @@ export async function uploadMedia(
       "Content-Disposition": `attachment; filename="${fileName}"`,
       "Content-Type": mime,
       Accept: "application/json",
+      "User-Agent": wordpressRestUserAgent,
     },
     body: bytes,
   });

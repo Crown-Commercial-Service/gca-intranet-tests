@@ -1,5 +1,6 @@
 import path from "path";
 import type Post from "../models/Post";
+import logger from "../utils/logger";
 
 import * as utils from "../utils/wp-utils";
 import * as rest from "../lib/wp-rest-client";
@@ -49,6 +50,15 @@ export default class WpPosts {
           post.category as string,
         );
       }
+
+      logger.info(
+        {
+          postType: post.type,
+          endpoint,
+          baseUrl: restConfig.baseUrl,
+        },
+        "Creating WordPress post via REST API",
+      );
 
       const created = await rest.wpRest<any>(restConfig, "POST", endpoint, {
         title: post.title,

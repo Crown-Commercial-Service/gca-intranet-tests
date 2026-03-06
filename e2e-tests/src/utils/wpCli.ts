@@ -1,3 +1,5 @@
+import logger from "../utils/logger";
+
 type WpResult = {
   exitCode: number;
   stdout: string;
@@ -101,6 +103,16 @@ async function remoteWp(args: string[]): Promise<WpResult> {
   const auth = basicAuthHeader(user, pass);
 
   const [resource, action, ...rest] = args;
+
+  logger.info(
+    {
+      resource,
+      action,
+      args: rest,
+      baseUrl,
+    },
+    "Running remote WordPress command",
+  );
 
   if (resource !== "post") {
     return {
