@@ -1,12 +1,13 @@
 import { test } from "../../src/wp.fixtures";
 import Post from "../../src/models/Post";
+import TakeALook from "../../src/models/TakeALook";
 
 test.describe("Accessibility - Homepage", () => {
   test.beforeEach(async ({ wp, runId }) => {
     await wp.posts.clearByRunId(runId);
   });
 
-  test("Homepage components (news, work updates, blogs) has no serious or critical violations", async ({
+  test("Homepage components (news, work updates, blogs, take a look) has no serious or critical violations", async ({
     homepage,
     wp,
     runId,
@@ -16,20 +17,33 @@ test.describe("Accessibility - Homepage", () => {
     await wp.posts.createMany(contentType.news);
     await wp.posts.createMany(contentType.workUpdates);
     await wp.posts.create(contentType.blog);
+    
+    const takeALook = TakeALook.aTakeALook()
+      .withTitle(`Take a look `)
+      .withDescription(`E2E description`)
+      .withLinkText(`E2E link text ${runId}`)
+      .withLinkUrl(`https://example.com/${runId}`);
+
+    await wp.customizer.applyCustomization(takeALook);
 
     await homepage.goto();
 
     await homepage.checkAccessibilityFor(
       homepage.latestNewsSectionSelector,
-      "Latest News Section",
+      "homepage:Latest News Section",
     );
     await homepage.checkAccessibilityFor(
       homepage.workUpdatesSectionSelector,
-      "Work Updates Section",
+      "homepage: Work Updates Section",
     );
     await homepage.checkAccessibilityFor(
       homepage.blogsSectionSelector,
-      "homepage.blogs",
+      "homepage: Blog Section",
+    );
+
+    await homepage.checkAccessibilityFor(
+      homepage.takeALookColumnSelector,
+      "homepage: Take a look Section",
     );
   });
 });

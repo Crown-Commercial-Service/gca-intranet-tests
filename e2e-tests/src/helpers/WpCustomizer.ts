@@ -1,88 +1,73 @@
-import * as docker from "../lib/wp-docker-client";
-import type { WpResult } from "../utils/wp-utils";
-import * as utils from "../utils/wp-utils";
-import type TakeALook from "../models/TakeALook";
+import * as docker from "../../src/lib/wp-docker-client";
+import type { WpResult } from "../../src/utils/wp-utils";
+import * as utils from "../../src/utils/wp-utils";
+import type TakeALook from "../../src/models/TakeALook";
+import { expect } from "../../src/wp.fixtures";
 
 type WpRunner = (args: string[]) => Promise<WpResult>;
-
-export type TakeALookConfig = {
-  enabled?: boolean;
-  title?: string;
-  description?: string;
-  linkText?: string;
-  linkUrl?: string;
-};
 
 export default class WpCustomizer {
   constructor(private readonly wp: WpRunner) {}
 
-  async setTakeALook(config: TakeALookConfig): Promise<void>;
-  async setTakeALook(takeALook: TakeALook): Promise<void>;
-  async setTakeALook(input: TakeALookConfig | TakeALook): Promise<void> {
+  /**
+   * Generic entry point for applying customizer changes.
+   */
+  async applyCustomization(customization: {
+    apply(customizer: WpCustomizer): Promise<void>;
+  }): Promise<void> {
     this.ensureLocalCliOnly();
+    await customization.apply(this);
+  }
 
-    const config: TakeALookConfig =
-      input &&
-      typeof input === "object" &&
-      "linkText" in input &&
-      "linkUrl" in input
-        ? {
-            title: input.title,
-            description: input.description,
-            linkText: input.linkText,
-            linkUrl: input.linkUrl,
-          }
-        : input;
+  /**
+   * Apply Take a look customizer configuration
+   */
+  async applyTakeALook(takeALook: TakeALook): Promise<void> {
+    const { title, description, linkText, linkUrl } = takeALook;
 
-    if (typeof config.enabled === "boolean") {
-      await this.setThemeMod(
-        "gca_takealook_enabled",
-        config.enabled ? "1" : "0",
-      );
+    if (typeof title === "string") {
+      await this.setThemeMod("gca_takealook_title", title);
     }
-    if (typeof config.title === "string") {
-      await this.setThemeMod("gca_takealook_title", config.title);
+
+    if (typeof description === "string") {
+      await this.setThemeMod("gca_takealook_desc", description);
     }
-    if (typeof config.description === "string") {
-      await this.setThemeMod("gca_takealook_desc", config.description);
+
+    if (typeof linkText === "string") {
+      await this.setThemeMod("gca_takealook_link_text", linkText);
     }
-    if (typeof config.linkText === "string") {
-      await this.setThemeMod("gca_takealook_link_text", config.linkText);
-    }
-    if (typeof config.linkUrl === "string") {
-      await this.setThemeMod("gca_takealook_link_url", config.linkUrl);
+
+    if (typeof linkUrl === "string") {
+      await this.setThemeMod("gca_takealook_link_url", linkUrl);
     }
   }
 
-  async clearTakeALook(): Promise<void> {
-    this.ensureLocalCliOnly();
-
-    await this.removeThemeMod("gca_takealook_enabled");
-    await this.removeThemeMod("gca_takealook_title");
-    await this.removeThemeMod("gca_takealook_desc");
-    await this.removeThemeMod("gca_takealook_link_text");
-    await this.removeThemeMod("gca_takealook_link_url");
-  }
-
+  /**
+   * Retrieve a theme mod value
+   */
   async getThemeMod(key: string): Promise<string> {
     this.ensureLocalCliOnly();
 
     const res = await this.wp(["theme", "mod", "get", key]);
-    if (res.exitCode !== 0) {
-      throw utils.formatWpCliFailure(`Failed to get theme mod "${key}"`, res);
-    }
+
     return (res.stdout || "").trim();
   }
 
+  /**
+   * Set a theme mod via wp-cli
+   */
   private async setThemeMod(key: string, value: string): Promise<void> {
     const res = await this.wp(["theme", "mod", "set", key, value]);
-    if (res.exitCode !== 0) {
-      throw utils.formatWpCliFailure(`Failed to set theme mod "${key}"`, res);
-    }
+
+    expect(res.exitCode, res.stderr).toBe(0);
   }
 
+  /**
+   * Remove a theme mod
+   */
   private async removeThemeMod(key: string): Promise<void> {
     const res = await this.wp(["theme", "mod", "remove", key]);
+
     if (res.exitCode !== 0) {
       throw utils.formatWpCliFailure(
         `Failed to remove theme mod "${key}"`,
@@ -91,11 +76,13 @@ export default class WpCustomizer {
     }
   }
 
+  /**
+   * Ensure we are using wp-cli (docker driver)
+   */
   private ensureLocalCliOnly(): void {
-    if (docker.wpDriver() === "remote") {
-      throw new Error(
-        "WpCustomizer only supports WP_DRIVER=docker (wp-cli). Remote customizer updates are not supported.",
-      );
-    }
+    expect(
+      docker.wpDriver(),
+      "WpCustomizer only supports WP_DRIVER=docker (wp-cli). Remote customizer updates are not supported.",
+    ).toBe("docker");
   }
 }

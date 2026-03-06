@@ -16,6 +16,8 @@ import WorkUpdateList from "../src/pages/WorkUpdateList";
 import BlogPage from "../src/pages/BlogPage";
 import BlogListPage from "../src/pages/BlogListPage";
 import WpCustomizer from "../src/helpers/WpCustomizer";
+import WordpressLoginPage from "./pages/WordpressLoginPage";
+import CustomizerPage from "../src/pages/CustomizerPage";
 
 type WpHelpers = {
   exec: typeof runWp;
@@ -31,6 +33,8 @@ type WpHelpers = {
 type Fixtures = {
   wp: WpHelpers;
   homepage: HomePage;
+  wordpressLoginPage: WordpressLoginPage;
+  customizerPage: CustomizerPage;
 
   latestNews: LatestNews;
   latestNewsList: LatestNewsList;
@@ -126,6 +130,14 @@ export const test = base.extend<Fixtures>({
     const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
 
     await use(new HomePage(page, baseUrl));
+  },
+
+  wordpressLoginPage: async ({ page }, use) => {
+    await use(new WordpressLoginPage(page));
+  },
+
+  customizerPage: async ({ page }, use) => {
+    await use(new CustomizerPage(page));
   },
 
   latestNews: async ({ page }, use, testInfo) => {

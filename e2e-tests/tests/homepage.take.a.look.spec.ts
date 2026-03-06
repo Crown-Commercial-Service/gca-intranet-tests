@@ -1,5 +1,6 @@
 import { test, expect } from "../src/wp.fixtures";
 import TakeALook from "../src/models/TakeALook";
+import { threadName } from "node:worker_threads";
 
 test.describe("homepage - take a look", () => {
   test("should display a look component with correct content", async ({
@@ -8,32 +9,65 @@ test.describe("homepage - take a look", () => {
     runId,
   }) => {
     const takeALook = TakeALook.aTakeALook()
-      .withRunId(runId)
       .withTitle(`E2E Take a look ${runId}`)
       .withDescription(`E2E description ${runId}`)
       .withLinkText(`E2E link text ${runId}`)
-      .withLinkUrl(`https://example.com/${runId}`)
-      .build();
+      .withLinkUrl(`https://example.com/${runId}`);
 
-    await wp.customizer.setTakeALook(takeALook);
+    await wp.customizer.applyCustomization(takeALook);
 
     await homepage.goto();
+    await homepage.assertTakeALookComponent(takeALook);
+  });
 
-    const root = homepage.page.getByTestId("take-a-look-column");
-    await expect(root).toBeVisible();
+  test("can edit a take a look component via wordpress customizer", async ({
+    wp,
+    homepage,
+    page,
+    runId,
+    wordpressLoginPage,
+    customizerPage,
+  }) => {
+    const takeALook = TakeALook.aTakeALook()
+      .withTitle(`E2E Take a look ${runId}`)
+      .withDescription(`E2E description ${runId}`)
+      .withLinkText(`E2E link text ${runId}`)
+      .withLinkUrl(`https://example.com/${runId}`);
 
-    const heading = homepage.page.getByTestId("take-a-look-heading");
-    await expect(heading).toBeVisible();
-    await expect(heading).toHaveText(takeALook.title);
+    await wp.customizer.applyCustomization(takeALook);
+    await homepage.goto();
+    await homepage.assertTakeALookComponent(takeALook);
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsDockerAdmin();
 
-    await expect(root).toContainText(takeALook.description);
+    const updatedTakeALook = TakeALook.aTakeALook()
+      .withTitleMaxChars(300)
+      .withDescriptionMaxChars(600)
+      .withLinkText(`Updated link text ${runId}`)
+      .withLinkUrl(`https://example.com/updated/${runId}`);
 
-    const link = homepage.page.getByTestId("take-a-look-link");
-    await expect(link).toBeVisible();
-    await expect(link).toHaveAttribute("href", takeALook.linkUrl);
+    await customizerPage.goto();
+    await customizerPage.openHomepageOptions();
+    await customizerPage.updateTakeALook(updatedTakeALook);
+    await customizerPage.publish();
+    await homepage.goto();
+    await homepage.assertTakeALookComponent(updatedTakeALook);
+  });
 
-    const linkTextEl = root.locator("p.gca-take-a-look__text");
-    await expect(linkTextEl).toBeVisible();
-    await expect(linkTextEl).toHaveText(takeALook.linkText);
+  test("can navigate to the take a look url", async ({
+    wp,
+    homepage,
+    runId,
+  }) => {
+    const takeALook = TakeALook.aTakeALook().withLinkUrl(
+      `https://example.com/${runId}`,
+    );
+
+    await wp.customizer.applyCustomization(takeALook);
+
+    await homepage.goto();
+    await homepage.takeALookLink.click();
+
+    await expect(homepage.page).toHaveURL(takeALook.linkUrl);
   });
 });

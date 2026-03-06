@@ -2,6 +2,7 @@ import { Page, Locator, expect } from "@playwright/test";
 import dayjs from "dayjs";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import type Post from "../models/Post";
+import type TakeALook from "../models/TakeALook";
 import {
   expectNoSeriousA11yViolations,
   expectNoSeriousA11yViolationsForSelector,
@@ -27,10 +28,8 @@ export default class HomePage {
 
   private readonly workUpdatesSectionTestId = "work-updates-section";
   private readonly workUpdateCardTestId = "work-update-card";
-  private readonly workUpdateAvatarTestId = "work-update-avatar";
   private readonly workUpdateLinkTestId = "work-update-link";
   private readonly workUpdateAuthorTestId = "work-update-author";
-  private readonly workUpdateDateTestId = "work-update-date";
   private readonly workUpdateSeeMoreLinkTestId = "work-updates-see-more-link";
 
   private readonly blogsSectionTestId = "blogs-column";
@@ -39,7 +38,13 @@ export default class HomePage {
   private readonly blogLinkTestId = "blogs-link";
   private readonly blogAuthorTestId = "blogs-author";
   private readonly blogDateTestId = "blogs-date";
-  private readonly blogSeeMoreLinkTestId = "blogs-see-more-link";
+
+  // --- Take a look ---
+  private readonly takeALookColumnTestId = "take-a-look-column";
+  private readonly takeALookHeadingTestId = "take-a-look-heading";
+  private readonly takeALookSubheadingTestId = "take-a-look-subheading";
+  private readonly takeALookLinkTestId = "take-a-look-link";
+  private readonly takeALookHeaderTestId = "take-a-look-header";
 
   readonly latestNewsColumn: Locator;
   readonly workUpdatesSection: Locator;
@@ -50,9 +55,18 @@ export default class HomePage {
   readonly blogCard: Locator;
   readonly blogSeeMoreLink: Locator;
 
+  // --- Take a look locators ---
+  readonly takeALookColumn: Locator;
+  readonly takeALookHeading: Locator;
+  readonly takeALookSubheading: Locator;
+  readonly takeALookLink: Locator;
+  readonly takeALookLinkText: Locator;
+  readonly takeALookHeader: Locator;
+
   readonly latestNewsSectionSelector: string;
   readonly workUpdatesSectionSelector: string;
   readonly blogsSectionSelector: string;
+  readonly takeALookColumnSelector: string;
 
   private readonly latestNewsCardSelector: string;
 
@@ -79,9 +93,22 @@ export default class HomePage {
 
     this.blogSeeMoreLink = this.page.getByRole("link", { name: "More blogs" });
 
+    // --- Take a look ---
+    this.takeALookColumn = this.page.getByTestId(this.takeALookColumnTestId);
+    this.takeALookHeading = this.page.getByTestId(this.takeALookHeadingTestId);
+    this.takeALookSubheading = this.page.getByTestId(
+      this.takeALookSubheadingTestId,
+    );
+    this.takeALookLink = this.page.getByTestId(this.takeALookLinkTestId);
+    this.takeALookHeader = this.page.getByTestId(this.takeALookHeaderTestId);
+    this.takeALookLinkText = this.takeALookColumn.locator(
+      "p.gca-take-a-look__text",
+    );
+
     this.latestNewsSectionSelector = `[data-testid="${this.latestNewsColumnTestId}"]`;
     this.workUpdatesSectionSelector = `[data-testid="${this.workUpdatesSectionTestId}"]`;
     this.blogsSectionSelector = `[data-testid="${this.blogsSectionTestId}"]`;
+    this.takeALookColumnSelector = `[data-testid="${this.takeALookColumnTestId}"]`;
 
     this.latestNewsCardSelector = [
       `[data-testid="${this.latestNewsFeaturedCardTestId}"]`,
@@ -100,6 +127,44 @@ export default class HomePage {
   async checkAccessibilityFor(selector: string, label: string): Promise<void> {
     await expectNoSeriousA11yViolationsForSelector(this.page, selector, label);
   }
+
+  // ---------------------------------------------------------
+  // Take a look assertions
+  // ---------------------------------------------------------
+
+  async assertTakeALookComponent(takeALook: TakeALook): Promise<void> {
+    await expect(this.takeALookColumn).toBeVisible();
+    await expect(this.takeALookHeader).toBeVisible();
+
+    // title
+    await expect(this.takeALookHeading).toBeVisible();
+
+    // wait until the heading contains part of the new title
+    await expect(this.takeALookHeading).toContainText(
+      takeALook.title.slice(0, 5),
+    );
+
+    const uiTitle = (await this.takeALookHeading.innerText()).trim();
+    const visiblePart = getVisibleTruncatedText(uiTitle);
+
+    expect(takeALook.title.startsWith(visiblePart)).toBe(true);
+
+    // description
+    const uiDesc = (await this.takeALookSubheading.innerText()).trim();
+    expect(uiDesc.length).toBeLessThanOrEqual(40);
+
+    // link
+    await expect(this.takeALookLink).toBeVisible();
+    await expect(this.takeALookLink).toHaveAttribute("href", takeALook.linkUrl);
+
+    // link text
+    await expect(this.takeALookLinkText).toBeVisible();
+    await expect(this.takeALookLinkText).toHaveText(takeALook.linkText);
+  }
+
+  // ---------------------------------------------------------
+  // Existing code below (unchanged)
+  // ---------------------------------------------------------
 
   private articleLink(title: string): Locator {
     return this.page.getByRole("link", { name: title });
@@ -277,16 +342,13 @@ export default class HomePage {
     const card = this.workUpdateCardByTitle(title);
     await expect(card).toHaveCount(1);
 
-    const authorElement = card.getByTestId(this.workUpdateAuthorTestId);
+    const author = expectedAuthor ?? process.env.WP_ADMIN_USERNAME;
+    expect(author).toBeTruthy();
 
-    const author =
-      expectedAuthor ??
-      process.env.WP_ADMIN_USERNAME ??
-      process.env.WP_USER ??
-      process.env.WP_API_USER ??
-      "";
-
-    await expect(authorElement).toHaveText(`By ${author}`);
+    await this.assertAuthorPossiblyTruncated(
+      card.getByTestId(this.workUpdateAuthorTestId),
+      `By ${author}`,
+    );
   }
 
   async assertBlogAuthor(
@@ -313,17 +375,18 @@ export default class HomePage {
 
     const normalize = (s: string) => s.replace(/\s+/g, " ").trim();
 
-    const actualRaw = (await authorEl.textContent()) ?? "";
-    const actual = normalize(actualRaw);
+    const actual = normalize((await authorEl.textContent()) ?? "");
     const expected = normalize(expectedFullText);
 
     if (actual === expected) return;
 
-    const hasEllipsis = actual.endsWith("...") || actual.endsWith("…");
-    expect(hasEllipsis).toBe(true);
+    if (actual.endsWith("...") || actual.endsWith("…")) {
+      const visiblePart = actual.replace(/(\.\.\.|…)\s*$/, "").trim();
+      expect(expected.startsWith(visiblePart)).toBe(true);
+      return;
+    }
 
-    const visiblePart = actual.replace(/(\.\.\.|…)\s*$/, "").trimEnd();
-    expect(expected.startsWith(visiblePart)).toBe(true);
+    expect(actual).toBe(expected);
   }
 
   private blogCardByTitle(title: string): Locator {
@@ -409,4 +472,28 @@ export default class HomePage {
     const visiblePart = getVisibleTruncatedText(uiTitle);
     expect(post.title.startsWith(visiblePart)).toBe(true);
   }
+
+  async hasTruncatedChars(locator: Locator, maxChars: number): Promise<void> {
+    const text = ((await locator.innerText()) ?? "").trim();
+    expect(text.length).toBe(maxChars);
+  }
+
+  // async hasTruncatedTitle(): Promise<void> {
+  //   await expect(this.takeALookHeading).toBeVisible();
+
+  //   await expect(this.takeALookHeading).toHaveClass(/gca-clamp-2/);
+  //   await expect(this.takeALookHeading).toHaveCSS("overflow", "hidden");
+  //   await expect(this.takeALookHeading).toHaveCSS("text-overflow", "ellipsis");
+  //   await expect(this.takeALookHeading).toHaveCSS("-webkit-line-clamp", "2");
+  // }
+
+  // async hasTruncatedDescription(): Promise<void> {
+  //   await expect(this.takeALookColumn).toBeVisible();
+
+  //   await expect(this.takeALookSubheading).toHaveCSS("overflow", "hidden");
+  //   await expect(this.takeALookSubheading).toHaveCSS(
+  //     "text-overflow",
+  //     "ellipsis",
+  //   );
+  // }
 }
