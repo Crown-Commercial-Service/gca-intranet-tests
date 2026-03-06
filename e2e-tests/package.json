@@ -6,18 +6,18 @@
   "main": "",
   "scripts": {
     "test": "npx dotenv -e .env -- playwright test --workers=1",
-
     "test:docker": "npx dotenv -e $WP_DOCKER_CWD/.env.e2e.docker -- playwright test",
     "test:docker:headed": "npx dotenv -e $WP_DOCKER_CWD/.env.e2e.docker -- playwright test --headed",
     "test:docker:ui": "npx dotenv -e $WP_DOCKER_CWD/.env.e2e.docker -- playwright test --ui",
-
     "test:docker:a11y": "npx dotenv -e $WP_DOCKER_CWD/.env.e2e.docker -- playwright test -c playwright.a11y.config.ts",
     "test:docker:a11y:headed": "npx dotenv -e $WP_DOCKER_CWD/.env.e2e.docker -- playwright test -c playwright.a11y.config.ts --headed",
     "test:docker:a11y:ui": "npx dotenv -e $WP_DOCKER_CWD/.env.e2e.docker -- playwright test -c playwright.a11y.config.ts --ui",
-
     "test:a11y": "npx dotenv -e .env -- playwright test -c playwright.a11y.config.ts --workers=1",
     "test:a11y:ui": "npx dotenv -e .env -- playwright test -c playwright.a11y.config.ts --ui --workers=1",
-    "test:a11y:headed": "npx dotenv -e .env -- playwright test -c playwright.a11y.config.ts --headed --workers=1"
+    "test:a11y:headed": "npx dotenv -e .env -- playwright test -c playwright.a11y.config.ts --headed --workers=1",
+    "report": "playwright show-report",
+    "report:allure": "npx allure generate ./allure-results --clean && npx allure open",
+    "report:a11y": "open -a \"Google Chrome\" test-results/axe/a11y-sections.html"
   },
   "keywords": [
     "playwright",
@@ -35,6 +35,8 @@
     "@types/html-to-text": "^9.0.4",
     "@types/node": "^25.2.3",
     "@typescript-eslint/parser": "^8.54.0",
+    "allure-commandline": "^2.37.0",
+    "allure-playwright": "^3.6.0",
     "axe-html-reporter": "^2.2.11",
     "baseline-browser-mapping": "^2.9.19",
     "dotenv-cli": "^11.0.0",

@@ -1,7 +1,8 @@
 import { expect, Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { writeAxeHtmlReport, mergeAxeResults } from "./axeReport";
 import { runA11yScan } from "./axe";
-import { writeAxeHtmlReport } from "./axeReport";
+// import { writeAxeHtmlReport } from "./axeReport";
 
 type AxeViolation = {
   id: string;
@@ -45,26 +46,45 @@ export async function expectNoSeriousA11yViolations(
   expect(serious).toHaveLength(0);
 }
 
-export async function expectNoSeriousA11yViolationsForSelector(
+async function expectNoSeriousA11yViolationsForSelector(
   page: Page,
   selector: string,
-  label: string,
 ) {
   const results = (await new AxeBuilder({ page })
     .include(selector)
     .analyze()) as AxeResults;
-
-  writeAxeHtmlReport(results as any, {
-    fileName: `${label}.html`,
-    projectKey: label,
-    customSummary: `Accessibility scan for section: ${selector}`,
-  });
 
   const critical = getCriticalViolations(results);
   const serious = getSeriousViolations(results);
 
   expect(critical).toHaveLength(0);
   expect(serious).toHaveLength(0);
+
+  return results;
+}
+
+export async function expectNoSeriousA11yViolationsForSelectors(
+  page: Page,
+  selectors: string[],
+  label: string = "a11y-sections",
+) {
+  const results = [];
+
+  for (const selector of selectors) {
+    const result = await expectNoSeriousA11yViolationsForSelector(
+      page,
+      selector,
+    );
+    results.push(result);
+  }
+
+  const merged = mergeAxeResults(results as any, page.url());
+
+  writeAxeHtmlReport(merged as any, {
+    fileName: `${label}.html`,
+    projectKey: "- GCA Intranet Homepage",
+    customSummary: `Accessibility scan for selectors: ${selectors.join(", ")}`,
+  });
 }
 
 export async function expectNoSeriousA11yViolationsForPaths(

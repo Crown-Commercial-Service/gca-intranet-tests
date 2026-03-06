@@ -5,7 +5,7 @@ import type Post from "../models/Post";
 import type TakeALook from "../models/TakeALook";
 import {
   expectNoSeriousA11yViolations,
-  expectNoSeriousA11yViolationsForSelector,
+  expectNoSeriousA11yViolationsForSelectors,
 } from "../a11y/assertions";
 import { htmlToPlainText, getVisibleTruncatedText } from "../utils/formatters";
 
@@ -124,8 +124,8 @@ export default class HomePage {
     await expectNoSeriousA11yViolations(this.page);
   }
 
-  async checkAccessibilityFor(selector: string, label: string): Promise<void> {
-    await expectNoSeriousA11yViolationsForSelector(this.page, selector, label);
+  async checkAccessibilityFor(selectors: string[]): Promise<void> {
+    await expectNoSeriousA11yViolationsForSelectors(this.page, selectors);
   }
 
   // ---------------------------------------------------------
@@ -161,10 +161,6 @@ export default class HomePage {
     await expect(this.takeALookLinkText).toBeVisible();
     await expect(this.takeALookLinkText).toHaveText(takeALook.linkText);
   }
-
-  // ---------------------------------------------------------
-  // Existing code below (unchanged)
-  // ---------------------------------------------------------
 
   private articleLink(title: string): Locator {
     return this.page.getByRole("link", { name: title });
@@ -477,23 +473,4 @@ export default class HomePage {
     const text = ((await locator.innerText()) ?? "").trim();
     expect(text.length).toBe(maxChars);
   }
-
-  // async hasTruncatedTitle(): Promise<void> {
-  //   await expect(this.takeALookHeading).toBeVisible();
-
-  //   await expect(this.takeALookHeading).toHaveClass(/gca-clamp-2/);
-  //   await expect(this.takeALookHeading).toHaveCSS("overflow", "hidden");
-  //   await expect(this.takeALookHeading).toHaveCSS("text-overflow", "ellipsis");
-  //   await expect(this.takeALookHeading).toHaveCSS("-webkit-line-clamp", "2");
-  // }
-
-  // async hasTruncatedDescription(): Promise<void> {
-  //   await expect(this.takeALookColumn).toBeVisible();
-
-  //   await expect(this.takeALookSubheading).toHaveCSS("overflow", "hidden");
-  //   await expect(this.takeALookSubheading).toHaveCSS(
-  //     "text-overflow",
-  //     "ellipsis",
-  //   );
-  // }
 }

@@ -17,10 +17,10 @@ test.describe("Accessibility - Homepage", () => {
     await wp.posts.createMany(contentType.news);
     await wp.posts.createMany(contentType.workUpdates);
     await wp.posts.create(contentType.blog);
-    
+
     const takeALook = TakeALook.aTakeALook()
-      .withTitle(`Take a look `)
-      .withDescription(`E2E description`)
+      .withTitle("Take a look")
+      .withDescription("E2E description")
       .withLinkText(`E2E link text ${runId}`)
       .withLinkUrl(`https://example.com/${runId}`);
 
@@ -28,22 +28,11 @@ test.describe("Accessibility - Homepage", () => {
 
     await homepage.goto();
 
-    await homepage.checkAccessibilityFor(
+    await homepage.checkAccessibilityFor([
       homepage.latestNewsSectionSelector,
-      "homepage:Latest News Section",
-    );
-    await homepage.checkAccessibilityFor(
       homepage.workUpdatesSectionSelector,
-      "homepage: Work Updates Section",
-    );
-    await homepage.checkAccessibilityFor(
       homepage.blogsSectionSelector,
-      "homepage: Blog Section",
-    );
-
-    await homepage.checkAccessibilityFor(
       homepage.takeALookColumnSelector,
-      "homepage: Take a look Section",
-    );
+    ]);
   });
 });

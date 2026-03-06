@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 import type { AxeResults } from "axe-core";
 import { createHtmlReport } from "axe-html-reporter";
 
@@ -26,4 +27,43 @@ export function writeAxeHtmlReport(
       reportFileName: opts.fileName,
     },
   });
+}
+
+export function mergeAxeResults(
+  resultsList: AxeResults[],
+  pageUrl = "",
+): AxeResults {
+  if (resultsList.length === 0) {
+    throw new Error("No axe results supplied to merge.");
+  }
+
+  const first = resultsList[0];
+
+  return {
+    ...first,
+    url: pageUrl || first.url,
+    timestamp: new Date().toISOString(),
+    violations: resultsList.flatMap((r) => r.violations),
+    passes: resultsList.flatMap((r) => r.passes),
+    incomplete: resultsList.flatMap((r) => r.incomplete),
+    inapplicable: resultsList.flatMap((r) => r.inapplicable),
+  };
+}
+
+export function getLatestAxeReportPath(
+  outputDir = "test-results/axe",
+): string | null {
+  if (!fs.existsSync(outputDir)) return null;
+
+  const htmlFiles = fs
+    .readdirSync(outputDir)
+    .filter((file) => file.endsWith(".html"))
+    .map((file) => ({
+      file,
+      fullPath: path.join(outputDir, file),
+      mtimeMs: fs.statSync(path.join(outputDir, file)).mtimeMs,
+    }))
+    .sort((a, b) => b.mtimeMs - a.mtimeMs);
+
+  return htmlFiles[0]?.fullPath ?? null;
 }
