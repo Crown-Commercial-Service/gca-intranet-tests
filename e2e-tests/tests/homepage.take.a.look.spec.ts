@@ -1,6 +1,5 @@
 import { test, expect } from "../src/wp.fixtures";
 import TakeALook from "../src/models/TakeALook";
-import { threadName } from "node:worker_threads";
 
 test.describe("homepage - take a look", () => {
   test("should display take a look component with correct content", async ({
