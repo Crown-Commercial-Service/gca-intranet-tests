@@ -85,6 +85,28 @@ function baseUrlForWorker(
   return `http://localhost:${8080 + idx}`;
 }
 
+async function loginToQaWordpress(
+  page: import("@playwright/test").Page,
+): Promise<void> {
+  const username = process.env.WP_API_USER;
+  const password = process.env.WP_API_PASSWORD;
+  const baseUrl = process.env.PW_BASE_URL;
+
+  expect(username, "WP_API_USER is not set").toBeTruthy();
+  expect(password, "WP_API_PASSWORD is not set").toBeTruthy();
+  expect(baseUrl, "PW_BASE_URL is not set").toBeTruthy();
+
+  await page.request.post(`${baseUrl}/wp-login.php`, {
+    form: {
+      log: username!,
+      pwd: password!,
+      "wp-submit": "Log In",
+      redirect_to: `${baseUrl}/wp-admin/`,
+      testcookie: "1",
+    },
+  });
+}
+
 export const test = base.extend<Fixtures>({
   runId: async ({}, use, testInfo) => {
     const id = `run-${testInfo.workerIndex}-${Date.now()}`;
@@ -140,6 +162,10 @@ export const test = base.extend<Fixtures>({
     const qaMode = isQaMode();
     const parallel = qaMode ? false : await isParallelEnabled();
     const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
+
+    if (qaMode) {
+      await loginToQaWordpress(page);
+    }
 
     await use(new HomePage(page, baseUrl));
   },
