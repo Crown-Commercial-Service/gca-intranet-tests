@@ -3,7 +3,7 @@ import TakeALook from "../src/models/TakeALook";
 import { threadName } from "node:worker_threads";
 
 test.describe("homepage - take a look", () => {
-  test("should display a look component with correct content", async ({
+  test("should display take a look component with correct content", async ({
     wp,
     homepage,
     runId,
