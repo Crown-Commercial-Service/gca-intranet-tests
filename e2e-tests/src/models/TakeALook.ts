@@ -61,17 +61,17 @@ class TakeALookBuilder {
   }
 
   withTitleMaxChars(max: number): this {
-    this.props.title = this.randomWithin(max);
+    this.props.title = chance.word({ length: max + 5 }).trim();
     return this;
   }
 
   withDescriptionMaxChars(max: number): this {
-    this.props.description = this.randomWithin(max);
+    this.props.description = chance.word({ length: max + 5 }).trim();
     return this;
   }
 
   withLinkTextMaxChars(max: number): this {
-    this.props.linkText = this.randomWithin(max);
+    this.props.linkText = chance.word({ length: max + 5 }).trim();
     return this;
   }
 
@@ -97,15 +97,5 @@ class TakeALookBuilder {
 
   get linkUrl() {
     return this.props.linkUrl;
-  }
-
-  private randomWithin(max: number): string {
-    if (max <= 0) return "";
-
-    const txt = chance
-      .sentence({ words: Math.max(3, Math.floor(max / 6)) })
-      .trim();
-
-    return txt.length <= max ? txt : txt.slice(0, max).trimEnd();
   }
 }

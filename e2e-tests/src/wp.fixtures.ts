@@ -104,16 +104,16 @@ export const test = base.extend<Fixtures>({
 
     process.env.WP_SERVICE = service;
 
-    logger.info(
-      {
-        qaMode,
-        parallel,
-        service,
-        baseUrl: process.env.PW_BASE_URL,
-        wpDriver: process.env.WP_DRIVER,
-      },
-      "Initialising WordPress test helpers",
-    );
+    // logger.info(
+    //   {
+    //     qaMode,
+    //     parallel,
+    //     service,
+    //     baseUrl: process.env.PW_BASE_URL,
+    //     wpDriver: process.env.WP_DRIVER,
+    //   },
+    //   "Initialising WordPress test helpers",
+    // );
 
     const exec: typeof runWp = (args: string[], opts?: any) =>
       runWp(args, { ...(opts ?? {}), service });

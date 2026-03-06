@@ -1,30 +1,25 @@
 import { test } from "../../src/wp.fixtures";
 import Post from "../../src/models/Post";
-import TakeALook from "../../src/models/TakeALook";
+import HomepageCustomizationSet from "../../src/models/HomepageCustomizationSet";
 
 test.describe("Accessibility - Homepage", () => {
   test.beforeEach(async ({ wp, runId }) => {
     await wp.posts.clearByRunId(runId);
   });
 
-  test("Homepage components (news, work updates, blogs, take a look) has no serious or critical violations", async ({
+  test("Homepage components (news, work updates, blogs, take a look, quick links) has no serious or critical violations", async ({
     homepage,
     wp,
     runId,
   }) => {
     const contentType = Post.homepageSet(runId);
+    const customizations = HomepageCustomizationSet.homepageSet(runId);
 
     await wp.posts.createMany(contentType.news);
     await wp.posts.createMany(contentType.workUpdates);
     await wp.posts.create(contentType.blog);
-
-    const takeALook = TakeALook.aTakeALook()
-      .withTitle("Take a look")
-      .withDescription("E2E description")
-      .withLinkText(`E2E link text ${runId}`)
-      .withLinkUrl(`https://example.com/${runId}`);
-
-    await wp.customizer.applyCustomization(takeALook);
+    await wp.customizer.applyCustomization(customizations.takeALook);
+    await wp.customizer.applyCustomization(customizations.quickLinks);
 
     await homepage.goto();
 
@@ -33,6 +28,7 @@ test.describe("Accessibility - Homepage", () => {
       homepage.workUpdatesSectionSelector,
       homepage.blogsSectionSelector,
       homepage.takeALookColumnSelector,
+      homepage.quickLinksSelector,
     ]);
   });
 });

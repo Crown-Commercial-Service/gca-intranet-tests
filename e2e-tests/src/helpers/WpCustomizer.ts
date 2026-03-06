@@ -2,6 +2,7 @@ import * as docker from "../../src/lib/wp-docker-client";
 import type { WpResult } from "../../src/utils/wp-utils";
 import * as utils from "../../src/utils/wp-utils";
 import type TakeALook from "../../src/models/TakeALook";
+import type QuickLinks from "../../src/models/QuickLinks";
 import { expect } from "../../src/wp.fixtures";
 
 type WpRunner = (args: string[]) => Promise<WpResult>;
@@ -43,35 +44,65 @@ export default class WpCustomizer {
   }
 
   /**
+   * Apply Quick links customizer configuration
+   */
+  async applyQuickLinks(quickLinks: QuickLinks): Promise<void> {
+    const { title, description, links } = quickLinks;
+
+    if (typeof title === "string") {
+      await this.setThemeMod("gca_quicklinks_title", title);
+    }
+
+    if (typeof description === "string") {
+      await this.setThemeMod("gca_quicklinks_desc", description);
+    }
+
+    for (let index = 0; index < 3; index++) {
+      const linkNumber = index + 1;
+      const link = links[index];
+
+      await this.setThemeMod(
+        `gca_quicklinks_${linkNumber}_text`,
+        link?.text ?? "",
+      );
+
+      await this.setThemeMod(
+        `gca_quicklinks_${linkNumber}_url`,
+        link?.url ?? "",
+      );
+    }
+  }
+
+  /**
    * Retrieve a theme mod value
    */
   async getThemeMod(key: string): Promise<string> {
     this.ensureLocalCliOnly();
 
-    const res = await this.wp(["theme", "mod", "get", key]);
+    const result = await this.wp(["theme", "mod", "get", key]);
 
-    return (res.stdout || "").trim();
+    return (result.stdout || "").trim();
   }
 
   /**
    * Set a theme mod via wp-cli
    */
   private async setThemeMod(key: string, value: string): Promise<void> {
-    const res = await this.wp(["theme", "mod", "set", key, value]);
+    const result = await this.wp(["theme", "mod", "set", key, value]);
 
-    expect(res.exitCode, res.stderr).toBe(0);
+    expect(result.exitCode, result.stderr).toBe(0);
   }
 
   /**
    * Remove a theme mod
    */
   private async removeThemeMod(key: string): Promise<void> {
-    const res = await this.wp(["theme", "mod", "remove", key]);
+    const result = await this.wp(["theme", "mod", "remove", key]);
 
-    if (res.exitCode !== 0) {
+    if (result.exitCode !== 0) {
       throw utils.formatWpCliFailure(
         `Failed to remove theme mod "${key}"`,
-        res,
+        result,
       );
     }
   }
