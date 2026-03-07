@@ -88,13 +88,15 @@ function baseUrlForWorker(
 async function loginToQaWordpress(
   page: import("@playwright/test").Page,
 ): Promise<void> {
-  const username = process.env.WP_API_USER;
-  const password = process.env.WP_API_PASSWORD;
+  const username = process.env.WP_ADMIN_USERNAME;
+  const password = process.env.WP_ADMIN_PASSWORD;
   const baseUrl = process.env.PW_BASE_URL;
 
   expect(username, "WP_API_USER is not set").toBeTruthy();
   expect(password, "WP_API_PASSWORD is not set").toBeTruthy();
   expect(baseUrl, "PW_BASE_URL is not set").toBeTruthy();
+  
+  await page.request.get(`${baseUrl}/wp-login.php`);
 
   await page.request.post(`${baseUrl}/wp-login.php`, {
     form: {

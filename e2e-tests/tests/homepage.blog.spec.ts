@@ -4,7 +4,7 @@ import User from "../src/models/User";
 
 test.describe("blogs", () => {
   test.beforeEach(async ({ wp }) => {
-    await wp.posts.clearByTypeAndAuthor("blogs");
+    await wp.posts.clearByTypeAndAuthor("blog");
   });
   test("should display a single blog", async ({ wp, homepage }) => {
     const post = Post.aPost()

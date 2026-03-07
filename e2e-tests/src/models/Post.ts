@@ -3,7 +3,7 @@ import Chance from "chance";
 const chance = new Chance();
 
 export type HomepageContent = {
-  news: Post;
+  news: Post[];
   workUpdates: [Post, Post];
   blog: Post;
 };
@@ -58,22 +58,15 @@ export default class Post {
     return new PostBuilder().withType("page");
   }
 
-  /**
-   * Custom post type used by GCA.
-   */
   static aWorkUpdate(): PostBuilder {
     return new PostBuilder().withType("work_updates");
   }
 
-  /**
-   * Convenience builder for homepage scenario:
-   * - 1 News
-   * - 2 Work Updates
-   * - 1 Blog
-   */
-  static homepageSet(runId?: string) {
+  static homepageSet(runId?: string): HomepageContent {
     const applyRunId = (builder: PostBuilder) => {
-      if (runId) builder.withRunId(runId);
+      if (runId) {
+        builder.withRunId(runId);
+      }
       return builder;
     };
 
@@ -115,7 +108,7 @@ export default class Post {
       ).build(),
     ];
 
-    const workUpdates = [
+    const workUpdates: [Post, Post] = [
       applyRunId(
         Post.aPost()
           .withType("work_update")
@@ -160,16 +153,16 @@ class PostBuilder {
     template: undefined,
   };
 
-  private applyRunId(title: string): string {
+  private applyRunId(value: string): string {
     const runId = this.runId || process.env.PW_RUN_ID;
-    const cleanTitle = String(title ?? "")
+    const cleanValue = String(value ?? "")
       .replace(/\s+/g, " ")
       .trim();
 
-    if (!runId) return cleanTitle;
-    if (cleanTitle.includes(runId)) return cleanTitle;
+    if (!runId) return cleanValue;
+    if (cleanValue.includes(runId)) return cleanValue;
 
-    return `${cleanTitle} ${runId}`.trim();
+    return `${cleanValue} ${runId}`.trim();
   }
 
   withRunId(runId: string): this {
@@ -233,7 +226,6 @@ class PostBuilder {
     return this;
   }
 
-  // title helpers
   withTitleMaxChars(max: number): this {
     this.props.title = this.applyRunId(this.randomTitleWithin(max));
     return this;
@@ -249,7 +241,6 @@ class PostBuilder {
     return this;
   }
 
-  // paragraph helpers
   withParagraphMaxChars(max: number): this {
     this.props.content = this.randomParagraphWithin(max);
     return this;
@@ -268,24 +259,31 @@ class PostBuilder {
   get title() {
     return this.props.title;
   }
+
   get content() {
     return this.props.content;
   }
+
   get status() {
     return this.props.status;
   }
+
   get type() {
     return this.props.type;
   }
+
   get author() {
     return this.props.author;
   }
+
   get featuredImagePath() {
     return this.props.featuredImagePath;
   }
+
   get createdAt() {
     return this.props.createdAt;
   }
+
   get category() {
     return this.props.category;
   }
@@ -296,29 +294,35 @@ class PostBuilder {
     return new Post(props);
   }
 
-  // helpers
   private randomTitleWithin(max: number): string {
     if (max <= 0) return "";
+
     const title = chance
       .sentence({ words: Math.max(3, Math.floor(max / 5)) })
       .trim();
+
     return title.length <= max ? title : title.slice(0, max).trimEnd();
   }
 
   private randomTitleExact(exact: number): string {
     if (exact <= 0) return "";
+
     let title = chance
       .sentence({ words: Math.max(3, Math.floor(exact / 5)) })
       .trim();
+
     while (title.length < exact) {
-      title += " " + chance.word();
+      title += ` ${chance.word()}`;
     }
+
     return title.slice(0, exact);
   }
 
   private randomParagraphWithin(max: number): string {
     if (max <= 0) return "";
+
     const paragraph = chance.paragraph({ sentences: 3 }).trim();
+
     return paragraph.length <= max
       ? paragraph
       : paragraph.slice(0, max).trimEnd();
@@ -326,10 +330,13 @@ class PostBuilder {
 
   private randomParagraphExact(exact: number): string {
     if (exact <= 0) return "";
+
     let paragraph = chance.paragraph({ sentences: 5 }).trim();
+
     while (paragraph.length < exact) {
-      paragraph += " " + chance.sentence({ words: 5 });
+      paragraph += ` ${chance.sentence({ words: 5 })}`;
     }
+
     return paragraph.slice(0, exact);
   }
 }
