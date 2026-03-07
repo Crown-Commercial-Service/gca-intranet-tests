@@ -3,8 +3,8 @@ import Post from "../src/models/Post";
 import User from "../src/models/User";
 
 test.describe("blogs", () => {
-  test.beforeEach(async ({ wp, runId }) => {
-    await wp.posts.clearByTypeAndRunId("blogs", runId);
+  test.beforeEach(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("blogs");
   });
   test("should display a single blog", async ({ wp, homepage }) => {
     const post = Post.aPost()

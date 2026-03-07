@@ -234,6 +234,88 @@ export default class WpPosts {
     await this.wp(["post", "delete", ...ids.split(/\s+/), "--force"]);
   }
 
+  async clearByTypeAndAuthor(postType: string): Promise<void> {
+    const username = (
+      process.env.WP_API_USER ||
+      process.env.WP_ADMIN_USERNAME ||
+      process.env.WP_ADMIN_USER ||
+      ""
+    ).trim();
+
+    if (!username) {
+      throw new Error(
+        "No username found in env: WP_API_USER or WP_ADMIN_USERNAME",
+      );
+    }
+
+    // --- REMOTE DRIVER ---
+    if (docker.wpDriver() === "remote") {
+      const restConfig = rest.getRestConfig();
+
+      const users = await rest.wpRest<any[]>(
+        restConfig,
+        "GET",
+        `/wp-json/wp/v2/users?search=${encodeURIComponent(username)}`,
+      );
+
+      const user = users.find(
+        (item) => item.slug === username || item.name === username,
+      );
+
+      if (!user?.id) {
+        throw new Error(`User not found: ${username}`);
+      }
+
+      const endpoint =
+        postType === "attachment"
+          ? "media"
+          : rest.restEndpointForType(postType);
+
+      const items = await rest.wpRest<any[]>(
+        restConfig,
+        "GET",
+        `/wp-json/wp/v2/${endpoint}?author=${user.id}&per_page=100`,
+      );
+
+      for (const item of items) {
+        await rest.wpRest(
+          restConfig,
+          "DELETE",
+          `/wp-json/wp/v2/${endpoint}/${item.id}?force=true`,
+        );
+      }
+
+      return;
+    }
+
+    // --- DOCKER / CLI DRIVER ---
+    const userResult = await this.wp(["user", "get", username, "--field=ID"]);
+    if (userResult.exitCode !== 0) {
+      throw utils.formatWpCliFailure(
+        `Failed to resolve author id for "${username}"`,
+        userResult,
+      );
+    }
+
+    const authorId = (userResult.stdout || "").trim();
+    if (!authorId) {
+      throw new Error(`Author id not found for "${username}"`);
+    }
+
+    const list = await this.wp([
+      "post",
+      "list",
+      `--post_type=${postType}`,
+      `--author=${authorId}`,
+      "--format=ids",
+    ]);
+
+    const ids = (list.stdout || "").trim();
+    if (!ids) return;
+
+    await this.wp(["post", "delete", ...ids.split(/\s+/), "--force"]);
+  }
+
   async getPublishedDate(postId: number): Promise<string> {
     if (docker.wpDriver() === "remote") {
       const post = await rest.wpRest<any>(
