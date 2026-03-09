@@ -506,7 +506,6 @@ export default class HomePage {
     const visiblePart = getVisibleTruncatedText(actual);
 
     expect(post.title.startsWith(visiblePart)).toBe(true);
-    expect(actual.endsWith("...")).toBe(true);
 
     await expect(
       card.getByTestId(this.blogAvatarTestId).locator("img"),

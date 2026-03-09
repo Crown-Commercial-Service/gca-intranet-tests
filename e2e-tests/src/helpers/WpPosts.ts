@@ -235,21 +235,23 @@ export default class WpPosts {
   }
 
   async clearByTypeAndAuthor(postType: string): Promise<void> {
+    const isRemote = docker.wpDriver() === "remote";
+
     const username = (
-      process.env.WP_API_USER ||
-      process.env.WP_ADMIN_USERNAME ||
-      process.env.WP_ADMIN_USER ||
-      ""
-    ).trim();
+      isRemote
+        ? process.env.WP_API_USER
+        : process.env.WP_ADMIN_USERNAME || process.env.WP_ADMIN_USER
+    )?.trim();
 
     if (!username) {
       throw new Error(
-        "No username found in env: WP_API_USER or WP_ADMIN_USERNAME",
+        isRemote
+          ? "No username found in env: WP_API_USER"
+          : "No username found in env: WP_ADMIN_USERNAME or WP_ADMIN_USER",
       );
     }
 
-    // --- REMOTE DRIVER ---
-    if (docker.wpDriver() === "remote") {
+    if (isRemote) {
       const restConfig = rest.getRestConfig();
 
       const users = await rest.wpRest<any[]>(
@@ -288,7 +290,6 @@ export default class WpPosts {
       return;
     }
 
-    // --- DOCKER / CLI DRIVER ---
     const userResult = await this.wp(["user", "get", username, "--field=ID"]);
     if (userResult.exitCode !== 0) {
       throw utils.formatWpCliFailure(
