@@ -18,6 +18,7 @@ import BlogListPage from "../src/pages/BlogListPage";
 import WpCustomizer from "../src/helpers/WpCustomizer";
 import WordpressLoginPage from "./pages/WordpressLoginPage";
 import CustomizerPage from "../src/pages/CustomizerPage";
+import logger from "../src/utils/logger";
 
 type WpHelpers = {
   exec: typeof runWp;
@@ -84,6 +85,30 @@ function baseUrlForWorker(
   return `http://localhost:${8080 + idx}`;
 }
 
+async function loginToQaWordpress(
+  page: import("@playwright/test").Page,
+): Promise<void> {
+  const username = process.env.WP_ADMIN_USERNAME;
+  const password = process.env.WP_ADMIN_PASSWORD;
+  const baseUrl = process.env.PW_BASE_URL;
+
+  expect(username, "WP_API_USER is not set").toBeTruthy();
+  expect(password, "WP_API_PASSWORD is not set").toBeTruthy();
+  expect(baseUrl, "PW_BASE_URL is not set").toBeTruthy();
+  
+  await page.request.get(`${baseUrl}/wp-login.php`);
+
+  await page.request.post(`${baseUrl}/wp-login.php`, {
+    form: {
+      log: username!,
+      pwd: password!,
+      "wp-submit": "Log In",
+      redirect_to: `${baseUrl}/wp-admin/`,
+      testcookie: "1",
+    },
+  });
+}
+
 export const test = base.extend<Fixtures>({
   runId: async ({}, use, testInfo) => {
     const id = `run-${testInfo.workerIndex}-${Date.now()}`;
@@ -102,6 +127,17 @@ export const test = base.extend<Fixtures>({
       : wpServiceForWorker(testInfo.workerIndex, parallel);
 
     process.env.WP_SERVICE = service;
+
+    // logger.info(
+    //   {
+    //     qaMode,
+    //     parallel,
+    //     service,
+    //     baseUrl: process.env.PW_BASE_URL,
+    //     wpDriver: process.env.WP_DRIVER,
+    //   },
+    //   "Initialising WordPress test helpers",
+    // );
 
     const exec: typeof runWp = (args: string[], opts?: any) =>
       runWp(args, { ...(opts ?? {}), service });
@@ -128,6 +164,10 @@ export const test = base.extend<Fixtures>({
     const qaMode = isQaMode();
     const parallel = qaMode ? false : await isParallelEnabled();
     const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
+
+    if (qaMode) {
+      await loginToQaWordpress(page);
+    }
 
     await use(new HomePage(page, baseUrl));
   },

@@ -1,5 +1,6 @@
 import path from "path";
 import type Post from "../models/Post";
+import logger from "../utils/logger";
 
 import * as utils from "../utils/wp-utils";
 import * as rest from "../lib/wp-rest-client";
@@ -49,6 +50,15 @@ export default class WpPosts {
           post.category as string,
         );
       }
+
+      logger.info(
+        {
+          postType: post.type,
+          endpoint,
+          baseUrl: restConfig.baseUrl,
+        },
+        "Creating WordPress post via REST API",
+      );
 
       const created = await rest.wpRest<any>(restConfig, "POST", endpoint, {
         title: post.title,
@@ -216,6 +226,89 @@ export default class WpPosts {
       `--post_type=${postType}`,
       "--format=ids",
       `--search=${runId}`,
+    ]);
+
+    const ids = (list.stdout || "").trim();
+    if (!ids) return;
+
+    await this.wp(["post", "delete", ...ids.split(/\s+/), "--force"]);
+  }
+
+  async clearByTypeAndAuthor(postType: string): Promise<void> {
+    const isRemote = docker.wpDriver() === "remote";
+
+    const username = (
+      isRemote
+        ? process.env.WP_API_USER
+        : process.env.WP_ADMIN_USERNAME || process.env.WP_ADMIN_USER
+    )?.trim();
+
+    if (!username) {
+      throw new Error(
+        isRemote
+          ? "No username found in env: WP_API_USER"
+          : "No username found in env: WP_ADMIN_USERNAME or WP_ADMIN_USER",
+      );
+    }
+
+    if (isRemote) {
+      const restConfig = rest.getRestConfig();
+
+      const users = await rest.wpRest<any[]>(
+        restConfig,
+        "GET",
+        `/wp-json/wp/v2/users?search=${encodeURIComponent(username)}`,
+      );
+
+      const user = users.find(
+        (item) => item.slug === username || item.name === username,
+      );
+
+      if (!user?.id) {
+        throw new Error(`User not found: ${username}`);
+      }
+
+      const endpoint =
+        postType === "attachment"
+          ? "media"
+          : rest.restEndpointForType(postType);
+
+      const items = await rest.wpRest<any[]>(
+        restConfig,
+        "GET",
+        `/wp-json/wp/v2/${endpoint}?author=${user.id}&per_page=100`,
+      );
+
+      for (const item of items) {
+        await rest.wpRest(
+          restConfig,
+          "DELETE",
+          `/wp-json/wp/v2/${endpoint}/${item.id}?force=true`,
+        );
+      }
+
+      return;
+    }
+
+    const userResult = await this.wp(["user", "get", username, "--field=ID"]);
+    if (userResult.exitCode !== 0) {
+      throw utils.formatWpCliFailure(
+        `Failed to resolve author id for "${username}"`,
+        userResult,
+      );
+    }
+
+    const authorId = (userResult.stdout || "").trim();
+    if (!authorId) {
+      throw new Error(`Author id not found for "${username}"`);
+    }
+
+    const list = await this.wp([
+      "post",
+      "list",
+      `--post_type=${postType}`,
+      `--author=${authorId}`,
+      "--format=ids",
     ]);
 
     const ids = (list.stdout || "").trim();

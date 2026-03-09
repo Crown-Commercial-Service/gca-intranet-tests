@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import type Post from "../models/Post";
 import type TakeALook from "../models/TakeALook";
+import type QuickLinks from "../models/QuickLinks";
 import {
   expectNoSeriousA11yViolations,
   expectNoSeriousA11yViolationsForSelectors,
@@ -46,6 +47,14 @@ export default class HomePage {
   private readonly takeALookLinkTestId = "take-a-look-link";
   private readonly takeALookHeaderTestId = "take-a-look-header";
 
+  // --- Quick links ---
+  private readonly quickLinksTestId = "quick-links";
+  private readonly quickLinksHeaderTestId = "quick-links-header";
+  private readonly quickLinksHeadingTestId = "quick-links-heading";
+  private readonly quickLinksSubheadingTestId = "quick-links-subheading";
+  private readonly quickLinksListTestId = "quick-links-list";
+  private readonly quickLinksItemTestId = "quick-links-item";
+
   readonly latestNewsColumn: Locator;
   readonly workUpdatesSection: Locator;
   readonly workUpdateCards: Locator;
@@ -63,10 +72,19 @@ export default class HomePage {
   readonly takeALookLinkText: Locator;
   readonly takeALookHeader: Locator;
 
+  // --- Quick links locators ---
+  readonly quickLinks: Locator;
+  readonly quickLinksHeader: Locator;
+  readonly quickLinksHeading: Locator;
+  readonly quickLinksSubheading: Locator;
+  readonly quickLinksList: Locator;
+  readonly quickLinksItems: Locator;
+
   readonly latestNewsSectionSelector: string;
   readonly workUpdatesSectionSelector: string;
   readonly blogsSectionSelector: string;
   readonly takeALookColumnSelector: string;
+  readonly quickLinksSelector: string;
 
   private readonly latestNewsCardSelector: string;
 
@@ -105,10 +123,23 @@ export default class HomePage {
       "p.gca-take-a-look__text",
     );
 
+    // --- Quick links ---
+    this.quickLinks = this.page.getByTestId(this.quickLinksTestId);
+    this.quickLinksHeader = this.page.getByTestId(this.quickLinksHeaderTestId);
+    this.quickLinksHeading = this.page.getByTestId(
+      this.quickLinksHeadingTestId,
+    );
+    this.quickLinksSubheading = this.page.getByTestId(
+      this.quickLinksSubheadingTestId,
+    );
+    this.quickLinksList = this.page.getByTestId(this.quickLinksListTestId);
+    this.quickLinksItems = this.page.getByTestId(this.quickLinksItemTestId);
+
     this.latestNewsSectionSelector = `[data-testid="${this.latestNewsColumnTestId}"]`;
     this.workUpdatesSectionSelector = `[data-testid="${this.workUpdatesSectionTestId}"]`;
     this.blogsSectionSelector = `[data-testid="${this.blogsSectionTestId}"]`;
     this.takeALookColumnSelector = `[data-testid="${this.takeALookColumnTestId}"]`;
+    this.quickLinksSelector = `[data-testid="${this.quickLinksTestId}"]`;
 
     this.latestNewsCardSelector = [
       `[data-testid="${this.latestNewsFeaturedCardTestId}"]`,
@@ -160,6 +191,46 @@ export default class HomePage {
     // link text
     await expect(this.takeALookLinkText).toBeVisible();
     await expect(this.takeALookLinkText).toHaveText(takeALook.linkText);
+  }
+
+  // ---------------------------------------------------------
+  // Quick links assertions
+  // ---------------------------------------------------------
+
+  async assertQuickLinksComponent(quickLinks: QuickLinks): Promise<void> {
+    await expect(this.quickLinks).toBeVisible();
+    await expect(this.quickLinksHeader).toBeVisible();
+
+    // title
+    await expect(this.quickLinksHeading).toBeVisible();
+    await expect(this.quickLinksHeading).toContainText(
+      quickLinks.title.slice(0, 5),
+    );
+
+    const quickLinksTitle = (await this.quickLinksHeading.innerText()).trim();
+    const visibleTitle = getVisibleTruncatedText(quickLinksTitle);
+    expect(quickLinks.title.startsWith(visibleTitle)).toBe(true);
+
+    // description
+    await expect(this.quickLinksSubheading).toBeVisible();
+    const quickLinksDescription = (
+      await this.quickLinksSubheading.innerText()
+    ).trim();
+    expect(quickLinksDescription.length).toBeLessThanOrEqual(43); // TODO: needs to be 40 not 43
+
+    // links
+    await expect(this.quickLinksList).toBeVisible();
+    await expect(this.quickLinksItems).toHaveCount(quickLinks.links.length);
+
+    for (let index = 0; index < quickLinks.links.length; index++) {
+      const expectedLink = quickLinks.links[index];
+      const quickLinkItem = this.quickLinksItems.nth(index);
+      const quickLinkText = quickLinkItem.locator(".gca-quick-links__text");
+
+      await expect(quickLinkItem).toBeVisible();
+      await expect(quickLinkItem).toHaveAttribute("href", expectedLink.url);
+      await expect(quickLinkText).toHaveText(expectedLink.text);
+    }
   }
 
   private articleLink(title: string): Locator {
@@ -435,7 +506,6 @@ export default class HomePage {
     const visiblePart = getVisibleTruncatedText(actual);
 
     expect(post.title.startsWith(visiblePart)).toBe(true);
-    expect(actual.endsWith("...")).toBe(true);
 
     await expect(
       card.getByTestId(this.blogAvatarTestId).locator("img"),

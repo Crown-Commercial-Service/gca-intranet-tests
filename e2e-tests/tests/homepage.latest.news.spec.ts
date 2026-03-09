@@ -2,16 +2,18 @@ import { test, expect } from "../src/wp.fixtures";
 import Post from "../src/models/Post";
 
 test.describe("homepage - latest news", () => {
-  test("should display article in single column", async ({ wp, homepage }) => {
+  test.beforeEach(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("news");
+  });
+  test("should display article in single column", async ({ wp, homepage, runId }) => {
     const post = Post.aPost()
       .withType("news")
-      .withFixedTitle("E2E Latest Article")
+      .withFixedTitle(`E2E Latest Article ${runId}`)
       .withParagraphMaxChars(120)
       .withStatus("publish")
       .withFeaturedImage("featured.jpg");
 
     await wp.posts.create(post);
-
     await homepage.goto();
     await homepage.assertLatestNewsLayout([post]);
   });
@@ -19,28 +21,29 @@ test.describe("homepage - latest news", () => {
   test("should display articles in two columns and in order (latest first and oldest last)", async ({
     wp,
     homepage,
+    runId,
   }) => {
     const post1 = Post.aPost()
       .withType("news")
-      .withFixedTitle("Post 1")
+      .withFixedTitle(`Post 1 ${runId}`)
       .withFeaturedImage("img-1.jpg")
       .withStatus("publish");
 
     const post2 = Post.aPost()
       .withType("news")
-      .withFixedTitle("Post 2")
+      .withFixedTitle(`Post 2 ${runId}`)
       .withFeaturedImage("img-2.jpg")
       .withStatus("publish");
 
     const post3 = Post.aPost()
       .withType("news")
-      .withFixedTitle("Post 3")
+      .withFixedTitle(`Post 3 ${runId}`)
       .withFeaturedImage("img-3.jpg")
       .withStatus("publish");
 
     const post4 = Post.aPost()
       .withType("news")
-      .withFixedTitle("Post 4")
+      .withFixedTitle(`Post 4 ${runId}`)
       .withFeaturedImage("featured.jpg")
       .withStatus("publish");
 
@@ -60,10 +63,11 @@ test.describe("homepage - latest news", () => {
   test("should enforce title and paragraph character limits in single column", async ({
     wp,
     homepage,
+    runId,
   }) => {
     const post = Post.aPost()
       .withType("news")
-      .withFixedTitle("E2E Latest Article")
+      .withFixedTitle(`E2E Latest Article ${runId}`)
       .withParagraphMaxChars(120)
       .withStatus("publish")
       .withFeaturedImage("featured.jpg");
