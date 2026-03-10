@@ -107,7 +107,7 @@ test.describe("blogs", () => {
 
     await wp.users.upsert(newUser);
 
-    await wp.posts.updatePostAuthor(postId, "blog", newUser.username);
+    await wp.posts.updatePostAuthor(postId, "blogs", newUser.username);
 
     await homepage.goto();
     await homepage.assertBlogAuthor(post.title, newUser.username);

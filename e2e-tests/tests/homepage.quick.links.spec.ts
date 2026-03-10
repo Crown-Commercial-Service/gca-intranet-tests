@@ -39,7 +39,7 @@ test.describe("homepage - quick links", () => {
     await homepage.assertQuickLinksComponent(quickLinks);
 
     await wordpressLoginPage.goto();
-    await wordpressLoginPage.loginAsDockerAdmin();
+    await wordpressLoginPage.loginAsAdmin();
 
     const updatedQuickLinks = QuickLinks.quickLinks()
       .withTitleMaxChars(300)
