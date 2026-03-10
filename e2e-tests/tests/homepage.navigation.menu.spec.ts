@@ -29,6 +29,6 @@ test.describe("menu pages", () => {
       "Business Processes",
       "Accessibility",
     );
-    await expect(homepage.page).toHaveURL(/\/accessibility\/?$/);
+    await expect(homepage.page).toHaveURL("accessibility/");
   });
 });
