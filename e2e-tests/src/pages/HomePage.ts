@@ -20,7 +20,8 @@ type CharLimits = {
 export default class HomePage {
   readonly page: Page;
   private readonly baseUrl?: string;
-
+  private readonly primaryNavigationTestId = "primary-navigation";
+  private readonly primaryNavigationSubMenuSelector = ".sub-menu li a";
   private readonly latestNewsColumnTestId = "latest-news-column";
   private readonly latestNewsFeaturedCardTestId = "latest-news-featured-card";
   private readonly latestNewsSecondaryCardTestId = "latest-news-secondary-card";
@@ -55,6 +56,9 @@ export default class HomePage {
   private readonly quickLinksListTestId = "quick-links-list";
   private readonly quickLinksItemTestId = "quick-links-item";
 
+  readonly primaryNavigation: Locator;
+  readonly primaryNavigationSubMenuLinks: Locator;
+  readonly primaryNavigationParentLinks: Locator;
   readonly latestNewsColumn: Locator;
   readonly workUpdatesSection: Locator;
   readonly workUpdateCards: Locator;
@@ -91,7 +95,12 @@ export default class HomePage {
   constructor(page: Page, baseUrl?: string) {
     this.page = page;
     this.baseUrl = baseUrl;
-
+    this.primaryNavigation = this.page.locator("#primaryNav");
+    this.primaryNavigationParentLinks = this.primaryNavigation.locator(
+      ".nav-list--primary > li > a",
+    );
+    this.primaryNavigationSubMenuLinks =
+      this.primaryNavigation.locator(".sub-menu li a");
     this.latestNewsColumn = this.page.getByTestId(this.latestNewsColumnTestId);
 
     this.workUpdatesSection = this.page.getByTestId(
@@ -542,5 +551,57 @@ export default class HomePage {
   async hasTruncatedChars(locator: Locator, maxChars: number): Promise<void> {
     const text = ((await locator.innerText()) ?? "").trim();
     expect(text.length).toBe(maxChars);
+  }
+
+  async assertNavigationMenu(
+    menu: { parent: string; children: string[] }[],
+  ): Promise<void> {
+    await expect(this.primaryNavigation).toBeVisible();
+
+    for (const section of menu) {
+      const parentLink = await this.hoverParentLink(section.parent);
+
+      const subMenuLinks = parentLink
+        .locator("..")
+        .locator(this.primaryNavigationSubMenuSelector);
+
+      await expect(subMenuLinks).toHaveCount(section.children.length);
+
+      for (
+        let childIndex = 0;
+        childIndex < section.children.length;
+        childIndex++
+      ) {
+        await expect(subMenuLinks.nth(childIndex)).toHaveText(
+          section.children[childIndex],
+        );
+      }
+    }
+  }
+
+  async selectSubNavigationItem(parent: string, child: string): Promise<void> {
+    const parentLink = await this.hoverParentLink(parent);
+
+    const subMenuLink = parentLink
+      .locator("..")
+      .locator(this.primaryNavigationSubMenuSelector)
+      .filter({ hasText: child })
+      .first();
+
+    await expect(subMenuLink).toBeVisible();
+    await subMenuLink.click();
+  }
+
+  async hoverParentLink(parent: string): Promise<Locator> {
+    const parentLink = this.primaryNavigationParentLinks
+      .filter({
+        hasText: parent,
+      })
+      .first();
+
+    await expect(parentLink).toContainText(parent);
+    await parentLink.hover();
+
+    return parentLink;
   }
 }

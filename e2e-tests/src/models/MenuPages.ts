@@ -3,7 +3,7 @@ import Post from "./Post";
 export default class MenuPages {
   static all(): Post[] {
     return [
-      Post.aPage().withFixedTitle("About GCA").withStatus("publish"),
+      //   Post.aPage().withFixedTitle("About GCA").withStatus("publish"),
       // Post.aPage().withFixedTitle("HR").withStatus("publish"),
       // Post.aPage().withFixedTitle("Workplace & Travel").withStatus("publish"),
       Post.aPage().withFixedTitle("Business Processes").withStatus("publish"),
@@ -30,7 +30,6 @@ export default class MenuPages {
       // Post.aPage().withFixedTitle("All Events").withStatus("publish"),
       // Post.aPage().withFixedTitle("Staff network").withStatus("publish"),
 
-
       // Post.aPage().withFixedTitle("Working from home").withStatus("publish"),
       // Post.aPage().withFixedTitle("Travel and expenses").withStatus("publish"),
       // Post.aPage().withFixedTitle("Health and safety").withStatus("publish"),
@@ -44,18 +43,18 @@ export default class MenuPages {
       // Post.aPage()
       //   .withFixedTitle("Leave, absence and flexible working")
       //   .withStatus("publish"),
-      Post.aPage().withFixedTitle("Our Offices").withStatus("publish"),
-      Post.aPage().withFixedTitle("GCA Onboarding").withStatus("publish"),
-      Post.aPage().withFixedTitle("Events").withStatus("publish"),
+      //   Post.aPage().withFixedTitle("Our Offices").withStatus("publish"),
+      //   Post.aPage().withFixedTitle("GCA Onboarding").withStatus("publish"),
+      //   Post.aPage().withFixedTitle("Events").withStatus("publish"),
     ];
   }
 
   static menu() {
     return [
-      {
-        parent: "About GCA",
-        children: ["GCA Onboarding", "Events", "Our Offices"],
-      },
+      //   {
+      //     parent: "About GCA",
+      //     children: ["GCA Onboarding", "Events", "Our Offices"],
+      //   },
       // {
       //   parent: "HR",
       //   children: [
