@@ -1,6 +1,9 @@
 import { test, expect } from "../src/wp.fixtures";
 import Post from "../src/models/Post";
 import User from "../src/models/User";
+import Chance from "chance";
+
+const chance = new Chance();
 
 test.describe("blogs", () => {
   test.beforeEach(async ({ wp }) => {
@@ -84,11 +87,7 @@ test.describe("blogs", () => {
     await homepage.assertBlogsOnHomepage(latest);
   });
 
-  test("can edit author details of a blog post", async ({
-    wp,
-    homepage,
-    runId,
-  }) => {
+  test("can edit author details of a blog post", async ({ wp, homepage }) => {
     const post = Post.aPost()
       .withType("blogs")
       .withFixedTitle("E2E Blog Author Change")
@@ -99,9 +98,11 @@ test.describe("blogs", () => {
     await homepage.goto();
     await homepage.assertBlogAuthor(post.title);
 
+    const username = chance.word({ length: 6 });
+
     const newUser = User.anAdmin()
-      .withUsername(`e2e_blog_author_${runId}`)
-      .withEmail(`e2e_blog_author_${runId}@example.com`)
+      .withUsername(username)
+      .withEmail(`${username}@example.com`)
       .withPassword("Password123!");
 
     await wp.users.upsert(newUser);

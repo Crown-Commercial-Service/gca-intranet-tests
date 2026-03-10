@@ -431,21 +431,20 @@ export default class HomePage {
     );
   }
 
-  async assertBlogAuthor(
-    title: string,
-    expectedAuthor?: string,
-  ): Promise<void> {
-    const card = this.blogCardByTitle(title);
-    await expect(card).toHaveCount(1);
+async assertBlogAuthor(
+  title: string,
+  expectedAuthor?: string,
+): Promise<void> {
+  const card = this.blogCardByTitle(title);
+  await expect(card).toHaveCount(1);
 
-    const author = expectedAuthor ?? process.env.WP_ADMIN_USERNAME;
-    expect(author).toBeTruthy();
+  const author = expectedAuthor ?? process.env.WP_ADMIN_USERNAME;
+  expect(author).toBeTruthy();
 
-    await this.assertAuthorPossiblyTruncated(
-      card.getByTestId(this.blogAuthorTestId),
-      `By ${author}`,
-    );
-  }
+  await expect(card.getByTestId(this.blogAuthorTestId)).toHaveText(
+    `By ${author}`,
+  );
+}
 
   private async assertAuthorPossiblyTruncated(
     authorEl: Locator,
@@ -515,10 +514,7 @@ export default class HomePage {
 
     const link = card.getByTestId(this.blogLinkTestId);
 
-    const actual = ((await link.textContent()) ?? "").replace(/\s+/g, " ").trim();
-    const visiblePart = getVisibleTruncatedText(actual);
-    await this.page.pause()
-    expect(post.title.startsWith(visiblePart)).toBe(true);
+    await expect(link).toHaveText(post.title);
 
     await expect(
       card.getByTestId(this.blogAvatarTestId).locator("img"),
