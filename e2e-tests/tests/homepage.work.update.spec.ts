@@ -4,11 +4,11 @@ import User from "../src/models/User";
 
 test.describe("work updates", () => {
   test.beforeEach(async ({ wp, runId }) => {
-    await wp.posts.clearByTypeAndRunId("work_update", runId);
+    await wp.posts.clearByTypeAndRunId("work_updates", runId);
   });
   test("should display a single work update", async ({ wp, homepage }) => {
     const post = Post.aPost()
-      .withType("work_update")
+      .withType("work_updates")
       .withFixedTitle("E2E Work Update")
       .withParagraphMaxChars(180)
       .withStatus("publish");

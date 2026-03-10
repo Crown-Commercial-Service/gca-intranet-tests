@@ -2,42 +2,51 @@ import { test, expect } from "../src/wp.fixtures";
 import TakeALook from "../src/models/TakeALook";
 
 test.describe("homepage - take a look", () => {
-  test("should display take a look component with correct content", async ({
-    wp,
+  test("can create a take a look component via wordpress customizer", async ({
     homepage,
-    runId,
+    wordpressLoginPage,
+    customizerPage,
   }) => {
     const takeALook = TakeALook.aTakeALook()
-      .withTitle(`E2E Take a look ${runId}`)
-      .withDescription(`E2E description ${runId}`)
-      .withLinkText(`E2E link text ${runId}`)
-      .withLinkUrl(`https://example.com/${runId}`);
+      .withTitle("Take a look")
+      .withDescription("Useful content and services for GCA staff")
+      .withLinkText("Visit the GCA knowledge hub")
+      .withLinkUrl("https://example.com/gca-knowledge-hub");
 
-    await wp.customizer.applyCustomization(takeALook);
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await customizerPage.goto();
+    await customizerPage.openHomepageOptions();
+    await customizerPage.updateTakeALook(takeALook);
+    await customizerPage.publish();
 
     await homepage.goto();
     await homepage.assertTakeALookComponent(takeALook);
   });
 
   test("can edit a take a look component via wordpress customizer", async ({
-    wp,
     homepage,
-    page,
     runId,
     wordpressLoginPage,
     customizerPage,
   }) => {
     const takeALook = TakeALook.aTakeALook()
-      .withTitle(`E2E Take a look ${runId}`)
-      .withDescription(`E2E description ${runId}`)
-      .withLinkText(`E2E link text ${runId}`)
-      .withLinkUrl(`https://example.com/${runId}`);
+      .withTitle(`Take a look ${runId}`)
+      .withDescription(`Useful links for staff ${runId}`)
+      .withLinkText(`Visit resource ${runId}`)
+      .withLinkUrl(`https://example.com/resource/${runId}`);
 
-    await wp.customizer.applyCustomization(takeALook);
-    await homepage.goto();
-    await homepage.assertTakeALookComponent(takeALook);
     await wordpressLoginPage.goto();
     await wordpressLoginPage.loginAsAdmin();
+
+    await customizerPage.goto();
+    await customizerPage.openHomepageOptions();
+    await customizerPage.updateTakeALook(takeALook);
+    await customizerPage.publish();
+
+    await homepage.goto();
+    await homepage.assertTakeALookComponent(takeALook);
 
     const updatedTakeALook = TakeALook.aTakeALook()
       .withTitleMaxChars(300)
@@ -49,20 +58,29 @@ test.describe("homepage - take a look", () => {
     await customizerPage.openHomepageOptions();
     await customizerPage.updateTakeALook(updatedTakeALook);
     await customizerPage.publish();
+
     await homepage.goto();
     await homepage.assertTakeALookComponent(updatedTakeALook);
   });
 
   test("can navigate to the take a look url", async ({
-    wp,
     homepage,
-    runId,
+    wordpressLoginPage,
+    customizerPage,
   }) => {
-    const takeALook = TakeALook.aTakeALook().withLinkUrl(
-      `https://example.com/${runId}`,
-    );
+    const takeALook = TakeALook.aTakeALook()
+      .withTitle("Take a look")
+      .withDescription("Useful content and services for GCA staff")
+      .withLinkText("Open knowledge hub")
+      .withLinkUrl("https://example.com/gca-knowledge-hub");
 
-    await wp.customizer.applyCustomization(takeALook);
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await customizerPage.goto();
+    await customizerPage.openHomepageOptions();
+    await customizerPage.updateTakeALook(takeALook);
+    await customizerPage.publish();
 
     await homepage.goto();
     await homepage.takeALookLink.click();

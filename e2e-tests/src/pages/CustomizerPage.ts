@@ -37,8 +37,8 @@ export default class CustomizerPage {
   constructor(page: Page) {
     this.page = page;
 
-    this.homepageOptionsButton = page.getByRole("button", {
-      name: "Homepage options",
+    this.homepageOptionsButton = page.locator("h3.accordion-section-title", {
+      hasText: "Homepage options",
     });
     this.searchMenuItemsInput = page.locator("#menu-items-search");
     this.menusButton = page.locator("h3.accordion-section-title", {
