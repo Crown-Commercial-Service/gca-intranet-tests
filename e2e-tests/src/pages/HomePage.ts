@@ -91,6 +91,7 @@ export default class HomePage {
   readonly blogsSectionSelector: string;
   readonly takeALookColumnSelector: string;
   readonly quickLinksSelector: string;
+  readonly subMenuNavigation: string;
 
   private readonly latestNewsCardSelector: string;
 
@@ -103,6 +104,7 @@ export default class HomePage {
     this.primaryNavigationParentLinks = this.primaryNavigation.locator(
       this.primaryNavigationParentLinksSelector,
     );
+    this.subMenuNavigation = ".sub-menu";
 
     this.latestNewsColumn = this.page.getByTestId(this.latestNewsColumnTestId);
 

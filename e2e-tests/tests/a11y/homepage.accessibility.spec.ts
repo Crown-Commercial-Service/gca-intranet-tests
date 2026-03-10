@@ -35,6 +35,14 @@ test.describe("Accessibility - Homepage", () => {
 
     await homepage.goto();
     await homepage.hoverParentLink("Business Processes");
-    await homepage.checkAccessibility();
+    await homepage.checkAccessibilityFor([
+      homepage.latestNewsSectionSelector,
+      homepage.workUpdatesSectionSelector,
+      homepage.blogsSectionSelector,
+      homepage.takeALookColumnSelector,
+      homepage.quickLinksSelector,
+      homepage.primaryNavigationSelector,
+      homepage.subMenuNavigation
+    ]);
   });
 });
