@@ -154,15 +154,11 @@ class PostBuilder {
   };
 
   private applyRunId(value: string): string {
-    const runId = this.runId || process.env.PW_RUN_ID;
     const cleanValue = String(value ?? "")
       .replace(/\s+/g, " ")
       .trim();
 
-    if (!runId) return cleanValue;
-    if (cleanValue.includes(runId)) return cleanValue;
-
-    return `${cleanValue} ${runId}`.trim();
+    return cleanValue;
   }
 
   withRunId(runId: string): this {

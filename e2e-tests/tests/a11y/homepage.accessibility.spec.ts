@@ -23,7 +23,7 @@ test.describe("Accessibility - Homepage", () => {
     await wp.posts.createMany(contentType.workUpdates);
     await wp.posts.create(contentType.blog);
     await wp.posts.createPages(MenuPages.all());
-    
+
     await wp.customizer.applyCustomization(customizations.takeALook);
     await wp.customizer.applyCustomization(customizations.quickLinks);
 
@@ -32,6 +32,7 @@ test.describe("Accessibility - Homepage", () => {
     await customizerPage.goto();
     await customizerPage.buildMenu(MenuPages.menu());
     await customizerPage.publish();
+
     await homepage.goto();
     await homepage.hoverParentLink("Business Processes");
     await homepage.checkAccessibility();
