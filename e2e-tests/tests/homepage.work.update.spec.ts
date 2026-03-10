@@ -61,8 +61,14 @@ test.describe("work updates", () => {
       .withStatus("publish");
 
     await wp.posts.create(post1);
+    await homepage.page.waitForTimeout(1000);
+
     await wp.posts.create(post2);
+    await homepage.page.waitForTimeout(1000);
+
     await wp.posts.create(post3);
+    await homepage.page.waitForTimeout(1000);
+
     await wp.posts.create(post4);
 
     await homepage.goto();

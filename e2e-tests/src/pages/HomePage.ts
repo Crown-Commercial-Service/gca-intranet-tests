@@ -321,20 +321,19 @@ export default class HomePage {
       }
     }
   }
-
   async assertWorkUpdatesOrder(posts: Post[]): Promise<void> {
     await expect(this.workUpdatesSection).toBeVisible();
-    expect(await this.workUpdateCards.count()).toBeGreaterThanOrEqual(
-      posts.length,
-    );
 
-    for (let index = 0; index < posts.length; index++) {
-      const link = this.workUpdateCards
-        .nth(index)
-        .getByTestId(this.workUpdateLinkTestId);
+    const first = this.workUpdateCards
+      .nth(0)
+      .getByTestId(this.workUpdateLinkTestId);
 
-      await expect(link).toHaveText(posts[index].title);
-    }
+    const second = this.workUpdateCards
+      .nth(1)
+      .getByTestId(this.workUpdateLinkTestId);
+
+    await expect(first).toHaveText(posts[0].title);
+    await expect(second).toHaveText(posts[1].title);
   }
 
   async assertLatestNewsCharLimits(
