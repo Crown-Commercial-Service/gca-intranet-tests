@@ -15,7 +15,7 @@ test.describe("menu pages", () => {
     await wp.posts.createPages(MenuPages.all());
 
     await wordpressLoginPage.goto();
-    await wordpressLoginPage.loginAsDockerAdmin();
+    await wordpressLoginPage.loginAsAdmin();
 
     await customizerPage.goto();
     await customizerPage.buildMenu(MenuPages.menu());

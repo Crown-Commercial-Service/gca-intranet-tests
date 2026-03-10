@@ -31,13 +31,10 @@ export default class WordpressLoginPage {
     await this.loginButton.click();
   }
 
-  async loginAsDockerAdmin(): Promise<void> {
-    expect(process.env.WP_ADMIN_USERNAME_DOCKER).toBeTruthy();
-    expect(process.env.WP_ADMIN_PASSWORD_DOCKER).toBeTruthy();
-
+  async loginAsAdmin(): Promise<void> {
     await this.login(
-      process.env.WP_ADMIN_USERNAME_DOCKER!,
-      process.env.WP_ADMIN_PASSWORD_DOCKER!,
+      process.env.WP_ADMIN_USERNAME!,
+      process.env.WP_ADMIN_PASSWORD!,
     );
   }
 }
