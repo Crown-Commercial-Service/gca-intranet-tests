@@ -10,6 +10,7 @@ test.describe("menu pages", () => {
     wp,
     wordpressLoginPage,
     customizerPage,
+    homepage,
   }) => {
     await wp.posts.createPages(MenuPages.all());
 
@@ -19,5 +20,7 @@ test.describe("menu pages", () => {
     await customizerPage.goto();
     await customizerPage.buildMenu(MenuPages.menu());
     await customizerPage.publish();
+    await homepage.goto();
+    // add assertion of nav menue
   });
 });

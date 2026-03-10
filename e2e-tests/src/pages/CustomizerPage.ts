@@ -57,7 +57,7 @@ export default class CustomizerPage {
     this.createNewMenuButton = page.getByRole("button", {
       name: "Create New Menu",
     });
-    this.addItemsButton = page.locator(".add-new-menu-item");
+    this.addItemsButton = page.getByRole('button', { name: 'Add or remove menu items' });
 
     this.takeALookTitle = page.getByLabel("Take a look: title");
     this.takeALookDescription = page.getByLabel("Take a look: description");
@@ -100,6 +100,7 @@ export default class CustomizerPage {
     await this.menuNameInput.fill(menu.name);
     await this.primaryNavigationCheckbox.check();
     await this.nextButton.click();
+    await this.page.waitForTimeout(1000);
     await this.addItemsButton.click();
   }
 
@@ -108,9 +109,8 @@ export default class CustomizerPage {
     await this.searchMenuItemsInput.fill(pageTitle);
 
     const pageButton = this.page
-      .locator(".menu-item-bar")
-      .getByText(pageTitle, { exact: true })
-      .first();
+      .locator("#available-menu-items-search")
+      .getByText(pageTitle, { exact: true });
 
     await expect(pageButton).toBeVisible();
     await pageButton.click();
@@ -121,7 +121,7 @@ export default class CustomizerPage {
     childTitle: string,
     parentTitle: string,
   ): Promise<void> {
-        await this.page.pause();
+
     const childItem = this.page
       .locator(".menu-item")
       .filter({ hasText: childTitle })
@@ -134,7 +134,8 @@ export default class CustomizerPage {
 
     await expect(childItem).toBeVisible();
     await expect(parentItem).toBeVisible();
-    await this.page.pause();
+
+    await childItem.scrollIntoViewIfNeeded();
 
     const childBox = await childItem.boundingBox();
     const parentBox = await parentItem.boundingBox();
