@@ -328,17 +328,12 @@ export default class HomePage {
       posts.length,
     );
 
-    for (let i = 0; i < posts.length; i++) {
-      const text = (
-        await this.workUpdateCards
-          .nth(i)
-          .getByTestId(this.workUpdateLinkTestId)
-          .innerText()
-      ).trim();
+    for (let index = 0; index < posts.length; index++) {
+      const link = this.workUpdateCards
+        .nth(index)
+        .getByTestId(this.workUpdateLinkTestId);
 
-      expect(posts[i].title.startsWith(getVisibleTruncatedText(text))).toBe(
-        true,
-      );
+      await expect(link).toHaveText(posts[index].title);
     }
   }
 
@@ -431,20 +426,20 @@ export default class HomePage {
     );
   }
 
-async assertBlogAuthor(
-  title: string,
-  expectedAuthor?: string,
-): Promise<void> {
-  const card = this.blogCardByTitle(title);
-  await expect(card).toHaveCount(1);
+  async assertBlogAuthor(
+    title: string,
+    expectedAuthor?: string,
+  ): Promise<void> {
+    const card = this.blogCardByTitle(title);
+    await expect(card).toHaveCount(1);
 
-  const author = expectedAuthor ?? process.env.WP_ADMIN_USERNAME;
-  expect(author).toBeTruthy();
+    const author = expectedAuthor ?? process.env.WP_ADMIN_USERNAME;
+    expect(author).toBeTruthy();
 
-  await expect(card.getByTestId(this.blogAuthorTestId)).toHaveText(
-    `By ${author}`,
-  );
-}
+    await expect(card.getByTestId(this.blogAuthorTestId)).toHaveText(
+      `By ${author}`,
+    );
+  }
 
   private async assertAuthorPossiblyTruncated(
     authorEl: Locator,
