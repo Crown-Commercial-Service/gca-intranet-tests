@@ -2,11 +2,21 @@ import { Page, Locator, expect } from "@playwright/test";
 import TakeALook from "../models/TakeALook";
 import QuickLinks from "../models/QuickLinks";
 
+type Menu = {
+  name: string;
+};
+
 export default class CustomizerPage {
   readonly page: Page;
 
   readonly homepageOptionsButton: Locator;
-
+  readonly menusButton: Locator;
+  readonly createNewMenuButton: Locator;
+  readonly menuNameInput: Locator;
+  readonly primaryNavigationCheckbox: Locator;
+  readonly nextButton: Locator;
+  readonly addItemsButton: Locator;
+  readonly searchMenuItemsInput: Locator;
   readonly takeALookTitle: Locator;
   readonly takeALookDescription: Locator;
   readonly takeALookLinkText: Locator;
@@ -30,11 +40,30 @@ export default class CustomizerPage {
     this.homepageOptionsButton = page.getByRole("button", {
       name: "Homepage options",
     });
+    this.searchMenuItemsInput = page.getByLabel("Search Menu Items");
+    this.menusButton = page.getByRole("button", {
+      name: "Menus",
+    });
+
+    this.createNewMenuButton = page.getByRole("button", {
+      name: "Create New Menu",
+    });
+
+    this.menuNameInput = page.getByLabel("Menu Name");
+    this.primaryNavigationCheckbox = page.getByRole("checkbox", {
+      name: "Primary Navigation",
+    });
+    this.nextButton = page.getByRole("button", {
+      name: "Next",
+      exact: true,
+    });
+    this.addItemsButton = page.locator(".add-new-menu-item");
 
     this.takeALookTitle = page.getByLabel("Take a look: title");
     this.takeALookDescription = page.getByLabel("Take a look: description");
     this.takeALookLinkText = page.getByLabel("Take a look: link text");
     this.takeALookLinkUrl = page.getByLabel("Take a look: link URL");
+
     this.quickLinksTitle = page.getByLabel("Quick links: title");
     this.quickLinksDescription = page.getByLabel("Quick links: description");
     this.quickLink1Text = page.getByLabel("Quick link 1: text");
@@ -43,6 +72,7 @@ export default class CustomizerPage {
     this.quickLink2Url = page.getByLabel("Quick link 2: URL");
     this.quickLink3Text = page.getByLabel("Quick link 3: text");
     this.quickLink3Url = page.getByLabel("Quick link 3: URL");
+
     this.publishButton = page.getByRole("button", {
       name: "Publish",
       exact: true,
@@ -62,6 +92,66 @@ export default class CustomizerPage {
 
   async openHomepageOptions(): Promise<void> {
     await this.homepageOptionsButton.click();
+  }
+
+  async createMenu(menu: Menu): Promise<void> {
+    await this.menusButton.click();
+    await this.createNewMenuButton.click();
+    await this.menuNameInput.fill(menu.name);
+    await this.primaryNavigationCheckbox.check();
+    await this.nextButton.click();
+    await this.addItemsButton.click();
+  }
+
+  async addPageToMenu(pageTitle: string): Promise<void> {
+    await this.searchMenuItemsInput.fill(pageTitle);
+
+    const pageButton = this.page
+      .locator(".menu-item-bar")
+      .getByText(pageTitle, { exact: true })
+      .first();
+
+    await expect(pageButton).toBeVisible();
+    await pageButton.click();
+  }
+
+  async makeSubMenuItem(
+    childTitle: string,
+    parentTitle: string,
+  ): Promise<void> {
+    const childItem = this.page
+      .locator(".accordion-section-content .menu-item")
+      .filter({ hasText: childTitle })
+      .first();
+
+    const parentItem = this.page
+      .locator(".accordion-section-content .menu-item")
+      .filter({ hasText: parentTitle })
+      .first();
+
+    await expect(childItem).toBeVisible();
+    await expect(parentItem).toBeVisible();
+
+    const childBox = await childItem.boundingBox();
+    const parentBox = await parentItem.boundingBox();
+
+    if (!childBox || !parentBox) {
+      throw new Error("Could not get menu item position for drag and drop.");
+    }
+
+    await this.page.mouse.move(
+      childBox.x + childBox.width / 2,
+      childBox.y + childBox.height / 2,
+    );
+    await this.page.mouse.down();
+
+    await this.page.mouse.move(
+      parentBox.x + 80,
+      parentBox.y + parentBox.height + 10,
+      { steps: 10 },
+    );
+
+    await this.page.mouse.up();
   }
 
   async updateTakeALook(takeALook: TakeALook): Promise<void> {
@@ -88,6 +178,31 @@ export default class CustomizerPage {
     if (quickLinks.links[2]) {
       await this.quickLink3Text.fill(quickLinks.links[2].text);
       await this.quickLink3Url.fill(quickLinks.links[2].url);
+    }
+  }
+
+  async buildMenu(
+    menu: { parent: string; children: string[] }[],
+    menuName = "GCA Menu Navigation",
+  ): Promise<void> {
+    await this.createMenu({
+      name: menuName,
+    });
+
+    for (const section of menu) {
+      await this.addPageToMenu(section.parent);
+    }
+
+    for (const section of menu) {
+      for (const child of section.children) {
+        await this.addPageToMenu(child);
+      }
+    }
+
+    for (const section of menu) {
+      for (const child of [...section.children].reverse()) {
+        await this.makeSubMenuItem(child, section.parent);
+      }
     }
   }
 
