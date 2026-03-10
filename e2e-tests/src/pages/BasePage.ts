@@ -28,21 +28,24 @@ export default abstract class BasePage {
 
     const items = this.breadcrumbs.locator("li");
 
+    const sectionTitle = this.getBreadcrumbSectionTitle(post);
+
+    await expect(items).toHaveCount(3);
     await expect(items.nth(0)).toContainText("Home");
+    await expect(items.nth(1)).toContainText(sectionTitle);
+    await expect(items.nth(2)).toContainText(post.title);
+  }
 
-    const shouldShowCategory =
-      post.type === "post" || (post.type === "work_update" && !!post.category);
-
-    if (shouldShowCategory) {
-      await expect(items).toHaveCount(3);
-      await expect(items.nth(1)).toContainText(
-        post.category || "Uncategorized",
-      );
-      await expect(items.nth(2)).toContainText(post.title);
-      return;
+  private getBreadcrumbSectionTitle(post: Post): string {
+    switch (post.type) {
+      case "news":
+        return "News";
+      case "blogs":
+        return "Blogs";
+      case "work_update":
+        return "Work Updates";
+      default:
+        throw new Error(`Unsupported breadcrumb type: ${post.type}`);
     }
-
-    await expect(items).toHaveCount(2);
-    await expect(items.nth(1)).toContainText(post.title);
   }
 }

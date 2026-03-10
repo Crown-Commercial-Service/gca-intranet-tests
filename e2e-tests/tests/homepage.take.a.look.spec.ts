@@ -37,7 +37,7 @@ test.describe("homepage - take a look", () => {
     await homepage.goto();
     await homepage.assertTakeALookComponent(takeALook);
     await wordpressLoginPage.goto();
-    await wordpressLoginPage.loginAsDockerAdmin();
+    await wordpressLoginPage.loginAsAdmin();
 
     const updatedTakeALook = TakeALook.aTakeALook()
       .withTitleMaxChars(300)

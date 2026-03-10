@@ -28,13 +28,13 @@ test.describe("Accessibility - Homepage", () => {
     await wp.customizer.applyCustomization(customizations.quickLinks);
 
     await wordpressLoginPage.goto();
-    await wordpressLoginPage.loginAsDockerAdmin();
+    await wordpressLoginPage.loginAsAdmin();
     await customizerPage.goto();
     await customizerPage.buildMenu(MenuPages.menu());
     await customizerPage.publish();
 
     await homepage.goto();
-    await homepage.hoverParentLink("Business Processes");
+    await homepage.hoverParentLink("Parent Nav Link 1");
     await homepage.checkAccessibilityFor([
       homepage.latestNewsSectionSelector,
       homepage.workUpdatesSectionSelector,

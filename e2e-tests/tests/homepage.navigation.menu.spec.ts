@@ -24,11 +24,13 @@ test.describe("menu pages", () => {
     await homepage.goto();
     await homepage.assertNavigationMenu(MenuPages.menu());
 
-    await homepage.hoverParentLink("Business Processes");
+    await homepage.hoverParentLink("Parent Nav Link 1");
+
     await homepage.selectSubNavigationItem(
-      "Business Processes",
-      "Accessibility",
+      "Parent Nav Link 1",
+      "Child nav link 1",
     );
-    await expect(homepage.page).toHaveURL("accessibility/");
+
+    await expect(homepage.page).toHaveURL("child-nav-link-1/");
   });
 });

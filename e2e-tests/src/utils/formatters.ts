@@ -43,11 +43,15 @@ export function htmlToPlainText(html: string): string {
  * (removes trailing "..." if present).
  */
 export function getVisibleTruncatedText(text: string): string {
-  const trimmed = text.trim();
+  const normalized = text.replace(/\s+/g, " ").trim();
 
-  if (trimmed.endsWith("...")) {
-    return trimmed.slice(0, trimmed.length - 3);
+  if (normalized.endsWith("...")) {
+    return normalized.slice(0, -3).trim();
   }
 
-  return trimmed;
+  if (normalized.endsWith("…")) {
+    return normalized.slice(0, -1).trim();
+  }
+
+  return normalized;
 }

@@ -515,9 +515,9 @@ export default class HomePage {
 
     const link = card.getByTestId(this.blogLinkTestId);
 
-    const actual = ((await link.textContent()) ?? "").trim();
+    const actual = ((await link.textContent()) ?? "").replace(/\s+/g, " ").trim();
     const visiblePart = getVisibleTruncatedText(actual);
-
+    await this.page.pause()
     expect(post.title.startsWith(visiblePart)).toBe(true);
 
     await expect(

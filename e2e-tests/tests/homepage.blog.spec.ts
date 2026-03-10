@@ -4,11 +4,11 @@ import User from "../src/models/User";
 
 test.describe("blogs", () => {
   test.beforeEach(async ({ wp }) => {
-    await wp.posts.clearByTypeAndAuthor("blog");
+    await wp.posts.clearByTypeAndAuthor("blogs");
   });
   test("should display a single blog", async ({ wp, homepage }) => {
     const post = Post.aPost()
-      .withType("blog")
+      .withType("blogs")
       .withFixedTitle("E2E Blog Post")
       .withParagraphMaxChars(180)
       .withStatus("publish");
@@ -24,7 +24,7 @@ test.describe("blogs", () => {
     homepage,
   }) => {
     const post = Post.aPost()
-      .withType("blog")
+      .withType("blogs")
       .withTitleOver100Chars()
       .withStatus("publish");
 
@@ -36,7 +36,7 @@ test.describe("blogs", () => {
 
   test("should open blog page", async ({ wp, homepage, blog }) => {
     const post = Post.aPost()
-      .withType("blog")
+      .withType("blogs")
       .withFixedTitle("E2E Blog Navigation")
       .withStatus("publish");
 
@@ -51,7 +51,7 @@ test.describe("blogs", () => {
 
   test("should open blog list page", async ({ wp, homepage, blogList }) => {
     const post = Post.aPost()
-      .withType("blog")
+      .withType("blogs")
       .withFixedTitle("E2E Blog List Page Navigation")
       .withStatus("publish");
 
@@ -68,12 +68,12 @@ test.describe("blogs", () => {
     homepage,
   }) => {
     const older = Post.aPost()
-      .withType("blog")
+      .withType("blogs")
       .withFixedTitle("E2E Blog Older")
       .withStatus("publish");
 
     const latest = Post.aPost()
-      .withType("blog")
+      .withType("blogs")
       .withFixedTitle("E2E Blog Latest")
       .withStatus("publish");
 
@@ -90,7 +90,7 @@ test.describe("blogs", () => {
     runId,
   }) => {
     const post = Post.aPost()
-      .withType("blog")
+      .withType("blogs")
       .withFixedTitle("E2E Blog Author Change")
       .withStatus("publish");
 

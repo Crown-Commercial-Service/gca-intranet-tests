@@ -41,8 +41,8 @@ export default class CustomizerPage {
       name: "Homepage options",
     });
     this.searchMenuItemsInput = page.locator("#menu-items-search");
-    this.menusButton = page.getByRole("button", {
-      name: "Menus",
+    this.menusButton = page.locator("h3.accordion-section-title", {
+      hasText: "Menus",
     });
 
     this.menuNameInput = page.locator(
@@ -57,7 +57,9 @@ export default class CustomizerPage {
     this.createNewMenuButton = page.getByRole("button", {
       name: "Create New Menu",
     });
-    this.addItemsButton = page.getByRole('button', { name: 'Add or remove menu items' });
+    this.addItemsButton = page.getByRole("button", {
+      name: "Add or remove menu items",
+    });
 
     this.takeALookTitle = page.getByLabel("Take a look: title");
     this.takeALookDescription = page.getByLabel("Take a look: description");
@@ -121,7 +123,6 @@ export default class CustomizerPage {
     childTitle: string,
     parentTitle: string,
   ): Promise<void> {
-
     const childItem = this.page
       .locator(".menu-item")
       .filter({ hasText: childTitle })
