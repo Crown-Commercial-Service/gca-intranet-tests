@@ -20,8 +20,14 @@ type CharLimits = {
 export default class HomePage {
   readonly page: Page;
   private readonly baseUrl?: string;
-  private readonly primaryNavigationTestId = "primary-navigation";
+
+  readonly primaryNavigationSelector = "#primaryNav";
+
+  private readonly primaryNavigationParentLinksSelector =
+    ".nav-list--primary > li > a";
+
   private readonly primaryNavigationSubMenuSelector = ".sub-menu li a";
+
   private readonly latestNewsColumnTestId = "latest-news-column";
   private readonly latestNewsFeaturedCardTestId = "latest-news-featured-card";
   private readonly latestNewsSecondaryCardTestId = "latest-news-secondary-card";
@@ -41,14 +47,12 @@ export default class HomePage {
   private readonly blogAuthorTestId = "blogs-author";
   private readonly blogDateTestId = "blogs-date";
 
-  // --- Take a look ---
   private readonly takeALookColumnTestId = "take-a-look-column";
   private readonly takeALookHeadingTestId = "take-a-look-heading";
   private readonly takeALookSubheadingTestId = "take-a-look-subheading";
   private readonly takeALookLinkTestId = "take-a-look-link";
   private readonly takeALookHeaderTestId = "take-a-look-header";
 
-  // --- Quick links ---
   private readonly quickLinksTestId = "quick-links";
   private readonly quickLinksHeaderTestId = "quick-links-header";
   private readonly quickLinksHeadingTestId = "quick-links-heading";
@@ -57,8 +61,8 @@ export default class HomePage {
   private readonly quickLinksItemTestId = "quick-links-item";
 
   readonly primaryNavigation: Locator;
-  readonly primaryNavigationSubMenuLinks: Locator;
   readonly primaryNavigationParentLinks: Locator;
+
   readonly latestNewsColumn: Locator;
   readonly workUpdatesSection: Locator;
   readonly workUpdateCards: Locator;
@@ -68,7 +72,6 @@ export default class HomePage {
   readonly blogCard: Locator;
   readonly blogSeeMoreLink: Locator;
 
-  // --- Take a look locators ---
   readonly takeALookColumn: Locator;
   readonly takeALookHeading: Locator;
   readonly takeALookSubheading: Locator;
@@ -76,7 +79,6 @@ export default class HomePage {
   readonly takeALookLinkText: Locator;
   readonly takeALookHeader: Locator;
 
-  // --- Quick links locators ---
   readonly quickLinks: Locator;
   readonly quickLinksHeader: Locator;
   readonly quickLinksHeading: Locator;
@@ -95,12 +97,13 @@ export default class HomePage {
   constructor(page: Page, baseUrl?: string) {
     this.page = page;
     this.baseUrl = baseUrl;
-    this.primaryNavigation = this.page.locator("#primaryNav");
+
+    this.primaryNavigation = this.page.locator(this.primaryNavigationSelector);
+
     this.primaryNavigationParentLinks = this.primaryNavigation.locator(
-      ".nav-list--primary > li > a",
+      this.primaryNavigationParentLinksSelector,
     );
-    this.primaryNavigationSubMenuLinks =
-      this.primaryNavigation.locator(".sub-menu li a");
+
     this.latestNewsColumn = this.page.getByTestId(this.latestNewsColumnTestId);
 
     this.workUpdatesSection = this.page.getByTestId(
@@ -117,7 +120,6 @@ export default class HomePage {
 
     this.blogsSection = this.page.getByTestId(this.blogsSectionTestId);
     this.blogCard = this.blogsSection.getByTestId(this.blogCardTestId);
-
     this.blogSeeMoreLink = this.page.getByRole("link", { name: "More blogs" });
 
     // --- Take a look ---
