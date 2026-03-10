@@ -40,22 +40,22 @@ export default class CustomizerPage {
     this.homepageOptionsButton = page.getByRole("button", {
       name: "Homepage options",
     });
-    this.searchMenuItemsInput = page.getByLabel("Search Menu Items");
+    this.searchMenuItemsInput = page.locator("#menu-items-search");
     this.menusButton = page.getByRole("button", {
       name: "Menus",
     });
 
+    this.menuNameInput = page.locator(
+      "#customize-control-add_menu-name input.menu-name-field",
+    );
+    this.primaryNavigationCheckbox = page.locator(
+      '#customize-control-add_menu-locations input.menu-location[data-location-id="primary"]',
+    );
+
+    this.nextButton = page.locator("#customize-new-menu-submit");
+
     this.createNewMenuButton = page.getByRole("button", {
       name: "Create New Menu",
-    });
-
-    this.menuNameInput = page.getByLabel("Menu Name");
-    this.primaryNavigationCheckbox = page.getByRole("checkbox", {
-      name: "Primary Navigation",
-    });
-    this.nextButton = page.getByRole("button", {
-      name: "Next",
-      exact: true,
     });
     this.addItemsButton = page.locator(".add-new-menu-item");
 
@@ -104,6 +104,7 @@ export default class CustomizerPage {
   }
 
   async addPageToMenu(pageTitle: string): Promise<void> {
+    await expect(this.searchMenuItemsInput).toBeVisible();
     await this.searchMenuItemsInput.fill(pageTitle);
 
     const pageButton = this.page
@@ -113,24 +114,27 @@ export default class CustomizerPage {
 
     await expect(pageButton).toBeVisible();
     await pageButton.click();
+    await this.searchMenuItemsInput.fill("");
   }
 
   async makeSubMenuItem(
     childTitle: string,
     parentTitle: string,
   ): Promise<void> {
+        await this.page.pause();
     const childItem = this.page
-      .locator(".accordion-section-content .menu-item")
+      .locator(".menu-item")
       .filter({ hasText: childTitle })
       .first();
 
     const parentItem = this.page
-      .locator(".accordion-section-content .menu-item")
+      .locator(".menu-item")
       .filter({ hasText: parentTitle })
       .first();
 
     await expect(childItem).toBeVisible();
     await expect(parentItem).toBeVisible();
+    await this.page.pause();
 
     const childBox = await childItem.boundingBox();
     const parentBox = await parentItem.boundingBox();

@@ -56,50 +56,50 @@ export default class MenuPages {
         parent: "About GCA",
         children: ["GCA Onboarding", "Events", "Our Offices"],
       },
-      {
-        parent: "HR",
-        children: [
-          "Pay and Pensions",
-          "Performance Management",
-          "Health and wellbeing",
-          "Leave, absence and flexible working",
-        ],
-      },
-      {
-        parent: "Workplace & Travel",
-        children: [
-          "Our Offices",
-          "Working from home",
-          "Travel and expenses",
-          "Health and safety",
-          "Workplace and travel",
-        ],
-      },
-      {
-        parent: "Business Processes",
-        children: [
-          "Accessibility",
-          "Knowledge Centre",
-          "Marketing and communications",
-          "Change management",
-          "Digital and data",
-          "Finance",
-          "Customers and suppliers",
-        ],
-      },
-      {
-        parent: "IT, Data & Security",
-        children: ["Information security", "IT support"],
-      },
-      {
-        parent: "GCA Community",
-        children: [
-          "All Blogs",
-          "All Work Updates",
-          "All Events",
-          "Staff network",
-        ],
-      },
+    //   {
+    //     parent: "HR",
+    //     children: [
+    //       "Pay and Pensions",
+    //       "Performance Management",
+    //       "Health and wellbeing",
+    //       "Leave, absence and flexible working",
+    //     ],
+    //   },
+    //   {
+    //     parent: "Workplace & Travel",
+    //     children: [
+    //       "Our Offices",
+    //       "Working from home",
+    //       "Travel and expenses",
+    //       "Health and safety",
+    //       "Workplace and travel",
+    //     ],
+    //   },
+    //   {
+    //     parent: "Business Processes",
+    //     children: [
+    //       "Accessibility",
+    //       "Knowledge Centre",
+    //       "Marketing and communications",
+    //       "Change management",
+    //       "Digital and data",
+    //       "Finance",
+    //       "Customers and suppliers",
+    //     ],
+    //   },
+    //   {
+    //     parent: "IT, Data & Security",
+    //     children: ["Information security", "IT support"],
+    //   },
+    //   {
+    //     parent: "GCA Community",
+    //     children: [
+    //       "All Blogs",
+    //       "All Work Updates",
+    //       "All Events",
+    //       "Staff network",
+    //     ],
+    //   },
     ];
   }
 }
