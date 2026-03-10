@@ -141,6 +141,45 @@ export default class WpPosts {
     await this.wp(["post", "delete", ...ids.split(/\s+/), "--force"]);
   }
 
+  async clearByType(postType: string): Promise<void> {
+    if (this.isRemoteDriver()) {
+      const restConfig = rest.getRestConfig();
+
+      const endpoint =
+        postType === "attachment"
+          ? "media"
+          : rest.restEndpointForType(postType);
+
+      const items = await rest.wpRest<any[]>(
+        restConfig,
+        "GET",
+        `/wp-json/wp/v2/${endpoint}?per_page=100`,
+      );
+
+      for (const item of items) {
+        await rest.wpRest(
+          restConfig,
+          "DELETE",
+          `/wp-json/wp/v2/${endpoint}/${item.id}?force=true`,
+        );
+      }
+
+      return;
+    }
+
+    const listResult = await this.wp([
+      "post",
+      "list",
+      `--post_type=${postType}`,
+      "--format=ids",
+    ]);
+
+    const ids = (listResult.stdout || "").trim();
+    if (!ids) return;
+
+    await this.wp(["post", "delete", ...ids.split(/\s+/), "--force"]);
+  }
+
   async getPublishedDate(postId: number): Promise<string> {
     if (this.isRemoteDriver()) {
       const post = await rest.wpRest<any>(

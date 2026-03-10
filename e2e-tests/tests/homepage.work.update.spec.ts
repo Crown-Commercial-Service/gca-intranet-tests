@@ -3,17 +3,19 @@ import Post from "../src/models/Post";
 import User from "../src/models/User";
 
 test.describe("work updates", () => {
-  test.beforeEach(async ({ wp, runId }) => {
-    await wp.posts.clearByTypeAndRunId("work_updates", runId);
+  test.beforeEach(async ({ wp }) => {
+    await wp.posts.clearByType("work_updates");
   });
+
   test("should display a single work update", async ({ wp, homepage }) => {
     const post = Post.aPost()
       .withType("work_updates")
-      .withFixedTitle("E2E Work Update")
+      .withFixedTitle("Procurement Transformation Update")
       .withParagraphMaxChars(180)
       .withStatus("publish");
 
     await wp.posts.create(post);
+
     await homepage.goto();
     await homepage.assertWorkUpdateOnHomepage(post);
   });
@@ -23,12 +25,13 @@ test.describe("work updates", () => {
     homepage,
   }) => {
     const post = Post.aPost()
-      .withType("work_update")
+      .withType("work_updates")
       .withTitleOver100Chars()
       .withParagraphMaxChars(180)
       .withStatus("publish");
 
     await wp.posts.create(post);
+
     await homepage.goto();
     await homepage.assertWorkUpdateCharLimits(post);
   });
@@ -38,46 +41,46 @@ test.describe("work updates", () => {
     homepage,
   }) => {
     const post1 = Post.aPost()
-      .withType("work_update")
-      .withFixedTitle("Work Update 1")
+      .withType("work_updates")
+      .withFixedTitle("Commercial Systems Rollout")
       .withStatus("publish");
 
     const post2 = Post.aPost()
-      .withType("work_update")
-      .withFixedTitle("Work Update 2")
+      .withType("work_updates")
+      .withFixedTitle("Recruitment Campaign Progress")
       .withStatus("publish");
 
     const post3 = Post.aPost()
-      .withType("work_update")
-      .withFixedTitle("Work Update 3")
+      .withType("work_updates")
+      .withFixedTitle("Digital Delivery Milestones")
       .withStatus("publish");
 
     const post4 = Post.aPost()
-      .withType("work_update")
-      .withFixedTitle("Work Update 4")
+      .withType("work_updates")
+      .withFixedTitle("Procurement Policy Refresh")
       .withStatus("publish");
 
-    // create older posts first
     await wp.posts.create(post1);
     await wp.posts.create(post2);
     await wp.posts.create(post3);
-    // latest post last
     await wp.posts.create(post4);
+
     await homepage.goto();
     await homepage.assertWorkUpdatesOrder([post4, post3]);
   });
 
   test("should open work update page", async ({ wp, homepage, workUpdate }) => {
     const post = Post.aPost()
-      .withType("work_update")
-      .withFixedTitle("E2E Work Update Navigation")
+      .withType("work_updates")
+      .withFixedTitle("Supplier Onboarding Improvements")
       .withStatus("publish");
 
     await wp.posts.create(post);
+
     await homepage.goto();
     await homepage.selectWorkItemLink(post);
 
-    await workUpdate.expectUrlToMatch(/e2e-work-update-navigation/);
+    await workUpdate.expectUrlToMatch(/supplier-onboarding-improvements/);
     await workUpdate.assertBreadcrumbs(post);
   });
 
@@ -87,25 +90,25 @@ test.describe("work updates", () => {
     workUpdate,
   }) => {
     const post = Post.aPost()
-      .withType("work_update")
-      .withFixedTitle("E2E Work Update List Page Navigation")
+      .withType("work_updates")
+      .withFixedTitle("Quarterly Delivery Update")
       .withStatus("publish");
 
     await wp.posts.create(post);
+
     await homepage.goto();
     await homepage.workUpdateSeeMoreLink.click();
 
-    await workUpdate.expectUrlToMatch(/work_update/);
+    await workUpdate.expectUrlToMatch(/work_updates/);
   });
 
   test("can edit author details of a work update post", async ({
     wp,
     homepage,
-    runId,
   }) => {
     const post = Post.aPost()
-      .withType("work_update")
-      .withFixedTitle("E2E Work Update Author Change")
+      .withType("work_updates")
+      .withFixedTitle("Contract Management Update")
       .withStatus("publish");
 
     const postId = await wp.posts.create(post);
@@ -114,13 +117,13 @@ test.describe("work updates", () => {
     await homepage.assertWorkUpdateAuthor(post.title);
 
     const newUser = User.anAdmin()
-      .withUsername(`e2e_author_${runId}`)
-      .withEmail(`e2e_author_${runId}@example.com`)
+      .withUsername("editor1")
+      .withEmail("editor1@example.com")
       .withPassword("Password123!");
 
     await wp.users.upsert(newUser);
 
-    await wp.posts.updatePostAuthor(postId, "work_update", newUser.username);
+    await wp.posts.updatePostAuthor(postId, "work_updates", newUser.username);
 
     await homepage.goto();
     await homepage.assertWorkUpdateAuthor(post.title, newUser.username);
