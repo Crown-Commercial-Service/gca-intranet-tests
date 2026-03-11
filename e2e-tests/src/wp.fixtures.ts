@@ -20,6 +20,7 @@ import WordpressLoginPage from "./pages/WordpressLoginPage";
 import CustomizerPage from "../src/pages/CustomizerPage";
 import WpEvents from "../src/helpers/WpEvents";
 import logger from "../src/utils/logger";
+import EventEditorPage from "../src/pages/EventEditorPage";
 
 type WpHelpers = {
   exec: typeof runWp;
@@ -36,6 +37,7 @@ type WpHelpers = {
 type Fixtures = {
   wp: WpHelpers;
   homepage: HomePage;
+  eventEditorPage: EventEditorPage;
   wordpressLoginPage: WordpressLoginPage;
   customizerPage: CustomizerPage;
 
@@ -182,6 +184,10 @@ export const test = base.extend<Fixtures>({
 
   customizerPage: async ({ page }, use) => {
     await use(new CustomizerPage(page));
+  },
+
+  eventEditorPage: async ({ page }, use) => {
+    await use(new EventEditorPage(page));
   },
 
   latestNews: async ({ page }, use, testInfo) => {

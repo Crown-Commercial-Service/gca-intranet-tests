@@ -2,11 +2,16 @@ import { test } from "../src/wp.fixtures";
 import Event from "../src/models/Events";
 
 test.describe("events", () => {
-  // test.beforeEach(async ({ wp }) => {
-  //   await wp.posts.clearByType("event");
-  // });
+  test.beforeEach(async ({ wp }) => {
+    await wp.posts.clearByType("event");
+  });
 
-  test("should display a single event", async ({ wp, homepage }) => {
+  test("should display a single event", async ({
+    wp,
+    homepage,
+    wordpressLoginPage,
+    eventEditorPage,
+  }) => {
     const event = Event.anEvent()
       .withFixedTitle("Commercial Strategy Workshop")
       .withContent("A session covering the latest commercial strategy updates.")
@@ -16,7 +21,14 @@ test.describe("events", () => {
       .withCtaDestination("https://example.com/book-your-place")
       .withStatus("publish");
 
-    await wp.events.create(event);
+    const eventId = await wp.events.create(event);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await eventEditorPage.gotoEdit(eventId);
+    await eventEditorPage.fillEventDetails(event);
+    await eventEditorPage.update();
 
     await homepage.goto();
     // await homepage.assertEventOnHomepage(event);

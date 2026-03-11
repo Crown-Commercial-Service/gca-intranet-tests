@@ -55,3 +55,21 @@ export function getVisibleTruncatedText(text: string): string {
 
   return normalized;
 }
+
+export function toEditorDateTime(value: string): string {
+  const match = value.match(
+    /^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})(?::\d{2})?$/,
+  );
+
+  if (!match) {
+    return value;
+  }
+
+  const [, year, month, day, hourRaw, minute] = match;
+  const hour = Number(hourRaw);
+
+  const suffix = hour >= 12 ? "pm" : "am";
+  const twelveHour = hour % 12 === 0 ? 12 : hour % 12;
+
+  return `${day}-${month}-${year} ${twelveHour}:${minute} ${suffix}`;
+}
