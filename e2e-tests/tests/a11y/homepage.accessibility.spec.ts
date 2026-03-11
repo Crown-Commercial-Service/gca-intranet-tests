@@ -22,32 +22,7 @@ test.describe("Accessibility - Homepage", () => {
   }) => {
     const contentType = Post.homepageSet(runId);
     const customizations = HomepageCustomizationSet.homepageSet(runId);
-
-    const events = [
-      Event.anEvent()
-        .withFixedTitle("Accessibility Support Session")
-        .withCategory("Accessibility")
-        .withEventLocation("Online")
-        .withStartDate(dayjs().add(1, "day").format("DD-MM-YYYY") + " 12:00 am")
-        .withEndDate(dayjs().add(2, "day").format("DD-MM-YYYY") + " 12:00 am")
-        .withStatus("publish"),
-
-      Event.anEvent()
-        .withFixedTitle("Digital Strategy Workshop")
-        .withCategory("Digital and data")
-        .withEventLocation("In-person")
-        .withStartDate(dayjs().add(3, "day").format("DD-MM-YYYY") + " 12:00 am")
-        .withEndDate(dayjs().add(4, "day").format("DD-MM-YYYY") + " 12:00 am")
-        .withStatus("publish"),
-
-      Event.anEvent()
-        .withFixedTitle("HR Policy Briefing")
-        .withCategory("HR")
-        .withEventLocation("Online")
-        .withStartDate(dayjs().add(5, "day").format("DD-MM-YYYY") + " 12:00 am")
-        .withEndDate(dayjs().add(6, "day").format("DD-MM-YYYY") + " 12:00 am")
-        .withStatus("publish"),
-    ];
+    const events = Event.homepageEvents();
 
     await wp.posts.createMany(contentType.news);
     await wp.posts.createMany(contentType.workUpdates);

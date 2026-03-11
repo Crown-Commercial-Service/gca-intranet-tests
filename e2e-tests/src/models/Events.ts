@@ -43,6 +43,37 @@ export default class Event {
   static anEvent(): EventBuilder {
     return new EventBuilder();
   }
+
+  static homepageEvents(): Event[] {
+    return [
+      Event.anEvent()
+        .withFixedTitle("Accessibility Support Session")
+        .withCategory("Accessibility")
+        .withEventLocation("Online")
+        .withStartDate(dayjs().add(1, "day").format("DD-MM-YYYY") + " 12:00 am")
+        .withEndDate(dayjs().add(2, "day").format("DD-MM-YYYY") + " 12:00 am")
+        .withStatus("publish")
+        .build(),
+
+      Event.anEvent()
+        .withFixedTitle("Digital Strategy Workshop")
+        .withCategory("Digital and data")
+        .withEventLocation("In-person")
+        .withStartDate(dayjs().add(3, "day").format("DD-MM-YYYY") + " 12:00 am")
+        .withEndDate(dayjs().add(4, "day").format("DD-MM-YYYY") + " 12:00 am")
+        .withStatus("publish")
+        .build(),
+
+      Event.anEvent()
+        .withFixedTitle("HR Policy Briefing")
+        .withCategory("HR")
+        .withEventLocation("Online")
+        .withStartDate(dayjs().add(5, "day").format("DD-MM-YYYY") + " 12:00 am")
+        .withEndDate(dayjs().add(6, "day").format("DD-MM-YYYY") + " 12:00 am")
+        .withStatus("publish")
+        .build(),
+    ];
+  }
 }
 
 class EventBuilder {
