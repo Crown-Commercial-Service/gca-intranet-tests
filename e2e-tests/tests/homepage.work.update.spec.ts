@@ -134,4 +134,42 @@ test.describe("work updates", () => {
     await homepage.goto();
     await homepage.assertWorkUpdateAuthor(post.title, newUser.username);
   });
+
+  test("should truncate work update author when it is too long", async ({
+    wp,
+    homepage,
+  }) => {
+    const post = Post.aPost()
+      .withType("work_updates")
+      .withFixedTitle("Contract Delivery Update")
+      .withStatus("publish");
+
+    const postId = await wp.posts.create(post);
+
+    const newUser = User.anAdmin()
+      .withUsername("verylongworkupdateauthorname")
+      .withEmail("verylongworkupdateauthorname@example.com")
+      .withPassword("Password123!");
+
+    await wp.users.upsert(newUser);
+    await wp.posts.updatePostAuthor(postId, "work_updates", newUser.username);
+
+    await homepage.goto();
+    await homepage.assertWorkUpdateAuthorIsTruncated(newUser.username);
+  });
+
+  test("should truncate work update title when it is too long", async ({
+    wp,
+    homepage,
+  }) => {
+    const post = Post.aPost()
+      .withType("work_updates")
+      .withTitleOver100Chars()
+      .withStatus("publish");
+
+    await wp.posts.create(post);
+
+    await homepage.goto();
+    await homepage.assertWorkUpdateTitleIsTruncated(post);
+  });
 });

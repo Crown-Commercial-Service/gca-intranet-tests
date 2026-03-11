@@ -419,10 +419,8 @@ export default class HomePage {
     const author = expectedAuthor ?? process.env.WP_ADMIN_USERNAME;
     expect(author).toBeTruthy();
 
-    await this.assertAuthorPossiblyTruncated(
-      card.getByTestId(this.workUpdateAuthorTestId),
-      `By ${author}`,
-    );
+    const authorLocator = card.getByTestId(this.workUpdateAuthorTestId);
+    await expect(authorLocator).toHaveText(`By ${author}`);
   }
 
   async assertBlogAuthor(
@@ -597,5 +595,47 @@ export default class HomePage {
     await parentLink.hover();
 
     return parentLink;
+  }
+
+  async assertWorkUpdateAuthorIsTruncated(
+    expectedAuthor: string,
+  ): Promise<void> {
+    const author = this.workUpdateCards
+      .first()
+      .getByTestId(this.workUpdateAuthorTestId);
+
+    await this.assertTextIsTruncated(author, `By ${expectedAuthor}`);
+  }
+
+  async assertWorkUpdateTitleIsTruncated(post: Post): Promise<void> {
+    const link = this.workUpdateCards
+      .first()
+      .getByTestId(this.workUpdateLinkTestId);
+
+    await this.assertTitleIsTruncated(link, post.title);
+  }
+  
+  private async assertTextIsTruncated(
+    locator: Locator,
+    fullText: string,
+  ): Promise<void> {
+    await expect(locator).toBeVisible();
+
+    const actual = ((await locator.textContent()) ?? "").trim();
+
+    expect(actual).not.toBe(fullText);
+    expect(actual.endsWith("...")).toBe(true);
+  }
+
+  private async assertTitleIsTruncated(
+    locator: Locator,
+    fullTitle: string,
+  ): Promise<void> {
+    await expect(locator).toBeVisible();
+
+    const actual = ((await locator.textContent()) ?? "").trim();
+
+    expect(actual).not.toBe(fullTitle);
+    expect(actual.endsWith("...")).toBe(true);
   }
 }
