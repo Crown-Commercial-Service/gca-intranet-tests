@@ -18,6 +18,7 @@ import BlogListPage from "../src/pages/BlogListPage";
 import WpCustomizer from "../src/helpers/WpCustomizer";
 import WordpressLoginPage from "./pages/WordpressLoginPage";
 import CustomizerPage from "../src/pages/CustomizerPage";
+import WpEvents from "../src/helpers/WpEvents";
 import logger from "../src/utils/logger";
 
 type WpHelpers = {
@@ -25,6 +26,7 @@ type WpHelpers = {
   users: WpUsers;
   themes: WpThemes;
   posts: WpPosts;
+  events: WpEvents;
   customizer: WpCustomizer;
 
   expectUserToExist: (user: User) => Promise<void>;
@@ -95,7 +97,7 @@ async function loginToQaWordpress(
   expect(username, "WP_API_USER is not set").toBeTruthy();
   expect(password, "WP_API_PASSWORD is not set").toBeTruthy();
   expect(baseUrl, "PW_BASE_URL is not set").toBeTruthy();
-  
+
   await page.request.get(`${baseUrl}/wp-login.php`);
 
   await page.request.post(`${baseUrl}/wp-login.php`, {
@@ -145,6 +147,7 @@ export const test = base.extend<Fixtures>({
     const users = new WpUsers(exec);
     const themes = new WpThemes(exec);
     const posts = new WpPosts(exec);
+    const events = new WpEvents(exec);
     const customizer = new WpCustomizer(exec);
 
     const helpers: WpHelpers = {
@@ -152,6 +155,7 @@ export const test = base.extend<Fixtures>({
       users,
       themes,
       posts,
+      events,
       customizer,
       expectUserToExist,
       expectUserToHaveRole,
