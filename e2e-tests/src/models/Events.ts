@@ -52,7 +52,7 @@ class EventBuilder {
     status: "draft",
     startDate: dayjs().add(1, "day").format("YYYY-MM-DD 00:00:00"),
     endDate: dayjs().add(3, "day").format("YYYY-MM-DD 00:00:00"),
-    category: "Leave, absence and flexible",
+    category: "Leave, absence and flexible working",
     eventLocation: "In-person",
   };
 

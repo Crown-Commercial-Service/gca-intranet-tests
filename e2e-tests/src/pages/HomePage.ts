@@ -666,14 +666,32 @@ export default class HomePage {
 
     if (event.category) {
       await expect(this.eventCategoryTag(card)).toHaveText(
-        event.category.trim(),
+        event.category,
       );
     }
 
     if (event.eventLocation) {
       await expect(this.eventLocationTag(card)).toHaveText(
-        event.eventLocation.trim(),
+        event.eventLocation,
       );
+    }
+  }
+
+  async assertEventTitleIsTruncated(event: EventModel): Promise<void> {
+    const card = this.eventCardByTitle(event.title);
+
+    const link = card.getByTestId(this.eventsLinkTestId);
+
+    await this.assertTextIsTruncated(link, event.title);
+  }
+
+  async assertEventOrder(titles: string[]): Promise<void> {
+    await expect(this.eventsRows).toHaveCount(titles.length);
+
+    for (let i = 0; i < titles.length; i++) {
+      await expect(
+        this.eventsRows.nth(i).getByTestId(this.eventsLinkTestId),
+      ).toHaveText(titles[i]);
     }
   }
 }

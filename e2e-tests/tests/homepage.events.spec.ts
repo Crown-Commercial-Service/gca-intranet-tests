@@ -1,11 +1,10 @@
-import { test } from "../src/wp.fixtures";
+import { test, expect } from "../src/wp.fixtures";
 import Event from "../src/models/Events";
 import dayjs from "dayjs";
 
 test.describe("events", () => {
   test.beforeEach(async ({ wp }) => {
     await wp.posts.clearByType("events");
-    // await wp.posts.clearByTypeAndAuthor("events");
   });
 
   test("should display a single event", async ({
@@ -34,35 +33,32 @@ test.describe("events", () => {
 
     await homepage.goto();
 
+    await expect(homepage.eventsRows).toHaveCount(1);
+
     await homepage.assertEventOnHomepage(event);
   });
 
-  test("should create three events with different future dates", async ({
+  test("should render a maximum of two events on the homepage", async ({
     wp,
+    homepage,
     wordpressLoginPage,
     eventEditorPage,
   }) => {
     const events = [
       Event.anEvent()
         .withFixedTitle("Commercial Strategy Briefing")
-        .withCategory("Accessibility")
-        .withEventLocation("Online")
         .withStartDate(dayjs().add(1, "day").format("DD-MM-YYYY") + " 12:00 am")
         .withEndDate(dayjs().add(2, "day").format("DD-MM-YYYY") + " 12:00 am")
         .withStatus("publish"),
 
       Event.anEvent()
         .withFixedTitle("Procurement Policy Update Session")
-        .withCategory("Change management")
-        .withEventLocation("In-person")
         .withStartDate(dayjs().add(3, "day").format("DD-MM-YYYY") + " 12:00 am")
         .withEndDate(dayjs().add(4, "day").format("DD-MM-YYYY") + " 12:00 am")
         .withStatus("publish"),
 
       Event.anEvent()
         .withFixedTitle("Supplier Engagement Workshop")
-        .withCategory("Digital and data")
-        .withEventLocation("Online")
         .withStartDate(dayjs().add(5, "day").format("DD-MM-YYYY") + " 12:00 am")
         .withEndDate(dayjs().add(6, "day").format("DD-MM-YYYY") + " 12:00 am")
         .withStatus("publish"),
@@ -80,10 +76,20 @@ test.describe("events", () => {
       await eventEditorPage.selectEventLocation(event.eventLocation!);
       await eventEditorPage.update();
     }
+
+    await homepage.goto();
+    await expect(homepage.eventsRows).toHaveCount(2);
+    await expect(
+      homepage.eventsRows.nth(0).getByTestId("events-link"),
+    ).toHaveText(events[0].title);
+    await expect(
+      homepage.eventsRows.nth(1).getByTestId("events-link"),
+    ).toHaveText(events[1].title);
   });
 
-  test("should create an event with a very long title for truncation testing", async ({
+  test("should truncate event title", async ({
     wp,
+    homepage,
     wordpressLoginPage,
     eventEditorPage,
   }) => {
@@ -103,10 +109,15 @@ test.describe("events", () => {
     await eventEditorPage.selectCategory(event.category!);
     await eventEditorPage.selectEventLocation(event.eventLocation!);
     await eventEditorPage.update();
+
+    await homepage.goto();
+
+    await homepage.assertEventTitleIsTruncated(event);
   });
 
-  test("should create an event with a start date in the past", async ({
+  test("should display no events where start date is in the past", async ({
     wp,
+    homepage,
     wordpressLoginPage,
     eventEditorPage,
   }) => {
@@ -130,12 +141,17 @@ test.describe("events", () => {
     await eventEditorPage.selectCategory(event.category!);
     await eventEditorPage.selectEventLocation(event.eventLocation!);
     await eventEditorPage.update();
+
+    await homepage.goto();
+
+    await expect(homepage.eventsRows).toHaveCount(0);
   });
 
-  test("should create an event with a start date on the current date", async ({
+  test("should not show events when the start date is the current date", async ({
     wp,
     wordpressLoginPage,
     eventEditorPage,
+    homepage,
   }) => {
     const event = Event.anEvent()
       .withFixedTitle("Current Date Event Start")
@@ -155,12 +171,14 @@ test.describe("events", () => {
     await eventEditorPage.selectCategory(event.category!);
     await eventEditorPage.selectEventLocation(event.eventLocation!);
     await eventEditorPage.update();
+    await expect(homepage.eventsRows).toHaveCount(0);
   });
 
-  test("should create four future events and edit the first event to have past dates", async ({
+  test("should not display events that have expired", async ({
     wp,
     wordpressLoginPage,
     eventEditorPage,
+    homepage,
   }) => {
     const events = [
       Event.anEvent()
@@ -229,5 +247,11 @@ test.describe("events", () => {
     await eventEditorPage.selectCategory(updatedFirstEvent.category!);
     await eventEditorPage.selectEventLocation(updatedFirstEvent.eventLocation!);
     await eventEditorPage.update();
+
+    await homepage.assertEventOrder([
+      events[1].title,
+      events[2].title,
+      events[3].title,
+    ]);
   });
 });
