@@ -50,8 +50,11 @@ class EventBuilder {
     title: chance.sentence({ words: 5 }).replace(/\.$/, ""),
     content: chance.paragraph({ sentences: 3 }),
     status: "draft",
-    startDate: dayjs().format("DD-MM-YYYY") + " 12:00 am",
-    endDate: dayjs().add(2, "day").format("DD-MM-YYYY") + " 12:00 am",
+
+    // store ISO format internally
+    startDate: dayjs().format("YYYY-MM-DD 00:00:00"),
+    endDate: dayjs().add(2, "day").format("YYYY-MM-DD 00:00:00"),
+
     category: "Community",
     eventLocation: "In-person",
   };
@@ -81,6 +84,18 @@ class EventBuilder {
     return this;
   }
 
+  withStartInDays(days: number): this {
+    this.props.startDate = dayjs()
+      .add(days, "day")
+      .format("YYYY-MM-DD 00:00:00");
+    return this;
+  }
+
+  withEndInDays(days: number): this {
+    this.props.endDate = dayjs().add(days, "day").format("YYYY-MM-DD 00:00:00");
+    return this;
+  }
+
   withCtaLabel(label: string): this {
     this.props.ctaLabel = label;
     return this;
@@ -88,6 +103,16 @@ class EventBuilder {
 
   withCtaDestination(url: string): this {
     this.props.ctaDestination = url;
+    return this;
+  }
+
+  withCategory(category: string): this {
+    this.props.category = category;
+    return this;
+  }
+
+  withEventLocation(location: string): this {
+    this.props.eventLocation = location;
     return this;
   }
 

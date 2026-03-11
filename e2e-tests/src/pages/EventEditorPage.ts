@@ -25,6 +25,7 @@ export default class EventEditorPage {
     this.contentInput = page.locator("#content");
     this.categoriesBox = page.locator("#categorychecklist");
     this.eventLocationBox = page.locator("#event_locationchecklist");
+
     this.startDateInput = page.locator(
       'input[name="acf[202603101020a_202603101020b]"] + input.input',
     );
@@ -68,10 +69,16 @@ export default class EventEditorPage {
 
   async fillEventDetails(event: Event): Promise<void> {
     await expect(this.startDateInput).toBeVisible();
-    await this.startDateInput.fill(toEditorDateTime(event.startDate));
+    await this.selectDateFromDatePicker(
+      this.startDateInput,
+      toEditorDateTime(event.startDate),
+    );
 
     await expect(this.endDateInput).toBeVisible();
-    await this.endDateInput.fill(toEditorDateTime(event.endDate));
+    await this.selectDateFromDatePicker(
+      this.endDateInput,
+      toEditorDateTime(event.endDate),
+    );
 
     if (event.ctaLabel) {
       await this.ctaLabelInput.fill(event.ctaLabel);
@@ -80,6 +87,19 @@ export default class EventEditorPage {
     if (event.ctaDestination) {
       await this.ctaDestinationInput.fill(event.ctaDestination);
     }
+  }
+
+  async selectDateFromDatePicker(input: Locator, value: string): Promise<void> {
+    await input.click();
+    await expect(input).toBeVisible();
+
+    await input.fill("");
+    await input.press("ControlOrMeta+a");
+    await input.type(value, { delay: 20 });
+
+    await input.press("Tab");
+
+    await expect(input).toHaveValue(value);
   }
 
   async update(): Promise<void> {
