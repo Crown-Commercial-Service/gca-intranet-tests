@@ -78,13 +78,16 @@ test.describe("events", () => {
     }
 
     await homepage.goto();
-    await expect(homepage.eventsRows).toHaveCount(2);
+    await expect(homepage.eventsRows).toHaveCount(3);
     await expect(
       homepage.eventsRows.nth(0).getByTestId("events-link"),
     ).toHaveText(events[0].title);
     await expect(
       homepage.eventsRows.nth(1).getByTestId("events-link"),
     ).toHaveText(events[1].title);
+    await expect(
+      homepage.eventsRows.nth(2).getByTestId("events-link"),
+    ).toHaveText(events[2].title);
   });
 
   test("should truncate event title", async ({
