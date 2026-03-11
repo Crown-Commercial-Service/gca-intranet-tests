@@ -1,5 +1,8 @@
 import type Event from "../models/Events";
 import * as utils from "../utils/wp-utils";
+import * as rest from "../lib/wp-rest-client";
+import * as docker from "../lib/wp-docker-client";
+import logger from "../utils/logger";
 
 export default class WpEvents {
   constructor(
@@ -7,6 +10,53 @@ export default class WpEvents {
   ) {}
 
   async create(event: Event): Promise<number> {
+    if (this.isRemoteDriver()) {
+      return this.createRemote(event);
+    }
+
+    return this.createLocal(event);
+  }
+
+  private async createRemote(event: Event): Promise<number> {
+    const restConfig = rest.getRestConfig();
+
+    logger.info(
+      {
+        postType: "event",
+        baseUrl: restConfig.baseUrl,
+      },
+      "Creating WordPress event via REST API",
+    );
+
+    const created = await rest.wpRest<any>(
+      restConfig,
+      "POST",
+      "/wp-json/wp/v2/events",
+      {
+        title: event.title,
+        content: event.content,
+        status: event.status,
+        meta: {
+          start_datetime: event.startDate,
+          end_datetime: event.endDate,
+          secondary_cta_label: event.ctaLabel ?? "",
+          secondary_cta_destination: event.ctaDestination ?? "",
+        },
+      },
+    );
+
+    const postId = Number(created?.id);
+
+    if (!Number.isFinite(postId)) {
+      throw new Error(
+        `Failed to parse event id from API: ${JSON.stringify(created)}`,
+      );
+    }
+
+    return postId;
+  }
+
+  private async createLocal(event: Event): Promise<number> {
     const authorId = await this.getDefaultAuthorId();
 
     const createResult = await this.wp([
@@ -116,5 +166,9 @@ export default class WpEvents {
         result,
       );
     }
+  }
+
+  private isRemoteDriver(): boolean {
+    return docker.wpDriver() === "remote";
   }
 }
