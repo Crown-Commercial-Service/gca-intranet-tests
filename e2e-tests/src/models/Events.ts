@@ -50,11 +50,8 @@ class EventBuilder {
     title: chance.sentence({ words: 5 }).replace(/\.$/, ""),
     content: chance.paragraph({ sentences: 3 }),
     status: "draft",
-
-    // store ISO format internally
     startDate: dayjs().add(1, "day").format("YYYY-MM-DD 00:00:00"),
     endDate: dayjs().add(3, "day").format("YYYY-MM-DD 00:00:00"),
-
     category: "Leave, absence and flexible",
     eventLocation: "In-person",
   };
