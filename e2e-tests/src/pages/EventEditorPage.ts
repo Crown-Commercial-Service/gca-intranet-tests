@@ -7,7 +7,6 @@ export default class EventEditorPage {
 
   readonly titleInput: Locator;
   readonly contentInput: Locator;
-
   readonly startDateInput: Locator;
   readonly endDateInput: Locator;
   readonly ctaLabelInput: Locator;
@@ -69,7 +68,7 @@ export default class EventEditorPage {
 
   async fillEventDetails(event: Event): Promise<void> {
     await expect(this.startDateInput).toBeVisible();
-    await this.page.pause()
+    await this.page.pause();
     await this.selectDateFromDatePicker(
       this.startDateInput,
       toEditorDateTime(event.startDate),

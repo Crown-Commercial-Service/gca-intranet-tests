@@ -31,6 +31,7 @@ test.describe("events", () => {
     await eventEditorPage.update();
 
     await homepage.goto();
-    await homepage.assertEventOnHomepage(event); //lets have a function that now checks this card. then we can write another scenarion to check when there are multiple events
+
+    await homepage.assertEventOnHomepage(event);
   });
 });

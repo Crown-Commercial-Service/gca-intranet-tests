@@ -4,6 +4,7 @@ import advancedFormat from "dayjs/plugin/advancedFormat";
 import type Post from "../models/Post";
 import type TakeALook from "../models/TakeALook";
 import type QuickLinks from "../models/QuickLinks";
+import type EventModel from "../models/Events";
 import {
   expectNoSeriousA11yViolations,
   expectNoSeriousA11yViolationsForSelectors,
@@ -60,6 +61,11 @@ export default class HomePage {
   private readonly quickLinksListTestId = "quick-links-list";
   private readonly quickLinksItemTestId = "quick-links-item";
 
+  private readonly eventsRowTestId = "events-row";
+  private readonly eventsDateTestId = "events-date";
+  private readonly eventsTitleTestId = "events-title";
+  private readonly eventsLinkTestId = "events-link";
+
   readonly primaryNavigation: Locator;
   readonly primaryNavigationParentLinks: Locator;
 
@@ -85,6 +91,8 @@ export default class HomePage {
   readonly quickLinksSubheading: Locator;
   readonly quickLinksList: Locator;
   readonly quickLinksItems: Locator;
+
+  readonly eventsRows: Locator;
 
   readonly latestNewsSectionSelector: string;
   readonly workUpdatesSectionSelector: string;
@@ -119,6 +127,8 @@ export default class HomePage {
     this.workUpdateSeeMoreLink = this.workUpdatesSection.getByTestId(
       this.workUpdateSeeMoreLinkTestId,
     );
+
+    this.eventsRows = this.page.getByTestId(this.eventsRowTestId);
 
     this.blogsSection = this.page.getByTestId(this.blogsSectionTestId);
     this.blogCard = this.blogsSection.getByTestId(this.blogCardTestId);
@@ -615,5 +625,37 @@ export default class HomePage {
     const link = this.blogCard.first().getByTestId(this.blogLinkTestId);
 
     await this.assertTextIsTruncated(link, post.title);
+  }
+
+  async assertEventOnHomepage(event: EventModel): Promise<void> {
+    const card = this.eventsRows
+      .filter({
+        has: this.page.getByTestId(this.eventsLinkTestId).filter({
+          hasText: event.title,
+        }),
+      })
+      .first();
+
+    await expect(card).toBeVisible();
+
+    await expect(card.getByTestId(this.eventsLinkTestId)).toHaveText(
+      event.title,
+    );
+
+    await expect(card.getByTestId(this.eventsDateTestId)).toHaveText(
+      event.startDate,
+    );
+
+    if (event.category) {
+      await expect(card.locator(".gca-card-meta .tag_label").nth(0)).toHaveText(
+        event.category,
+      );
+    }
+
+    if (event.eventLocation) {
+      await expect(card.locator(".gca-card-meta .tag_label").nth(1)).toHaveText(
+        event.eventLocation,
+      );
+    }
   }
 }
