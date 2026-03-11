@@ -13,6 +13,8 @@ export default class EventEditorPage {
   readonly ctaDestinationInput: Locator;
   readonly categoriesBox: Locator;
   readonly eventLocationBox: Locator;
+  readonly publishingSpinner: Locator;
+  readonly publishMessage: Locator;
 
   readonly publishButton: Locator;
   readonly updateButton: Locator;
@@ -24,7 +26,8 @@ export default class EventEditorPage {
     this.contentInput = page.locator("#content");
     this.categoriesBox = page.locator("#categorychecklist");
     this.eventLocationBox = page.locator("#event_locationchecklist");
-
+    this.publishingSpinner = page.locator("#publishing-action .spinner");
+    this.publishMessage = page.locator("#message.updated, #message.notice");
     this.startDateInput = page.locator(
       'input[name="acf[202603101020a_202603101020b]"] + input.input',
     );
@@ -102,12 +105,14 @@ export default class EventEditorPage {
   }
 
   async update(): Promise<void> {
-    await Promise.all([
-      this.page.waitForURL(/post\.php\?post=\d+&action=edit&message=1/),
-      this.publishButton.click(),
-    ]);
+    await this.publishButton.click();
 
-    await this.page.waitForLoadState("domcontentloaded");
+    await this.publishingSpinner.waitFor({ state: "hidden" });
+
+    await this.page.waitForURL(/post\.php\?post=\d+&action=edit(&message=1)?/);
+
+    await expect(this.publishMessage).toBeVisible();
+    await expect(this.publishButton).toBeEnabled();
   }
 
   async updateEventDetails(event: Event): Promise<void> {
