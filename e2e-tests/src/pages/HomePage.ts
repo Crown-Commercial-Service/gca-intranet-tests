@@ -63,7 +63,7 @@ export default class HomePage {
 
   private readonly eventsRowTestId = "events-row";
   private readonly eventsDateTestId = "events-date";
-  private readonly eventsTitleTestId = "events-title";
+  private readonly eventsSectionTestId = "events-section";
   private readonly eventsCategoryTestId = "events-category";
   private readonly eventsLocationTestId = "events-location";
   private readonly eventsLinkTestId = "events-link";
@@ -101,6 +101,7 @@ export default class HomePage {
   readonly blogsSectionSelector: string;
   readonly takeALookColumnSelector: string;
   readonly quickLinksSelector: string;
+  readonly eventsSectionSelector: string;
   readonly subMenuNavigation: string;
 
   private readonly latestNewsCardSelector: string;
@@ -182,6 +183,7 @@ export default class HomePage {
     this.blogsSectionSelector = `[data-testid="${this.blogsSectionTestId}"]`;
     this.takeALookColumnSelector = `[data-testid="${this.takeALookColumnTestId}"]`;
     this.quickLinksSelector = `[data-testid="${this.quickLinksTestId}"]`;
+    this.eventsSectionSelector = `[data-testid="${this.eventsSectionTestId}"]`;
 
     this.latestNewsCardSelector = [
       `[data-testid="${this.latestNewsFeaturedCardTestId}"]`,

@@ -17,6 +17,10 @@ export default class WpEvents {
     return this.createLocal(event);
   }
 
+  async createMany(events: Event[]): Promise<number[]> {
+    return Promise.all(events.map((event) => this.create(event)));
+  }
+
   private async createRemote(event: Event): Promise<number> {
     const restConfig = rest.getRestConfig();
 

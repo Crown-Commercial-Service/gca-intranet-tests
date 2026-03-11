@@ -63,8 +63,6 @@ function workerStackIndex(workerIndex: number): number {
   return workerIndex % PARALLEL_STACK_COUNT;
 }
 
-let parallelEnabledPromise: Promise<boolean> | undefined;
-
 async function isParallelEnabled(): Promise<boolean> {
   return false;
 }
