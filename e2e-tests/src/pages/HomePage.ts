@@ -113,6 +113,15 @@ export default class HomePage {
     return card.getByTestId(this.eventsLocationTestId);
   }
 
+  private eventCardByTitle(title: string): Locator {
+    return this.eventsRows
+      .filter({
+        has: this.page
+          .getByTestId(this.eventsLinkTestId)
+          .filter({ hasText: title }),
+      })
+      .first();
+  }
   constructor(page: Page, baseUrl?: string) {
     this.page = page;
     this.baseUrl = baseUrl;
@@ -638,13 +647,7 @@ export default class HomePage {
   }
 
   async assertEventOnHomepage(event: EventModel): Promise<void> {
-    const card = this.eventsRows
-      .filter({
-        has: this.page.getByTestId(this.eventsLinkTestId).filter({
-          hasText: event.title,
-        }),
-      })
-      .first();
+    const card = this.eventCardByTitle(event.title);
 
     await expect(card).toBeVisible();
 
