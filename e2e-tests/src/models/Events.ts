@@ -52,10 +52,10 @@ class EventBuilder {
     status: "draft",
 
     // store ISO format internally
-    startDate: dayjs().format("YYYY-MM-DD 00:00:00"),
-    endDate: dayjs().add(2, "day").format("YYYY-MM-DD 00:00:00"),
+    startDate: dayjs().add(1, "day").format("YYYY-MM-DD 00:00:00"),
+    endDate: dayjs().add(3, "day").format("YYYY-MM-DD 00:00:00"),
 
-    category: "Community",
+    category: "Leave, absence and flexible",
     eventLocation: "In-person",
   };
 
