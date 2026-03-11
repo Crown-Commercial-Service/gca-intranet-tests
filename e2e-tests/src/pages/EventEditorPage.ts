@@ -12,6 +12,7 @@ export default class EventEditorPage {
   readonly endDateInput: Locator;
   readonly ctaLabelInput: Locator;
   readonly ctaDestinationInput: Locator;
+  readonly categoriesBox: Locator;
 
   readonly publishButton: Locator;
   readonly updateButton: Locator;
@@ -21,7 +22,7 @@ export default class EventEditorPage {
 
     this.titleInput = page.locator("#title");
     this.contentInput = page.locator("#content");
-
+    this.categoriesBox = page.locator("#categorychecklist");
     this.startDateInput = page.locator(
       'input[name="acf[202603101020a_202603101020b]"] + input.input',
     );
@@ -41,6 +42,16 @@ export default class EventEditorPage {
     await this.page.goto(`/wp-admin/post.php?post=${postId}&action=edit`, {
       waitUntil: "domcontentloaded",
     });
+  }
+
+  async selectCategory(categoryName: string): Promise<void> {
+    const categoryOption = this.categoriesBox
+      .locator("label")
+      .filter({ hasText: categoryName })
+      .first();
+
+    await expect(categoryOption).toBeVisible();
+    await categoryOption.click();
   }
 
   async fillEventDetails(event: Event): Promise<void> {

@@ -15,7 +15,7 @@ test.describe("events", () => {
     const event = Event.anEvent()
       .withFixedTitle("Commercial Strategy Workshop")
       .withContent("A session covering the latest commercial strategy updates.")
-      .withCategory("Events")
+      // .withCategory('Community')
       .withStartDate("2026-03-18 00:00:00")
       .withEndDate("2026-03-21 00:00:00")
       .withCtaLabel("Book your place")
@@ -29,6 +29,7 @@ test.describe("events", () => {
 
     await eventEditorPage.gotoEdit(eventId);
     await eventEditorPage.fillEventDetails(event);
+    await eventEditorPage.selectCategory(event.category!);
     await eventEditorPage.update();
 
     await homepage.goto();

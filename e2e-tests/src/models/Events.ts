@@ -118,6 +118,10 @@ class EventBuilder {
     return this.props.ctaDestination;
   }
 
+  get category() {
+    return this.props.category;
+  }
+
   build(): Event {
     return new Event({ ...this.props });
   }
