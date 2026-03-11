@@ -103,9 +103,12 @@ export default class EventEditorPage {
   }
 
   async update(): Promise<void> {
-    await this.publishButton.click();
-    await expect(this.updateButton).toBeDisabled();
-    await expect(this.updateButton).toBeDisabled();
+    await Promise.all([
+      this.page.waitForURL(/post\.php\?post=\d+&action=edit&message=1/),
+      this.publishButton.click(),
+    ]);
+
+    await this.page.waitForLoadState("domcontentloaded");
   }
 
   async updateEventDetails(event: Event): Promise<void> {
