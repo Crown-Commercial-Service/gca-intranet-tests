@@ -250,7 +250,7 @@ test.describe("events", () => {
     await eventEditorPage.selectCategory(updatedFirstEvent.category!);
     await eventEditorPage.selectEventLocation(updatedFirstEvent.eventLocation!);
     await eventEditorPage.update();
-
+    await homepage.goto();
     await homepage.assertEventOrder([
       events[1].title,
       events[2].title,

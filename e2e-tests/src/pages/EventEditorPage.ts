@@ -106,17 +106,21 @@ export default class EventEditorPage {
 
   async update(): Promise<void> {
     await this.publishButton.click();
-
-    await this.publishingSpinner.waitFor({ state: "hidden" });
-
-    await this.page.waitForURL(/post\.php\?post=\d+&action=edit(&message=1)?/);
-
-    await expect(this.publishMessage).toBeVisible();
-    await expect(this.publishButton).toBeEnabled();
+    await this.waitForSaveToComplete();
   }
 
   async updateEventDetails(event: Event): Promise<void> {
     await this.fillEventDetails(event);
-    await this.updateButton.click();
+    await this.update();
+  }
+
+  private async waitForSaveToComplete(): Promise<void> {
+    await Promise.race([
+      this.page.waitForURL(/post\.php\?post=\d+&action=edit(&message=1)?/),
+      expect(this.publishMessage).toBeVisible(),
+    ]);
+
+    await this.page.waitForLoadState("domcontentloaded");
+    await expect(this.publishButton).toBeEnabled();
   }
 }
