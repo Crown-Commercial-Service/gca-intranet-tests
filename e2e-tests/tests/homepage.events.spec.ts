@@ -2,9 +2,9 @@ import { test } from "../src/wp.fixtures";
 import Event from "../src/models/Events";
 
 test.describe("events", () => {
-  test.beforeEach(async ({ wp }) => {
-    await wp.posts.clearByType("event");
-  });
+  // test.beforeEach(async ({ wp }) => {
+  //   await wp.posts.clearByType("event");
+  // });
 
   test("should display a single event", async ({ wp, homepage }) => {
     const event = Event.anEvent()

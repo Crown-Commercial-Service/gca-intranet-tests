@@ -22,7 +22,7 @@ export default class WpEvents {
 
     logger.info(
       {
-        postType: "event",
+        postType: "events",
         baseUrl: restConfig.baseUrl,
       },
       "Creating WordPress event via REST API",
