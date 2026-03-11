@@ -1,5 +1,6 @@
 import { test } from "../src/wp.fixtures";
 import Event from "../src/models/Events";
+import dayjs from "dayjs";
 
 test.describe("events", () => {
   test.beforeEach(async ({ wp }) => {
@@ -33,5 +34,44 @@ test.describe("events", () => {
     await homepage.goto();
 
     await homepage.assertEventOnHomepage(event);
+  });
+
+  test("should create three events with different future dates", async ({
+    wp,
+    wordpressLoginPage,
+    eventEditorPage,
+  }) => {
+    const events = [
+      Event.anEvent()
+        .withFixedTitle("Commercial Strategy Briefing")
+        .withStartDate(dayjs().add(1, "day").format("DD-MM-YYYY") + " 12:00 am")
+        .withEndDate(dayjs().add(2, "day").format("DD-MM-YYYY") + " 12:00 am")
+        .withStatus("publish"),
+
+      Event.anEvent()
+        .withFixedTitle("Procurement Policy Update Session")
+        .withStartDate(dayjs().add(3, "day").format("DD-MM-YYYY") + " 12:00 am")
+        .withEndDate(dayjs().add(4, "day").format("DD-MM-YYYY") + " 12:00 am")
+        .withStatus("publish"),
+
+      Event.anEvent()
+        .withFixedTitle("Supplier Engagement Workshop")
+        .withStartDate(dayjs().add(5, "day").format("DD-MM-YYYY") + " 12:00 am")
+        .withEndDate(dayjs().add(6, "day").format("DD-MM-YYYY") + " 12:00 am")
+        .withStatus("publish"),
+    ];
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    for (const event of events) {
+      const eventId = await wp.events.create(event);
+
+      await eventEditorPage.gotoEdit(eventId);
+      await eventEditorPage.fillEventDetails(event);
+      await eventEditorPage.selectCategory(event.category!);
+      await eventEditorPage.selectEventLocation(event.eventLocation!);
+      await eventEditorPage.update();
+    }
   });
 });

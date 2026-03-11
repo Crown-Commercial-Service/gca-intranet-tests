@@ -64,8 +64,9 @@ export default class HomePage {
   private readonly eventsRowTestId = "events-row";
   private readonly eventsDateTestId = "events-date";
   private readonly eventsTitleTestId = "events-title";
+  private readonly eventsCategoryTestId = "events-category";
+  private readonly eventsLocationTestId = "events-location";
   private readonly eventsLinkTestId = "events-link";
-  private readonly eventMetaTagSelector = ".gca-card-meta .tag_label";
 
   readonly primaryNavigation: Locator;
   readonly primaryNavigationParentLinks: Locator;
@@ -105,11 +106,11 @@ export default class HomePage {
   private readonly latestNewsCardSelector: string;
 
   private eventCategoryTag(card: Locator): Locator {
-    return card.locator(this.eventMetaTagSelector).nth(0);
+    return card.getByTestId(this.eventsCategoryTestId);
   }
 
   private eventLocationTag(card: Locator): Locator {
-    return card.locator(this.eventMetaTagSelector).nth(1);
+    return card.getByTestId(this.eventsLocationTestId);
   }
 
   constructor(page: Page, baseUrl?: string) {
@@ -648,7 +649,7 @@ export default class HomePage {
     await expect(card).toBeVisible();
 
     await expect(card.getByTestId(this.eventsLinkTestId)).toHaveText(
-      event.title,
+      event.title.trim(),
     );
 
     const expectedDate = dayjs(event.startDate, [
@@ -661,11 +662,15 @@ export default class HomePage {
     );
 
     if (event.category) {
-      await expect(this.eventCategoryTag(card)).toHaveText(event.category);
+      await expect(this.eventCategoryTag(card)).toHaveText(
+        event.category.trim(),
+      );
     }
 
     if (event.eventLocation) {
-      await expect(this.eventLocationTag(card)).toHaveText(event.eventLocation);
+      await expect(this.eventLocationTag(card)).toHaveText(
+        event.eventLocation.trim(),
+      );
     }
   }
 }
