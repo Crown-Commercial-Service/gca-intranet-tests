@@ -19,6 +19,7 @@ test.describe("homepage - quick links", () => {
 
     await customizerPage.goto();
     await customizerPage.openHomepageOptions();
+    await customizerPage.page.waitForTimeout(1000);
     await customizerPage.updateQuickLinks(quickLinks);
     await customizerPage.publish();
 

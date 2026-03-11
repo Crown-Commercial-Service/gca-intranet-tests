@@ -303,14 +303,14 @@ export default class WpPosts {
       );
     }
 
-    logger.info(
-      {
-        postType: post.type,
-        endpoint,
-        baseUrl: restConfig.baseUrl,
-      },
-      "Creating WordPress post via REST API",
-    );
+    // logger.info(
+    //   {
+    //     postType: post.type,
+    //     endpoint,
+    //     baseUrl: restConfig.baseUrl,
+    //   },
+    //   "Creating WordPress post via REST API",
+    // );
 
     const created = await rest.wpRest<any>(restConfig, "POST", endpoint, {
       title: post.title,
