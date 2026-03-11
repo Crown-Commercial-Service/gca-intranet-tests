@@ -438,28 +438,6 @@ export default class HomePage {
     );
   }
 
-  private async assertAuthorPossiblyTruncated(
-    authorEl: Locator,
-    expectedFullText: string,
-  ): Promise<void> {
-    await expect(authorEl).toBeVisible();
-
-    const normalize = (s: string) => s.replace(/\s+/g, " ").trim();
-
-    const actual = normalize((await authorEl.textContent()) ?? "");
-    const expected = normalize(expectedFullText);
-
-    if (actual === expected) return;
-
-    if (actual.endsWith("...") || actual.endsWith("…")) {
-      const visiblePart = actual.replace(/(\.\.\.|…)\s*$/, "").trim();
-      expect(expected.startsWith(visiblePart)).toBe(true);
-      return;
-    }
-
-    expect(actual).toBe(expected);
-  }
-
   private blogCardByTitle(title: string): Locator {
     return this.cardByStableTitle(this.blogCard, this.blogLinkTestId, title);
   }
@@ -612,9 +590,9 @@ export default class HomePage {
       .first()
       .getByTestId(this.workUpdateLinkTestId);
 
-    await this.assertTitleIsTruncated(link, post.title);
+    await this.assertTextIsTruncated(link, post.title);
   }
-  
+
   private async assertTextIsTruncated(
     locator: Locator,
     fullText: string,
@@ -627,15 +605,15 @@ export default class HomePage {
     expect(actual.endsWith("...")).toBe(true);
   }
 
-  private async assertTitleIsTruncated(
-    locator: Locator,
-    fullTitle: string,
-  ): Promise<void> {
-    await expect(locator).toBeVisible();
+  async assertBlogAuthorIsTruncated(expectedAuthor: string): Promise<void> {
+    const author = this.blogCard.first().getByTestId(this.blogAuthorTestId);
 
-    const actual = ((await locator.textContent()) ?? "").trim();
+    await this.assertTextIsTruncated(author, `By ${expectedAuthor}`);
+  }
 
-    expect(actual).not.toBe(fullTitle);
-    expect(actual.endsWith("...")).toBe(true);
+  async assertBlogTitleIsTruncated(post: Post): Promise<void> {
+    const link = this.blogCard.first().getByTestId(this.blogLinkTestId);
+
+    await this.assertTextIsTruncated(link, post.title);
   }
 }
