@@ -42,7 +42,7 @@ export default abstract class BasePage {
         return "News";
       case "blogs":
         return "Blogs";
-      case "work_update":
+      case "work_updates":
         return "Work Updates";
       default:
         throw new Error(`Unsupported breadcrumb type: ${post.type}`);
