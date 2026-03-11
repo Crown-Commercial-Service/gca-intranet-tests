@@ -10,6 +10,7 @@ export type EventProps = {
   status: EventStatus;
   startDate: string;
   endDate: string;
+  category?: string;
   ctaLabel?: string;
   ctaDestination?: string;
 };
@@ -22,6 +23,7 @@ export default class Event {
   readonly endDate: string;
   readonly ctaLabel?: string;
   readonly ctaDestination?: string;
+  readonly category?: string;
 
   constructor(props: EventProps) {
     this.title = props.title;
@@ -31,6 +33,7 @@ export default class Event {
     this.endDate = props.endDate;
     this.ctaLabel = props.ctaLabel;
     this.ctaDestination = props.ctaDestination;
+    this.category = props.category;
   }
 
   static anEvent(): EventBuilder {
@@ -74,6 +77,11 @@ class EventBuilder {
 
   withCtaLabel(label: string): this {
     this.props.ctaLabel = label;
+    return this;
+  }
+
+  withCategory(category: string): this {
+    this.props.category = category;
     return this;
   }
 
