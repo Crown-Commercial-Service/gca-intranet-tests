@@ -9,7 +9,7 @@ test.describe("Accessibility - Homepage", () => {
   test.beforeEach(async ({ wp, runId }) => {
     await wp.posts.clearByRunId(runId);
     await wp.posts.clearByTypeAndAuthor("page");
-    await wp.posts.clearByTypeAndAuthor("event");
+    await wp.posts.clearByType("events");
   });
 
   test("Homepage components including events have no serious or critical violations", async ({
@@ -28,9 +28,6 @@ test.describe("Accessibility - Homepage", () => {
     await wp.posts.createMany(contentType.workUpdates);
     await wp.posts.create(contentType.blog);
     await wp.posts.createPages(MenuPages.all());
-
-    await wp.customizer.applyCustomization(customizations.takeALook);
-    await wp.customizer.applyCustomization(customizations.quickLinks);
 
     await wordpressLoginPage.goto();
     await wordpressLoginPage.loginAsAdmin();

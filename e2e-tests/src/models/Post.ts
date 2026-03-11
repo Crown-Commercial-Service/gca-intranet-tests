@@ -111,7 +111,7 @@ export default class Post {
     const workUpdates: [Post, Post] = [
       applyRunId(
         Post.aPost()
-          .withType("work_update")
+          .withType("work_updates")
           .withFixedTitle("E2E Work Update 1")
           .withParagraphMaxChars(180)
           .withStatus("publish"),
@@ -119,14 +119,14 @@ export default class Post {
 
       applyRunId(
         Post.aPost()
-          .withType("work_update")
+          .withType("work_updates")
           .withFixedTitle("E2E Work Update 2")
           .withParagraphMaxChars(180)
           .withStatus("publish"),
       ).build(),
     ];
 
-    const blog = applyRunId(Post.aPost().withType("blog"))
+    const blog = applyRunId(Post.aPost().withType("blogs"))
       .withFixedTitle("E2E Blog Post")
       .withParagraphMaxChars(180)
       .withStatus("publish")
