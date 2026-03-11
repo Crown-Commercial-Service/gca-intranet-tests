@@ -104,6 +104,8 @@ export default class EventEditorPage {
 
   async update(): Promise<void> {
     await this.publishButton.click();
+    await expect(this.updateButton).toBeDisabled();
+    await expect(this.updateButton).toBeDisabled();
   }
 
   async updateEventDetails(event: Event): Promise<void> {

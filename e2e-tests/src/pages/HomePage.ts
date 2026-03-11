@@ -65,6 +65,7 @@ export default class HomePage {
   private readonly eventsDateTestId = "events-date";
   private readonly eventsTitleTestId = "events-title";
   private readonly eventsLinkTestId = "events-link";
+  private readonly eventMetaTagSelector = ".gca-card-meta .tag_label";
 
   readonly primaryNavigation: Locator;
   readonly primaryNavigationParentLinks: Locator;
@@ -102,6 +103,14 @@ export default class HomePage {
   readonly subMenuNavigation: string;
 
   private readonly latestNewsCardSelector: string;
+
+  private eventCategoryTag(card: Locator): Locator {
+    return card.locator(this.eventMetaTagSelector).nth(0);
+  }
+
+  private eventLocationTag(card: Locator): Locator {
+    return card.locator(this.eventMetaTagSelector).nth(1);
+  }
 
   constructor(page: Page, baseUrl?: string) {
     this.page = page;
@@ -642,20 +651,21 @@ export default class HomePage {
       event.title,
     );
 
+    const expectedDate = dayjs(event.startDate, [
+      "DD-MM-YYYY h:mm a",
+      "YYYY-MM-DD HH:mm:ss",
+    ]).format("Do MMMM YYYY");
+
     await expect(card.getByTestId(this.eventsDateTestId)).toHaveText(
-      event.startDate,
+      expectedDate,
     );
 
     if (event.category) {
-      await expect(card.locator(".gca-card-meta .tag_label").nth(0)).toHaveText(
-        event.category,
-      );
+      await expect(this.eventCategoryTag(card)).toHaveText(event.category);
     }
 
     if (event.eventLocation) {
-      await expect(card.locator(".gca-card-meta .tag_label").nth(1)).toHaveText(
-        event.eventLocation,
-      );
+      await expect(this.eventLocationTag(card)).toHaveText(event.eventLocation);
     }
   }
 }
