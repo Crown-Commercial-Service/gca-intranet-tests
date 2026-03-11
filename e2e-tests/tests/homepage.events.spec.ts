@@ -4,7 +4,8 @@ import dayjs from "dayjs";
 
 test.describe("events", () => {
   test.beforeEach(async ({ wp }) => {
-    await wp.posts.clearByTypeAndAuthor("events");
+    await wp.posts.clearByType("events");
+    // await wp.posts.clearByTypeAndAuthor("events");
   });
 
   test("should display a single event", async ({
@@ -44,18 +45,24 @@ test.describe("events", () => {
     const events = [
       Event.anEvent()
         .withFixedTitle("Commercial Strategy Briefing")
+        .withCategory("Accessibility")
+        .withEventLocation("Online")
         .withStartDate(dayjs().add(1, "day").format("DD-MM-YYYY") + " 12:00 am")
         .withEndDate(dayjs().add(2, "day").format("DD-MM-YYYY") + " 12:00 am")
         .withStatus("publish"),
 
       Event.anEvent()
         .withFixedTitle("Procurement Policy Update Session")
+        .withCategory("Change management")
+        .withEventLocation("In-person")
         .withStartDate(dayjs().add(3, "day").format("DD-MM-YYYY") + " 12:00 am")
         .withEndDate(dayjs().add(4, "day").format("DD-MM-YYYY") + " 12:00 am")
         .withStatus("publish"),
 
       Event.anEvent()
         .withFixedTitle("Supplier Engagement Workshop")
+        .withCategory("Digital and data")
+        .withEventLocation("Online")
         .withStartDate(dayjs().add(5, "day").format("DD-MM-YYYY") + " 12:00 am")
         .withEndDate(dayjs().add(6, "day").format("DD-MM-YYYY") + " 12:00 am")
         .withStatus("publish"),
