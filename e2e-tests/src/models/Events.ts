@@ -1,4 +1,5 @@
 import Chance from "chance";
+import dayjs from "dayjs";
 
 const chance = new Chance();
 
@@ -49,9 +50,10 @@ class EventBuilder {
     title: chance.sentence({ words: 5 }).replace(/\.$/, ""),
     content: chance.paragraph({ sentences: 3 }),
     status: "draft",
-    startDate: "18-03-2026 12:00 am",
-    endDate: "21-03-2031 12:00 am",
+    startDate: dayjs().format("DD-MM-YYYY") + " 12:00 am",
+    endDate: dayjs().add(2, "day").format("DD-MM-YYYY") + " 12:00 am",
     category: "Community",
+    eventLocation: "In-person",
   };
 
   withFixedTitle(title: string): this {
