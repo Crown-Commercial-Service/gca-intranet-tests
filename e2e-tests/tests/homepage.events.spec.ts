@@ -30,6 +30,7 @@ test.describe("events", () => {
     await eventEditorPage.gotoEdit(eventId);
     await eventEditorPage.fillEventDetails(event);
     await eventEditorPage.selectCategory(event.category!);
+    await eventEditorPage.selectEventLocation(event.eventLocation!);
     await eventEditorPage.update();
 
     await homepage.goto();

@@ -11,6 +11,7 @@ export type EventProps = {
   startDate: string;
   endDate: string;
   category?: string;
+  eventLocation?: string;
   ctaLabel?: string;
   ctaDestination?: string;
 };
@@ -24,6 +25,7 @@ export default class Event {
   readonly ctaLabel?: string;
   readonly ctaDestination?: string;
   readonly category?: string;
+  readonly eventLocation?: string;
 
   constructor(props: EventProps) {
     this.title = props.title;
@@ -34,6 +36,7 @@ export default class Event {
     this.ctaLabel = props.ctaLabel;
     this.ctaDestination = props.ctaDestination;
     this.category = props.category;
+    this.eventLocation = props.eventLocation;
   }
 
   static anEvent(): EventBuilder {
@@ -48,6 +51,7 @@ class EventBuilder {
     status: "draft",
     startDate: "18-03-2026 12:00 am",
     endDate: "21-03-2031 12:00 am",
+    category: "Community",
   };
 
   withFixedTitle(title: string): this {
@@ -77,11 +81,6 @@ class EventBuilder {
 
   withCtaLabel(label: string): this {
     this.props.ctaLabel = label;
-    return this;
-  }
-
-  withCategory(category: string): this {
-    this.props.category = category;
     return this;
   }
 
@@ -120,6 +119,10 @@ class EventBuilder {
 
   get category() {
     return this.props.category;
+  }
+
+  get eventLocation() {
+    return this.props.eventLocation;
   }
 
   build(): Event {

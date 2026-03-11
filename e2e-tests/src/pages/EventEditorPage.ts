@@ -13,6 +13,7 @@ export default class EventEditorPage {
   readonly ctaLabelInput: Locator;
   readonly ctaDestinationInput: Locator;
   readonly categoriesBox: Locator;
+  readonly eventLocationBox: Locator;
 
   readonly publishButton: Locator;
   readonly updateButton: Locator;
@@ -23,6 +24,7 @@ export default class EventEditorPage {
     this.titleInput = page.locator("#title");
     this.contentInput = page.locator("#content");
     this.categoriesBox = page.locator("#categorychecklist");
+    this.eventLocationBox = page.locator("#event_locationchecklist");
     this.startDateInput = page.locator(
       'input[name="acf[202603101020a_202603101020b]"] + input.input',
     );
@@ -52,6 +54,16 @@ export default class EventEditorPage {
 
     await expect(categoryOption).toBeVisible();
     await categoryOption.click();
+  }
+
+  async selectEventLocation(eventLocation: string): Promise<void> {
+    const eventLocationOption = this.eventLocationBox
+      .locator("label")
+      .filter({ hasText: eventLocation })
+      .first();
+
+    await expect(eventLocationOption).toBeVisible();
+    await eventLocationOption.click();
   }
 
   async fillEventDetails(event: Event): Promise<void> {
