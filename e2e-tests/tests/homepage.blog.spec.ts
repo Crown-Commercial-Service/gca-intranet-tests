@@ -81,7 +81,9 @@ test.describe("blogs", () => {
       .withStatus("publish");
 
     await wp.posts.create(older);
+    await homepage.page.waitForTimeout(1000);
     await wp.posts.create(latest);
+    await homepage.page.waitForTimeout(1000);
 
     await homepage.goto();
     await homepage.assertBlogsOnHomepage(latest);

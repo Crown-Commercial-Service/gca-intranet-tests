@@ -5,7 +5,8 @@
   "description": "End-to-end test suite for the gsa intranet wordpress application using Playwright.",
   "main": "",
   "scripts": {
-    "test": "npx dotenv -e .env -- playwright test --workers=1",
+    "test:qa": "npx dotenv -e .env.qa -- playwright test --workers=1",
+    "test:dev": "npx dotenv -e .env.dev -- playwright test --workers=1",
     "test:docker": "npx dotenv -e $WP_DOCKER_CWD/.env.e2e.docker -- playwright test",
     "test:docker:headed": "npx dotenv -e $WP_DOCKER_CWD/.env.e2e.docker -- playwright test --headed",
     "test:docker:ui": "npx dotenv -e $WP_DOCKER_CWD/.env.e2e.docker -- playwright test --ui",
