@@ -1,12 +1,12 @@
 import { test, expect } from "../src/wp.fixtures";
 import MenuPages from "../src/models/MenuPages";
 
-test.describe("menu pages", () => {
+test.describe("Header Navigation Menu", () => {
   test.beforeEach(async ({ wp }) => {
     await wp.posts.clearByTypeAndAuthor("page");
   });
 
-  test("Can create a GCA navigation menu and navigate it", async ({
+  test("Can create a GCA Header navigation menu and navigate it", async ({
     wp,
     wordpressLoginPage,
     customizerPage,

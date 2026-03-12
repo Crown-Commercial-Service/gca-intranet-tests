@@ -29,10 +29,16 @@ export default class CustomizerPage {
   readonly quickLink2Url: Locator;
   readonly quickLink3Text: Locator;
   readonly quickLink3Url: Locator;
+  readonly footerNavigationCheckbox: Locator;
 
   readonly publishButton: Locator;
   readonly publishedText: Locator;
   readonly publishedButton: Locator;
+
+  readonly customLinksAccordionButton: Locator;
+  readonly customLinkUrlInput: Locator;
+  readonly customLinkTextInput: Locator;
+  readonly addToMenuButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -84,6 +90,24 @@ export default class CustomizerPage {
       name: "Published",
       exact: true,
     });
+    this.footerNavigationCheckbox = page.locator(
+      '#customize-control-add_menu-locations input.menu-location[data-location-id="footer"]',
+    );
+    this.customLinksAccordionButton = page.getByRole("button", {
+      name: "Custom Links",
+    });
+
+    this.customLinkUrlInput = page.locator(
+      '#available-menu-items-custom-links input[type="url"]',
+    );
+
+    this.customLinkTextInput = page.locator(
+      '#available-menu-items-custom-links input[type="text"]',
+    );
+
+    this.addToMenuButton = page
+      .locator("#available-menu-items-custom-links")
+      .getByRole("button", { name: "Add to Menu" });
   }
 
   async goto(): Promise<void> {
@@ -96,11 +120,21 @@ export default class CustomizerPage {
     await this.homepageOptionsButton.click();
   }
 
-  async createMenu(menu: Menu): Promise<void> {
+  async createMenu(
+    menu: Menu,
+    location: "primary" | "footer" = "primary",
+  ): Promise<void> {
     await this.menusButton.click();
     await this.createNewMenuButton.click();
     await this.menuNameInput.fill(menu.name);
-    await this.primaryNavigationCheckbox.check();
+    await this.page.pause();
+
+    if (location === "primary") {
+      await this.primaryNavigationCheckbox.check();
+    } else {
+      await this.footerNavigationCheckbox.check();
+    }
+
     await this.nextButton.click();
     await this.page.waitForTimeout(1000);
     await this.addItemsButton.click();
@@ -210,6 +244,38 @@ export default class CustomizerPage {
         await this.makeSubMenuItem(child, section.parent);
       }
     }
+  }
+
+  async buildFooterMenu(
+    menu: { label: string; type: "page" | "custom"; url?: string }[],
+    menuName = "GCA Footer Navigation",
+  ): Promise<void> {
+    await this.createMenu(
+      {
+        name: menuName,
+      },
+      "footer",
+    );
+
+    for (const item of menu) {
+      if (item.type === "page") {
+        await this.addPageToMenu(item.label);
+      } else {
+        await this.addCustomLinkToMenu(item.label, item.url!);
+      }
+    }
+  }
+
+  async addCustomLinkToMenu(label: string, url: string): Promise<void> {
+    await this.customLinksAccordionButton.click();
+
+    await expect(this.customLinkUrlInput).toBeVisible();
+    await this.customLinkUrlInput.fill(url);
+
+    await expect(this.customLinkTextInput).toBeVisible();
+    await this.customLinkTextInput.fill(label);
+
+    await this.addToMenuButton.click();
   }
 
   async publish(): Promise<void> {
