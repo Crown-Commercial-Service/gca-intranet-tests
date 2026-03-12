@@ -50,6 +50,13 @@ async function expectNoSeriousA11yViolationsForSelector(
   page: Page,
   selector: string,
 ) {
+  const locator = page.locator(selector);
+  const count = await locator.count();
+
+  expect(count, `A11y selector not found on page: ${selector}`).toBeGreaterThan(
+    0,
+  );
+
   const results = (await new AxeBuilder({ page })
     .include(selector)
     .analyze()) as AxeResults;
@@ -62,7 +69,6 @@ async function expectNoSeriousA11yViolationsForSelector(
 
   return results;
 }
-
 export async function expectNoSeriousA11yViolationsForSelectors(
   page: Page,
   selectors: string[],
