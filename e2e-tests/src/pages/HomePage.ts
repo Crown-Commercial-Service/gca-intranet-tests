@@ -63,7 +63,7 @@ export default class HomePage {
 
   private readonly eventsRowTestId = "events-row";
   private readonly eventsDateTestId = "events-date";
-  private readonly eventsSectionTestId = "events-section";
+  private readonly eventsSectionTestId = "event-section";
   private readonly eventsCategoryTestId = "events-category";
   private readonly eventsLocationTestId = "events-location";
   private readonly eventsLinkTestId = "events-link";
