@@ -40,6 +40,12 @@ export default class CustomizerPage {
   readonly customLinkTextInput: Locator;
   readonly addToMenuButton: Locator;
 
+  readonly menuItemEditButton: string;
+
+  private menuItem(title: string): Locator {
+    return this.page.locator(".menu-item").filter({ hasText: title }).first();
+  }
+
   constructor(page: Page) {
     this.page = page;
 
@@ -104,6 +110,8 @@ export default class CustomizerPage {
     this.addToMenuButton = page
       .locator(".accordion-section.open")
       .getByRole("button", { name: "Add to Menu" });
+
+    this.menuItemEditButton = ".item-edit";
   }
 
   async goto(): Promise<void> {
@@ -152,40 +160,58 @@ export default class CustomizerPage {
     childTitle: string,
     parentTitle: string,
   ): Promise<void> {
-    const childItem = this.page
-      .locator(".menu-item")
-      .filter({ hasText: childTitle })
-      .first();
-
-    const parentItem = this.page
-      .locator(".menu-item")
-      .filter({ hasText: parentTitle })
-      .first();
+    const childItem = this.menuItem(childTitle);
+    const parentItem = this.menuItem(parentTitle);
 
     await expect(childItem).toBeVisible();
     await expect(parentItem).toBeVisible();
-
     await childItem.scrollIntoViewIfNeeded();
 
     const childBox = await childItem.boundingBox();
     const parentBox = await parentItem.boundingBox();
 
-    if (!childBox || !parentBox) {
-      throw new Error("Could not get menu item position for drag and drop.");
-    }
+    expect(childBox).not.toBeNull();
+    expect(parentBox).not.toBeNull();
 
     await this.page.mouse.move(
-      childBox.x + childBox.width / 2,
-      childBox.y + childBox.height / 2,
+      childBox!.x + childBox!.width / 2,
+      childBox!.y + childBox!.height / 2,
     );
     await this.page.mouse.down();
-
     await this.page.mouse.move(
-      parentBox.x + 80,
-      parentBox.y + parentBox.height + 10,
+      parentBox!.x + 80,
+      parentBox!.y + parentBox!.height + 10,
       { steps: 10 },
     );
+    await this.page.mouse.up();
+  }
 
+  async moveFooterLink(label: string, newIndex: number): Promise<void> {
+    const item = this.menuItem(label);
+    await expect(item).toBeVisible();
+
+    const items = this.page.locator(".menu-item");
+    const target = items.nth(newIndex);
+
+    await expect(target).toBeVisible();
+    await item.scrollIntoViewIfNeeded();
+
+    const itemBox = await item.boundingBox();
+    const targetBox = await target.boundingBox();
+
+    expect(itemBox).not.toBeNull();
+    expect(targetBox).not.toBeNull();
+
+    await this.page.mouse.move(
+      itemBox!.x + itemBox!.width / 2,
+      itemBox!.y + itemBox!.height / 2,
+    );
+    await this.page.mouse.down();
+    await this.page.mouse.move(
+      targetBox!.x + targetBox!.width / 2,
+      targetBox!.y + targetBox!.height / 2,
+      { steps: 10 },
+    );
     await this.page.mouse.up();
   }
 
@@ -277,11 +303,9 @@ export default class CustomizerPage {
     await expect(this.customLinkUrlInput).toBeVisible();
     await this.customLinkUrlInput.fill("");
     await this.customLinkUrlInput.fill(url);
-
     await expect(this.customLinkTextInput).toBeVisible();
     await this.customLinkTextInput.fill("");
     await this.customLinkTextInput.fill(label);
-
     await this.addToMenuButton.click();
   }
 
@@ -289,5 +313,25 @@ export default class CustomizerPage {
     await this.publishButton.click();
     await expect(this.publishedText).toBeVisible();
     await expect(this.publishedButton).toBeDisabled();
+  }
+  async editFooterLinkLabel(
+    currentLabel: string,
+    newLabel: string,
+  ): Promise<void> {
+    const menuItem = this.menuItem(currentLabel);
+    await expect(menuItem).toBeVisible();
+    await menuItem.locator(this.menuItemEditButton).click();
+    const textInput = menuItem.locator("input.edit-menu-item-title");
+    await expect(textInput).toBeVisible();
+    await textInput.fill(newLabel);
+  }
+
+  async deleteFooterLink(label: string): Promise<void> {
+    const menuItem = this.menuItem(label);
+    await expect(menuItem).toBeVisible();
+    await menuItem.locator(this.menuItemEditButton).click();
+    const removeLink = menuItem.getByRole("link", { name: "Remove" });
+    await expect(removeLink).toBeVisible();
+    await removeLink.click();
   }
 }
