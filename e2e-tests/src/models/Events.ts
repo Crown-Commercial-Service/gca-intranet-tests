@@ -11,6 +11,8 @@ export type EventProps = {
   status: EventStatus;
   startDate: string;
   endDate: string;
+  startTime?: string;
+  endTime?: string;
   category?: string;
   eventLocation?: string;
   ctaLabel?: string;
@@ -27,6 +29,8 @@ export default class Event {
   readonly ctaDestination?: string;
   readonly category?: string;
   readonly eventLocation?: string;
+  readonly startTime?: string;
+  readonly endTime?: string;
 
   constructor(props: EventProps) {
     this.title = props.title;
@@ -38,6 +42,8 @@ export default class Event {
     this.ctaDestination = props.ctaDestination;
     this.category = props.category;
     this.eventLocation = props.eventLocation;
+    this.startTime = props.startTime;
+    this.endTime = props.endTime;
   }
 
   static anEvent(): EventBuilder {
@@ -50,8 +56,8 @@ export default class Event {
         .withFixedTitle("Accessibility Support Session")
         .withCategory("Accessibility")
         .withEventLocation("Online")
-        .withStartDate(dayjs().add(1, "day").format("DD-MM-YYYY") + " 12:00 am")
-        .withEndDate(dayjs().add(2, "day").format("DD-MM-YYYY") + " 12:00 am")
+        .withStartDate(dayjs().add(1, "day").format("DD-MM-YYYY"))
+        .withEndDate(dayjs().add(2, "day").format("DD-MM-YYYY"))
         .withStatus("publish")
         .build(),
 
@@ -59,8 +65,8 @@ export default class Event {
         .withFixedTitle("Digital Strategy Workshop")
         .withCategory("Digital and data")
         .withEventLocation("In-person")
-        .withStartDate(dayjs().add(3, "day").format("DD-MM-YYYY") + " 12:00 am")
-        .withEndDate(dayjs().add(4, "day").format("DD-MM-YYYY") + " 12:00 am")
+        .withStartDate(dayjs().add(3, "day").format("DD-MM-YYYY"))
+        .withEndDate(dayjs().add(4, "day").format("DD-MM-YYYY"))
         .withStatus("publish")
         .build(),
 
@@ -68,8 +74,8 @@ export default class Event {
         .withFixedTitle("HR Policy Briefing")
         .withCategory("HR")
         .withEventLocation("Online")
-        .withStartDate(dayjs().add(5, "day").format("DD-MM-YYYY") + " 12:00 am")
-        .withEndDate(dayjs().add(6, "day").format("DD-MM-YYYY") + " 12:00 am")
+        .withStartDate(dayjs().add(5, "day").format("DD-MM-YYYY"))
+        .withEndDate(dayjs().add(6, "day").format("DD-MM-YYYY"))
         .withStatus("publish")
         .build(),
     ];
@@ -81,8 +87,10 @@ class EventBuilder {
     title: chance.sentence({ words: 5 }).replace(/\.$/, ""),
     content: chance.paragraph({ sentences: 3 }),
     status: "draft",
-    startDate: dayjs().add(1, "day").format("YYYY-MM-DD 00:00:00"),
-    endDate: dayjs().add(3, "day").format("YYYY-MM-DD 00:00:00"),
+    startDate: dayjs().add(1, "day").format("DD-MM-YYYY"),
+    endDate: dayjs().add(3, "day").format("DD-MM-YYYY"),
+    startTime: "09:00",
+    endTime: "17:00",
     category: "Leave, absence and flexible working",
     eventLocation: "In-person",
   };
@@ -112,15 +120,23 @@ class EventBuilder {
     return this;
   }
 
+  withStartTime(time: string): this {
+    this.props.startTime = time;
+    return this;
+  }
+
+  withEndTime(time: string): this {
+    this.props.endTime = time;
+    return this;
+  }
+
   withStartInDays(days: number): this {
-    this.props.startDate = dayjs()
-      .add(days, "day")
-      .format("YYYY-MM-DD 00:00:00");
+    this.props.startDate = dayjs().add(days, "day").format("DD-MM-YYYY");
     return this;
   }
 
   withEndInDays(days: number): this {
-    this.props.endDate = dayjs().add(days, "day").format("YYYY-MM-DD 00:00:00");
+    this.props.endDate = dayjs().add(days, "day").format("DD-MM-YYYY");
     return this;
   }
 
@@ -178,6 +194,14 @@ class EventBuilder {
 
   get eventLocation() {
     return this.props.eventLocation;
+  }
+
+  get startTime() {
+    return this.props.startTime;
+  }
+
+  get endTime() {
+    return this.props.endTime;
   }
 
   build(): Event {

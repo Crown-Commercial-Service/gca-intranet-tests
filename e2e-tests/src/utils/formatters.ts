@@ -73,3 +73,25 @@ export function toEditorDateTime(value: string): string {
 
   return `${day}-${month}-${year} ${twelveHour}:${minute} ${suffix}`;
 }
+
+export function toEditorDate(value: string): string {
+  const parsed = dayjs(value, [
+    "DD-MM-YYYY h:mm a",
+    "DD-MM-YYYY HH:mm",
+    "YYYY-MM-DD HH:mm:ss",
+    "YYYY-MM-DD 00:00:00",
+  ]);
+
+  return parsed.isValid() ? parsed.format("DD-MM-YYYY") : value;
+}
+
+export function toEditorTime(value: string): string {
+  const parsed = dayjs(value, [
+    "DD-MM-YYYY h:mm a",
+    "DD-MM-YYYY HH:mm",
+    "YYYY-MM-DD HH:mm:ss",
+    "YYYY-MM-DD 00:00:00",
+  ]);
+
+  return parsed.isValid() ? parsed.format("HH:mm") : value;
+}

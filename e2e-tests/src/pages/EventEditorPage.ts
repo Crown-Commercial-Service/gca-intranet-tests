@@ -1,6 +1,6 @@
 import { Page, Locator, expect } from "@playwright/test";
 import Event from "../../src/models/Events";
-import { toEditorDateTime } from "../../src/utils/formatters";
+import { toEditorDate } from "../../src/utils/formatters";
 
 export default class EventEditorPage {
   readonly page: Page;
@@ -15,7 +15,8 @@ export default class EventEditorPage {
   readonly eventLocationBox: Locator;
   readonly publishingSpinner: Locator;
   readonly publishMessage: Locator;
-
+  readonly startTimeInput: Locator;
+  readonly endTimeInput: Locator;
   readonly publishButton: Locator;
   readonly updateButton: Locator;
 
@@ -41,6 +42,21 @@ export default class EventEditorPage {
 
     this.publishButton = page.locator("#publish");
     this.updateButton = page.locator("#publish");
+    this.startDateInput = page.locator(
+      'input[name="acf[202603101020a_202603101020b]"] + input.input',
+    );
+
+    this.startTimeInput = page.locator(
+      'input[name="acf[202603101020a_202603101021c]"] + input.input',
+    );
+
+    this.endDateInput = page.locator(
+      'input[name="acf[202603101020a_202603101020c]"] + input.input',
+    );
+
+    this.endTimeInput = page.locator(
+      'input[name="acf[202603101020a_202603131021c]"] + input.input',
+    );
   }
 
   async gotoEdit(postId: number): Promise<void> {
@@ -73,14 +89,20 @@ export default class EventEditorPage {
     await expect(this.startDateInput).toBeVisible();
     await this.selectDateFromDatePicker(
       this.startDateInput,
-      toEditorDateTime(event.startDate),
+      toEditorDate(event.startDate),
     );
+
+    await expect(this.startTimeInput).toBeVisible();
+    await this.setTimeFromTimePicker(this.startTimeInput);
 
     await expect(this.endDateInput).toBeVisible();
     await this.selectDateFromDatePicker(
       this.endDateInput,
-      toEditorDateTime(event.endDate),
+      toEditorDate(event.endDate),
     );
+
+    await expect(this.endTimeInput).toBeVisible();
+    await this.setTimeFromTimePicker(this.endTimeInput);
 
     if (event.ctaLabel) {
       await this.ctaLabelInput.fill(event.ctaLabel);
@@ -89,6 +111,15 @@ export default class EventEditorPage {
     if (event.ctaDestination) {
       await this.ctaDestinationInput.fill(event.ctaDestination);
     }
+  }
+
+  async setTimeFromTimePicker(input: Locator): Promise<void> {
+    await input.click();
+
+    const nowButton = this.page.getByRole("button", { name: "Now" });
+    await expect(nowButton).toBeVisible();
+
+    await nowButton.click();
   }
 
   async selectDateFromDatePicker(input: Locator, value: string): Promise<void> {
