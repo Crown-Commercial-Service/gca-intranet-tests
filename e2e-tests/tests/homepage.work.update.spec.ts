@@ -4,7 +4,7 @@ import User from "../src/models/User";
 
 test.describe("work updates", () => {
   test.beforeEach(async ({ wp }) => {
-    await wp.posts.clearByType("work_updates");
+    await wp.posts.clearByTypeAndAuthor("work_updates");
   });
 
   test("should display a single work update", async ({ wp, homepage }) => {
@@ -20,7 +20,7 @@ test.describe("work updates", () => {
     await homepage.assertWorkUpdateOnHomepage(post);
   });
 
-  test("should enforce character limits for work update on homepage", async ({
+  test("should enforce character limits for work update on homepage", { tag: '@regression' }, async ({
     wp,
     homepage,
   }) => {
@@ -36,7 +36,7 @@ test.describe("work updates", () => {
     await homepage.assertWorkUpdateCharLimits(post);
   });
 
-  test("should display work updates in order (latest first and oldest last)", async ({
+  test("should display work updates in order (latest first and oldest last)", { tag: '@regression' }, async ({
     wp,
     homepage,
   }) => {
@@ -75,7 +75,7 @@ test.describe("work updates", () => {
     await homepage.assertWorkUpdatesOrder([post4, post3]);
   });
 
-  test("should open work update page", async ({ wp, homepage, workUpdate }) => {
+  test("should open work update page", { tag: '@regression' }, async ({ wp, homepage, workUpdate }) => {
     const post = Post.aPost()
       .withType("work_updates")
       .withFixedTitle("Supplier Onboarding Improvements")
@@ -90,7 +90,7 @@ test.describe("work updates", () => {
     await workUpdate.assertBreadcrumbs(post);
   });
 
-  test("should open work update list page", async ({
+  test("should open work update list page", { tag: '@regression' }, async ({
     wp,
     homepage,
     workUpdate,
@@ -108,7 +108,7 @@ test.describe("work updates", () => {
     await workUpdate.expectUrlToMatch(/work_update/);
   });
 
-  test("can edit author details of a work update post", async ({
+  test("can edit author details of a work update post", { tag: '@regression' }, async ({
     wp,
     homepage,
   }) => {
@@ -135,7 +135,7 @@ test.describe("work updates", () => {
     await homepage.assertWorkUpdateAuthor(post.title, newUser.username);
   });
 
-  test("should truncate work update author when it is too long", async ({
+  test("should truncate work update author when it is too long", { tag: '@regression' }, async ({
     wp,
     homepage,
   }) => {
@@ -158,7 +158,7 @@ test.describe("work updates", () => {
     await homepage.assertWorkUpdateAuthorIsTruncated(newUser.username);
   });
 
-  test("should truncate work update title when it is too long", async ({
+  test("should truncate work update title when it is too long", { tag: '@regression' }, async ({
     wp,
     homepage,
   }) => {

@@ -18,7 +18,7 @@ test.describe("homepage - latest news", () => {
     await homepage.assertLatestNewsLayout([post]);
   });
 
-  test("should display articles in two columns and in order (latest first and oldest last)", async ({
+  test("should display articles in two columns and in order (latest first and oldest last)", { tag: '@regression' }, async ({
     wp,
     homepage,
     runId,
@@ -60,7 +60,7 @@ test.describe("homepage - latest news", () => {
     await homepage.assertLatestNewsLayout([post4, post3, post2, post1]);
   });
 
-  test("should enforce title and paragraph character limits in single column", async ({
+  test("should enforce title and paragraph character limits in single column", { tag: '@regression' }, async ({
     wp,
     homepage,
     runId,
@@ -82,7 +82,7 @@ test.describe("homepage - latest news", () => {
     });
   });
 
-  test("should enforce title and paragraph character limits in two columns", async ({
+  test("should enforce title and paragraph character limits in two columns", { tag: '@regression' }, async ({
     wp,
     homepage,
   }) => {
@@ -127,7 +127,7 @@ test.describe("homepage - latest news", () => {
     });
   });
 
-  test("should open news details page", async ({
+  test("should open news details page", { tag: '@regression' }, async ({
     wp,
     homepage,
     latestNews,

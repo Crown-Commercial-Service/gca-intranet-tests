@@ -9,9 +9,9 @@ type FooterMenuItem = {
 export default class FooterPages {
   static all(): Post[] {
     return [
-      Post.aPage().withFixedTitle("Accessibility").withStatus("publish"),
+      Post.aPage().withFixedTitle("Accessibility1").withStatus("publish"),
       Post.aPage()
-        .withFixedTitle("Cookie Setting & Policy")
+        .withFixedTitle("Cookie Setting & Policy1")
         .withStatus("publish"),
     ];
   }
@@ -19,11 +19,11 @@ export default class FooterPages {
   static menu(): FooterMenuItem[] {
     return [
       {
-        label: "Accessibility",
+        label: "Accessibility1",
         type: "page",
       },
       {
-        label: "Cookie Setting & Policy",
+        label: "Cookie Setting & Policy1",
         type: "page",
       },
       {

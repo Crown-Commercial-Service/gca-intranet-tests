@@ -90,23 +90,19 @@ export default class CustomizerPage {
       name: "Published",
       exact: true,
     });
-    this.footerNavigationCheckbox = page.locator(
-      '#customize-control-add_menu-locations input.menu-location[data-location-id="footer"]',
-    );
+    this.footerNavigationCheckbox = page.getByRole("checkbox", {
+      name: "Footer legal links (Current:",
+    });
     this.customLinksAccordionButton = page.getByRole("button", {
       name: "Custom Links",
     });
 
-    this.customLinkUrlInput = page.locator(
-      '#available-menu-items-custom-links input[type="url"]',
-    );
+    this.customLinkUrlInput = page.getByRole("textbox", { name: "URL" });
 
-    this.customLinkTextInput = page.locator(
-      '#available-menu-items-custom-links input[type="text"]',
-    );
+    this.customLinkTextInput = page.getByRole("textbox", { name: "Link Text" });
 
     this.addToMenuButton = page
-      .locator("#available-menu-items-custom-links")
+      .locator(".accordion-section.open")
       .getByRole("button", { name: "Add to Menu" });
   }
 
@@ -127,7 +123,6 @@ export default class CustomizerPage {
     await this.menusButton.click();
     await this.createNewMenuButton.click();
     await this.menuNameInput.fill(menu.name);
-    await this.page.pause();
 
     if (location === "primary") {
       await this.primaryNavigationCheckbox.check();
@@ -260,19 +255,31 @@ export default class CustomizerPage {
     for (const item of menu) {
       if (item.type === "page") {
         await this.addPageToMenu(item.label);
-      } else {
-        await this.addCustomLinkToMenu(item.label, item.url!);
+      }
+    }
+
+    const customLinks = menu.filter(
+      (item): item is { label: string; type: "custom"; url: string } =>
+        item.type === "custom" && Boolean(item.url),
+    );
+
+    if (customLinks.length > 0) {
+      await this.customLinksAccordionButton.click();
+      await expect(this.customLinkUrlInput).toBeVisible();
+
+      for (const item of customLinks) {
+        await this.addCustomLinkToMenu(item.label, item.url);
       }
     }
   }
 
   async addCustomLinkToMenu(label: string, url: string): Promise<void> {
-    await this.customLinksAccordionButton.click();
-
     await expect(this.customLinkUrlInput).toBeVisible();
+    await this.customLinkUrlInput.fill("");
     await this.customLinkUrlInput.fill(url);
 
     await expect(this.customLinkTextInput).toBeVisible();
+    await this.customLinkTextInput.fill("");
     await this.customLinkTextInput.fill(label);
 
     await this.addToMenuButton.click();

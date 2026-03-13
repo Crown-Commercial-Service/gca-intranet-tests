@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 
 test.describe("events", () => {
   test.beforeEach(async ({ wp }) => {
-    await wp.posts.clearByType("events");
+    await wp.posts.clearByTypeAndAuthor("events");
   });
 
   test("should display a single event", async ({
@@ -38,7 +38,7 @@ test.describe("events", () => {
     await homepage.assertEventOnHomepage(event);
   });
 
-  test("should render a maximum of two events on the homepage", async ({
+  test("should render a maximum of two events on the homepage", { tag: '@regression' }, async ({
     wp,
     homepage,
     wordpressLoginPage,
@@ -90,7 +90,7 @@ test.describe("events", () => {
     ).toHaveText(events[2].title);
   });
 
-  test("should truncate event title", async ({
+  test("should truncate event title", { tag: '@regression' },  async ({
     wp,
     homepage,
     wordpressLoginPage,
@@ -118,7 +118,7 @@ test.describe("events", () => {
     await homepage.assertEventTitleIsTruncated(event);
   });
 
-  test("should display no events where start date is in the past", async ({
+  test("should display no events where start date is in the past", { tag: '@regression' }, async ({
     wp,
     homepage,
     wordpressLoginPage,
@@ -150,7 +150,7 @@ test.describe("events", () => {
     await expect(homepage.eventsRows).toHaveCount(0);
   });
 
-  test("should not show events when the start date is the current date", async ({
+  test("should not show events when the start date is the current date", { tag: '@regression' }, async ({
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -177,7 +177,7 @@ test.describe("events", () => {
     await expect(homepage.eventsRows).toHaveCount(0);
   });
 
-  test("should not display events that have expired", async ({
+  test("should not display events that have expired", { tag: '@regression' }, async ({
     wp,
     wordpressLoginPage,
     eventEditorPage,

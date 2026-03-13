@@ -1,7 +1,7 @@
 import { test, expect } from "../src/wp.fixtures";
 import TakeALook from "../src/models/TakeALook";
 
-test.describe("homepage - take a look", () => {
+test.describe("homepage - take a look", { tag: '@regression' }, () => {
   test("can create a take a look component via wordpress customizer", async ({
     homepage,
     wordpressLoginPage,

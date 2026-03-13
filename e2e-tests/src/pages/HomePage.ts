@@ -68,6 +68,8 @@ export default class HomePage {
   private readonly eventsLocationTestId = "events-location";
   private readonly eventsLinkTestId = "events-link";
 
+  readonly footerLinks: Locator;
+
   readonly primaryNavigation: Locator;
   readonly primaryNavigationParentLinks: Locator;
 
@@ -189,6 +191,9 @@ export default class HomePage {
       `[data-testid="${this.latestNewsFeaturedCardTestId}"]`,
       `[data-testid="${this.latestNewsSecondaryCardTestId}"]`,
     ].join(", ");
+    this.footerLinks = this.page.locator(
+      ".footer-legal-nav .govuk-footer__link",
+    );
   }
 
   async goto(): Promise<void> {
@@ -667,15 +672,11 @@ export default class HomePage {
     );
 
     if (event.category) {
-      await expect(this.eventCategoryTag(card)).toHaveText(
-        event.category,
-      );
+      await expect(this.eventCategoryTag(card)).toHaveText(event.category);
     }
 
     if (event.eventLocation) {
-      await expect(this.eventLocationTag(card)).toHaveText(
-        event.eventLocation,
-      );
+      await expect(this.eventLocationTag(card)).toHaveText(event.eventLocation);
     }
   }
 
@@ -694,6 +695,22 @@ export default class HomePage {
       await expect(
         this.eventsRows.nth(i).getByTestId(this.eventsLinkTestId),
       ).toHaveText(titles[i]);
+    }
+  }
+
+  async selectFooterLink(linkText: string): Promise<void> {
+    const link = this.footerLinks.filter({ hasText: linkText }).first();
+
+    await expect(link).toBeVisible();
+    await link.click();
+  }
+
+  async assertFooterLinks(
+    menu: { label: string; type: "page" | "custom"; url?: string }[],
+  ): Promise<void> {
+    for (const item of menu) {
+      const link = this.footerLinks.filter({ hasText: item.label }).first();
+      await expect(link).toBeVisible();
     }
   }
 }

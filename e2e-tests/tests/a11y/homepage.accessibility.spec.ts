@@ -8,7 +8,7 @@ test.describe("Accessibility - Homepage", () => {
   test.beforeEach(async ({ wp, runId }) => {
     await wp.posts.clearByRunId(runId);
     await wp.posts.clearByTypeAndAuthor("page");
-    await wp.posts.clearByType("events");
+    await wp.posts.clearByTypeAndAuthor("events");
   });
 
   test("Components on the homepage should have no serious or critical violations", async ({

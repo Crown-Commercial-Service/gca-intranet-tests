@@ -5,7 +5,7 @@ import Chance from "chance";
 
 const chance = new Chance();
 
-test.describe("blogs", () => {
+test.describe("blogs", { tag: '@regression' }, () => {
   test.beforeEach(async ({ wp }) => {
     await wp.posts.clearByTypeAndAuthor("blogs");
   });
