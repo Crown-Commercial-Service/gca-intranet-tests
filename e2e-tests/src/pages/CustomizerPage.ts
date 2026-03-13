@@ -186,33 +186,18 @@ export default class CustomizerPage {
     await this.page.mouse.up();
   }
 
-  async moveFooterLink(label: string, newIndex: number): Promise<void> {
+  async reorderFooterLink(label: string, newIndex: number): Promise<void> {
+    await this.page.getByRole("button", { name: "Reorder" }).click();
+
     const item = this.menuItem(label);
+
     await expect(item).toBeVisible();
+    await this.page.getByRole("button", { name: /Move/ }).nth(newIndex).click();
 
-    const items = this.page.locator(".menu-item");
-    const target = items.nth(newIndex);
-
-    await expect(target).toBeVisible();
-    await item.scrollIntoViewIfNeeded();
-
-    const itemBox = await item.boundingBox();
-    const targetBox = await target.boundingBox();
-
-    expect(itemBox).not.toBeNull();
-    expect(targetBox).not.toBeNull();
-
-    await this.page.mouse.move(
-      itemBox!.x + itemBox!.width / 2,
-      itemBox!.y + itemBox!.height / 2,
-    );
-    await this.page.mouse.down();
-    await this.page.mouse.move(
-      targetBox!.x + targetBox!.width / 2,
-      targetBox!.y + targetBox!.height / 2,
-      { steps: 10 },
-    );
-    await this.page.mouse.up();
+    const doneButton = this.page.getByRole("button", { name: "Done" });
+    if (await doneButton.isVisible()) {
+      await doneButton.click();
+    }
   }
 
   async updateTakeALook(takeALook: TakeALook): Promise<void> {
@@ -328,9 +313,10 @@ export default class CustomizerPage {
 
   async deleteFooterLink(label: string): Promise<void> {
     const menuItem = this.menuItem(label);
+
     await expect(menuItem).toBeVisible();
     await menuItem.locator(this.menuItemEditButton).click();
-    const removeLink = menuItem.getByRole("link", { name: "Remove" });
+    const removeLink = menuItem.getByRole('button', { name: 'Remove', exact: true });
     await expect(removeLink).toBeVisible();
     await removeLink.click();
   }

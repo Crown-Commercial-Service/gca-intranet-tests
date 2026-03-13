@@ -56,29 +56,26 @@ test.describe("footer navigation menu", () => {
       FooterPages.menu()[5],
     ]);
     await customizerPage.publish();
-    await customizerPage.goto();
     await customizerPage.editFooterLinkLabel(
       "Cookie Setting & Policy1",
       "Cookie Setting & Policy2",
     );
-    await customizerPage.moveFooterLink("Cookie Setting & Policy2", 0);
+    await customizerPage.reorderFooterLink("Cookie Setting & Policy2", 0);
     await customizerPage.publish();
     await homepage.goto();
     await homepage.assertFooterLinks([
-      { label: "Cookie Setting & Policy2", type: "page" },
       { label: "Submit Intranet Feedback", type: "custom" },
+      { label: "Cookie Setting & Policy2", type: "page" },
     ]);
   });
+
   test("can delete a footer link", async ({
     wp,
     wordpressLoginPage,
     customizerPage,
     homepage,
   }) => {
-    await wp.posts.createPages([
-      FooterPages.all()[0],
-      FooterPages.all()[1],
-    ]);
+    await wp.posts.createPages([FooterPages.all()[0], FooterPages.all()[1]]);
     await wordpressLoginPage.goto();
     await wordpressLoginPage.loginAsAdmin();
     await customizerPage.goto();
@@ -87,7 +84,6 @@ test.describe("footer navigation menu", () => {
       FooterPages.menu()[1],
     ]);
     await customizerPage.publish();
-    await customizerPage.goto();
     await customizerPage.deleteFooterLink("Accessibility1");
     await customizerPage.publish();
     await homepage.goto();
