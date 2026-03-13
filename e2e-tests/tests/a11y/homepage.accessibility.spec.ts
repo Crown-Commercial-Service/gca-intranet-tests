@@ -2,6 +2,7 @@ import { test } from "../../src/wp.fixtures";
 import Post from "../../src/models/Post";
 import Event from "../../src/models/Events";
 import MenuPages from "../../src/models/MenuPages";
+import FooterPages from "../../src/models/FooterPages";
 import HomepageCustomizationSet from "../../src/models/HomepageCustomizationSet";
 
 test.describe("Accessibility - Homepage", () => {
@@ -28,8 +29,8 @@ test.describe("Accessibility - Homepage", () => {
     await wp.posts.createMany(contentType.workUpdates);
     await wp.posts.create(contentType.blog);
 
-    // Create menu pages
-    await wp.posts.createPages(MenuPages.all());
+    // Create header and footer pages
+    await wp.posts.createPages([...MenuPages.all(), ...FooterPages.all()]);
 
     // Log in to WordPress admin
     await wordpressLoginPage.goto();
@@ -60,6 +61,12 @@ test.describe("Accessibility - Homepage", () => {
     await customizerPage.buildMenu(MenuPages.menu());
     await customizerPage.publish();
 
+    // Build footer navigation menu
+    await customizerPage.page.pause()
+    await customizerPage.goto();
+    await customizerPage.buildFooterMenu(FooterPages.menu());
+    await customizerPage.publish();
+
     // Open homepage and submenu for accessibility scan
     await homepage.goto();
     await homepage.hoverParentLink("Parent Nav Link 1");
@@ -74,6 +81,7 @@ test.describe("Accessibility - Homepage", () => {
       homepage.eventsSectionSelector,
       homepage.primaryNavigationSelector,
       homepage.subMenuNavigation,
+      homepage.footerSelector,
     ]);
   });
 });

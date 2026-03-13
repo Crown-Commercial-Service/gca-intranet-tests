@@ -105,6 +105,7 @@ export default class HomePage {
   readonly quickLinksSelector: string;
   readonly eventsSectionSelector: string;
   readonly subMenuNavigation: string;
+  readonly footerSelector: string;
 
   private readonly latestNewsCardSelector: string;
 
@@ -194,6 +195,7 @@ export default class HomePage {
     this.footerLinks = this.page.locator(
       ".footer-legal-nav .govuk-footer__link",
     );
+    this.footerSelector = "footer.site-footer";
   }
 
   async goto(): Promise<void> {
