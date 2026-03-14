@@ -21,6 +21,8 @@ import CustomizerPage from "../src/pages/CustomizerPage";
 import WpEvents from "../src/helpers/WpEvents";
 import logger from "../src/utils/logger";
 import EventEditorPage from "../src/pages/EventEditorPage";
+import EventsListPage from "../src/pages/EventsListPage";
+import EventPage from "../src/pages/EventPage";
 
 type WpHelpers = {
   exec: typeof runWp;
@@ -47,6 +49,8 @@ type Fixtures = {
   workUpdateList: WorkUpdateList;
   blog: BlogPage;
   blogList: BlogListPage;
+  eventsListPage: EventsListPage;
+  eventPage: EventPage;
 
   runId: string;
 };
@@ -234,6 +238,22 @@ export const test = base.extend<Fixtures>({
     const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
 
     await use(new BlogListPage(page, baseUrl));
+  },
+
+  eventsListPage: async ({ page }, use, testInfo) => {
+    const qaMode = isQaMode();
+    const parallel = qaMode ? false : await isParallelEnabled();
+    const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
+
+    await use(new EventsListPage(page, baseUrl));
+  },
+
+  eventPage: async ({ page }, use, testInfo) => {
+    const qaMode = isQaMode();
+    const parallel = qaMode ? false : await isParallelEnabled();
+    const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
+
+    await use(new EventPage(page, baseUrl));
   },
 });
 

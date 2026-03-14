@@ -655,6 +655,12 @@ export default class HomePage {
     await this.assertTextIsTruncated(link, post.title);
   }
 
+  async assertEventsOnHomepage(events: EventModel[]): Promise<void> {
+    for (const event of events) {
+      await this.assertEventOnHomepage(event);
+    }
+  }
+
   async assertEventOnHomepage(event: EventModel): Promise<void> {
     const card = this.eventCardByTitle(event.title);
 

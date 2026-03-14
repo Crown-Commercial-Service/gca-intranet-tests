@@ -62,7 +62,6 @@ test.describe("Accessibility - Homepage", () => {
     await customizerPage.publish();
 
     // Build footer navigation menu
-    await customizerPage.page.pause()
     await customizerPage.goto();
     await customizerPage.buildFooterMenu(FooterPages.menu());
     await customizerPage.publish();

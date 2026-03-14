@@ -60,6 +60,12 @@ test.describe("events", () => {
           .withStartDate(dayjs().add(5, "day").format("DD-MM-YYYY"))
           .withEndDate(dayjs().add(6, "day").format("DD-MM-YYYY"))
           .withStatus("publish"),
+
+        Event.anEvent()
+          .withFixedTitle("Working From Home")
+          .withStartDate(dayjs().add(7, "day").format("DD-MM-YYYY"))
+          .withEndDate(dayjs().add(8, "day").format("DD-MM-YYYY"))
+          .withStatus("publish"),
       ];
 
       await wordpressLoginPage.goto();
@@ -74,18 +80,9 @@ test.describe("events", () => {
         await eventEditorPage.selectEventLocation(events[index].eventLocation!);
         await eventEditorPage.update();
       }
-
       await homepage.goto();
-
-      await expect(homepage.eventsRows).toHaveCount(2);
-
-      await expect(
-        homepage.eventsRows.nth(0).getByTestId("events-link"),
-      ).toHaveText(events[0].title);
-
-      await expect(
-        homepage.eventsRows.nth(1).getByTestId("events-link"),
-      ).toHaveText(events[1].title);
+      await expect(homepage.eventsRows).toHaveCount(3);
+      await homepage.assertEventsOnHomepage(events.slice(0, 3));
     },
   );
 
@@ -109,9 +106,7 @@ test.describe("events", () => {
       await eventEditorPage.selectCategory(event.category!);
       await eventEditorPage.selectEventLocation(event.eventLocation!);
       await eventEditorPage.update();
-
       await homepage.goto();
-
       await homepage.assertEventTitleIsTruncated(event);
     },
   );
@@ -155,8 +150,8 @@ test.describe("events", () => {
         .withFixedTitle("Current Date Event Start")
         .withCategory("Change management")
         .withEventLocation("In-person")
-        .withStartDate(dayjs().format("DD-MM-YYYY") + " 12:00 am")
-        .withEndDate(dayjs().add(2, "day").format("DD-MM-YYYY") + " 12:00 am")
+        .withStartDate(dayjs().format("DD-MM-YYYY"))
+        .withEndDate(dayjs().add(2, "day").format("DD-MM-YYYY"))
         .withStatus("publish");
 
       await wordpressLoginPage.goto();
@@ -169,6 +164,8 @@ test.describe("events", () => {
       await eventEditorPage.selectCategory(event.category!);
       await eventEditorPage.selectEventLocation(event.eventLocation!);
       await eventEditorPage.update();
+
+      await homepage.goto();
       await expect(homepage.eventsRows).toHaveCount(0);
     },
   );
@@ -182,56 +179,45 @@ test.describe("events", () => {
           .withFixedTitle("Commercial Strategy Briefing")
           .withCategory("Accessibility")
           .withEventLocation("Online")
-          .withStartDate(
-            dayjs().add(1, "day").format("DD-MM-YYYY") + " 12:00 am",
-          )
-          .withEndDate(dayjs().add(2, "day").format("DD-MM-YYYY") + " 12:00 am")
+          .withStartDate(dayjs().add(1, "day").format("DD-MM-YYYY"))
+          .withEndDate(dayjs().add(2, "day").format("DD-MM-YYYY"))
           .withStatus("publish"),
 
         Event.anEvent()
           .withFixedTitle("Procurement Policy Update Session")
           .withCategory("Change management")
           .withEventLocation("In-person")
-          .withStartDate(
-            dayjs().add(3, "day").format("DD-MM-YYYY") + " 12:00 am",
-          )
-          .withEndDate(dayjs().add(4, "day").format("DD-MM-YYYY") + " 12:00 am")
+          .withStartDate(dayjs().add(3, "day").format("DD-MM-YYYY"))
+          .withEndDate(dayjs().add(4, "day").format("DD-MM-YYYY"))
           .withStatus("publish"),
 
         Event.anEvent()
           .withFixedTitle("Supplier Engagement Workshop")
           .withCategory("Digital and data")
           .withEventLocation("Online")
-          .withStartDate(
-            dayjs().add(5, "day").format("DD-MM-YYYY") + " 12:00 am",
-          )
-          .withEndDate(dayjs().add(6, "day").format("DD-MM-YYYY") + " 12:00 am")
+          .withStartDate(dayjs().add(5, "day").format("DD-MM-YYYY"))
+          .withEndDate(dayjs().add(6, "day").format("DD-MM-YYYY"))
           .withStatus("publish"),
 
         Event.anEvent()
           .withFixedTitle("Information Security Awareness Session")
           .withCategory("Information security")
           .withEventLocation("In-person")
-          .withStartDate(
-            dayjs().add(7, "day").format("DD-MM-YYYY") + " 12:00 am",
-          )
-          .withEndDate(dayjs().add(8, "day").format("DD-MM-YYYY") + " 12:00 am")
+          .withStartDate(dayjs().add(7, "day").format("DD-MM-YYYY"))
+          .withEndDate(dayjs().add(8, "day").format("DD-MM-YYYY"))
           .withStatus("publish"),
       ];
 
       await wordpressLoginPage.goto();
       await wordpressLoginPage.loginAsAdmin();
 
-      const eventIds: number[] = [];
+      const eventIds = await wp.events.createMany(events);
 
-      for (const event of events) {
-        const eventId = await wp.events.create(event);
-        eventIds.push(eventId);
-
-        await eventEditorPage.gotoEdit(eventId);
-        await eventEditorPage.fillEventDetails(event);
-        await eventEditorPage.selectCategory(event.category!);
-        await eventEditorPage.selectEventLocation(event.eventLocation!);
+      for (let index = 0; index < events.length; index++) {
+        await eventEditorPage.gotoEdit(eventIds[index]);
+        await eventEditorPage.fillEventDetails(events[index]);
+        await eventEditorPage.selectCategory(events[index].category!);
+        await eventEditorPage.selectEventLocation(events[index].eventLocation!);
         await eventEditorPage.update();
       }
 
@@ -239,12 +225,8 @@ test.describe("events", () => {
         .withFixedTitle(events[0].title)
         .withCategory(events[0].category!)
         .withEventLocation(events[0].eventLocation!)
-        .withStartDate(
-          dayjs().subtract(4, "day").format("DD-MM-YYYY") + " 12:00 am",
-        )
-        .withEndDate(
-          dayjs().subtract(2, "day").format("DD-MM-YYYY") + " 12:00 am",
-        )
+        .withStartDate(dayjs().subtract(4, "day").format("DD-MM-YYYY"))
+        .withEndDate(dayjs().subtract(2, "day").format("DD-MM-YYYY"))
         .withStatus("publish");
 
       await eventEditorPage.gotoEdit(eventIds[0]);
@@ -254,6 +236,7 @@ test.describe("events", () => {
         updatedFirstEvent.eventLocation!,
       );
       await eventEditorPage.update();
+
       await homepage.goto();
       await homepage.assertEventOrder([
         events[1].title,
