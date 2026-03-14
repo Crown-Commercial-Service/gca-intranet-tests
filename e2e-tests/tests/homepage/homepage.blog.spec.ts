@@ -1,6 +1,6 @@
-import { test, expect } from "../src/wp.fixtures";
-import Post from "../src/models/Post";
-import User from "../src/models/User";
+import { test, expect } from "../../src/wp.fixtures";
+import Post from "../../src/models/Post";
+import User from "../../src/models/User";
 import Chance from "chance";
 
 const chance = new Chance();

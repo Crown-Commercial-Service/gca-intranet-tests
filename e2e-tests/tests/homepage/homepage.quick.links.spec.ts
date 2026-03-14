@@ -1,5 +1,5 @@
-import { test, expect } from "../src/wp.fixtures";
-import QuickLinks from "../src/models/QuickLinks";
+import { test, expect } from "../../src/wp.fixtures";
+import QuickLinks from "../../src/models/QuickLinks";
 
 test.describe("homepage - quick links", { tag: '@regression' }, () => {
   test("can create a quick links component via wordpress customizer", async ({

@@ -1,5 +1,5 @@
-import { test, expect } from "../src/wp.fixtures";
-import FooterPages from "../src/models/FooterPages";
+import { test, expect } from "../../src/wp.fixtures";
+import FooterPages from "../../src/models/FooterPages";
 
 test.describe("footer navigation menu", () => {
   test.beforeEach(async ({ wp }) => {

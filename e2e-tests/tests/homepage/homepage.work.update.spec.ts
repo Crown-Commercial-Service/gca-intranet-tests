@@ -1,6 +1,6 @@
-import { test } from "../src/wp.fixtures";
-import Post from "../src/models/Post";
-import User from "../src/models/User";
+import { test } from "../../src/wp.fixtures";
+import Post from "../../src/models/Post";
+import User from "../../src/models/User";
 
 test.describe("work updates", () => {
   test.beforeEach(async ({ wp }) => {

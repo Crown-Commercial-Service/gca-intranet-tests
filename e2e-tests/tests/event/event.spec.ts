@@ -1,5 +1,5 @@
-import { test, expect } from "../src/wp.fixtures";
-import Event from "../src/models/Events";
+import { test, expect } from "../../src/wp.fixtures";
+import Event from "../../src/models/Events";
 
 test.describe("event builders", () => {
   test("event with only start date", async ({

@@ -1,5 +1,5 @@
-import { test, expect } from "../src/wp.fixtures";
-import MenuPages from "../src/models/MenuPages";
+import { test, expect } from "../../src/wp.fixtures";
+import MenuPages from "../../src/models/MenuPages";
 
 test.describe("Header Navigation Menu", () => {
   test.beforeEach(async ({ wp }) => {

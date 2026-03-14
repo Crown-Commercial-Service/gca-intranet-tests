@@ -1,5 +1,5 @@
-import { test, expect } from "../src/wp.fixtures";
-import Event from "../src/models/Events";
+import { test, expect } from "../../src/wp.fixtures";
+import Event from "../../src/models/Events";
 import dayjs from "dayjs";
 
 test.describe("events", () => {
