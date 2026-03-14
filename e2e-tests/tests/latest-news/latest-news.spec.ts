@@ -6,7 +6,7 @@ test.describe("Latest news component", () => {
   let post: Post;
   let postId: number;
 
-  test.beforeEach(async ({ wp }) => {
+  test.beforeEach(async ({ wp, wordpressLoginPage }) => {
     await wp.posts.clearByTypeAndAuthor("news");
     post = Post.aPost()
       .withType("news")
@@ -16,6 +16,8 @@ test.describe("Latest news component", () => {
       .withFeaturedImage("featured.jpg");
 
     postId = await wp.posts.create(post);
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
   });
 
   test("should display news details", async ({ latestNews }) => {

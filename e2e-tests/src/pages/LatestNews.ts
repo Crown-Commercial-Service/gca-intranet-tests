@@ -17,8 +17,7 @@ export default class LatestNews extends BasePage {
     super(page);
     this.baseUrl = baseUrl;
 
-    this.title = this.page.getByRole("heading").first();
-
+    this.title = this.page.getByTestId('news-title');
     this.main = this.page.getByTestId("news-main");
     this.featuredImage = this.page.getByTestId("news-featured-image");
     this.details = this.page.getByTestId("news-details");
