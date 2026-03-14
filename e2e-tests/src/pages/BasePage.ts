@@ -16,6 +16,7 @@ export default abstract class BasePage {
   readonly publishingSpinner: Locator;
   readonly publishMessage: Locator;
   readonly categoriesBox: Locator;
+  readonly labelsBox: Locator;
 
   protected constructor(page: Page) {
     this.page = page;
@@ -31,6 +32,7 @@ export default abstract class BasePage {
     this.publishingSpinner = page.locator("#publishing-action .spinner");
     this.publishMessage = page.locator("#message.updated, #message.notice");
     this.categoriesBox = page.locator("#categorychecklist");
+    this.labelsBox = page.locator("#taxonomy-label");
   }
 
   async goto(path: string) {
@@ -136,5 +138,15 @@ export default abstract class BasePage {
       default:
         throw new Error(`Unsupported breadcrumb type: ${post.type}`);
     }
+  }
+
+  async selectLabel(labelName: string): Promise<void> {
+    const labelOption = this.labelsBox
+      .locator("label")
+      .filter({ hasText: labelName })
+      .first();
+
+    await expect(labelOption).toBeVisible();
+    await labelOption.click();
   }
 }

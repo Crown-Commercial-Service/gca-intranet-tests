@@ -18,8 +18,7 @@ test.describe("Latest news component", () => {
       .withParagraphMaxChars(120)
       .withStatus("publish")
       .withFeaturedImage("featured.jpg")
-      .withCategory("Information security")
-      .withLabel("CCS live"); // this isnt working so we need to apply the label via the UI the same way we apply location in the events spec.
+      .withCategory("Information security");
 
     postId = await wp.posts.create(post);
 
@@ -28,6 +27,10 @@ test.describe("Latest news component", () => {
   });
 
   test("should display news details", async ({ latestNews }) => {
+    await latestNews.gotoEdit(postId);
+    await latestNews.selectLabel("CCS live");
+    await latestNews.update();
+
     await latestNews.gotoById(postId);
     await latestNews.assertTitle(post.title);
     await latestNews.assertContent(post.content);
