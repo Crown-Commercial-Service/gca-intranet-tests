@@ -32,7 +32,7 @@ export default abstract class BasePage {
     this.publishingSpinner = page.locator("#publishing-action .spinner");
     this.publishMessage = page.locator("#message.updated, #message.notice");
     this.categoriesBox = page.locator("#categorychecklist");
-    this.labelsBox = page.locator("#taxonomy-label");
+    this.labelsBox = page.locator("#radio-labeldiv #labelchecklist");
   }
 
   async goto(path: string) {
@@ -40,6 +40,7 @@ export default abstract class BasePage {
   }
 
   async gotoEdit(postId: number): Promise<void> {
+    await this.page.pause();
     await this.page.goto(`/wp-admin/post.php?post=${postId}&action=edit`, {
       waitUntil: "domcontentloaded",
     });
@@ -142,7 +143,7 @@ export default abstract class BasePage {
 
   async selectLabel(labelName: string): Promise<void> {
     const labelOption = this.labelsBox
-      .locator("label")
+      .locator("label.selectit")
       .filter({ hasText: labelName })
       .first();
 
