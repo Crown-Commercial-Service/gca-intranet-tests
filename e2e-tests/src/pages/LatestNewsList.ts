@@ -1,7 +1,7 @@
 import { Page, Locator, expect } from "@playwright/test";
+import BasePage from "./BasePage";
 
-export default class LatestNewsList {
-  readonly page: Page;
+export default class LatestNewsList extends BasePage {
   private readonly baseUrl?: string;
 
   readonly column: Locator;
@@ -12,8 +12,17 @@ export default class LatestNewsList {
   readonly secondaryCards: Locator;
   readonly seeMoreLink: Locator;
 
+  readonly main: Locator;
+  readonly posts: Locator;
+  readonly postTitles: Locator;
+  readonly postLinks: Locator;
+  readonly postDescriptions: Locator;
+  readonly postMeta: Locator;
+  readonly postTags: Locator;
+  readonly pagination: Locator;
+
   constructor(page: Page, baseUrl?: string) {
-    this.page = page;
+    super(page);
     this.baseUrl = baseUrl;
 
     this.column = this.page.getByTestId("latest-news-column");
@@ -27,6 +36,15 @@ export default class LatestNewsList {
 
     this.secondaryCards = this.column.getByTestId("latest-news-secondary-card");
     this.seeMoreLink = this.column.getByTestId("latest-news-see-more-link");
+
+    this.main = this.page.getByTestId("news-main");
+    this.posts = this.page.getByTestId("news-post");
+    this.postTitles = this.page.getByTestId("news-post-title");
+    this.postLinks = this.page.getByTestId("news-post-link");
+    this.postDescriptions = this.page.getByTestId("news-desc");
+    this.postMeta = this.page.getByTestId("news-post-meta");
+    this.postTags = this.page.getByTestId("news-post-tags");
+    this.pagination = this.page.getByTestId("news-pagination");
   }
 
   async goto(): Promise<void> {
@@ -34,8 +52,66 @@ export default class LatestNewsList {
     await expect(this.column).toBeVisible();
   }
 
+  async gotoNewsList(): Promise<void> {
+    const url = this.baseUrl
+      ? `${this.baseUrl.replace(/\/+$/, "")}/news`
+      : "/news";
+    await this.page.goto(url, { waitUntil: "networkidle" });
+    await expect(this.main).toBeVisible();
+  }
+
+  async assertNextPaginationVisible(): Promise<void> {
+    await expect(
+      this.pagination.getByRole("link", { name: "Next page" }),
+    ).toBeVisible();
+  }
+
+  async assertPreviousPaginationNotVisible(): Promise<void> {
+    await expect(
+      this.pagination.getByRole("link", { name: "Previous page" }),
+    ).toHaveCount(0);
+  }
+
+  async assertPreviousPaginationVisible(): Promise<void> {
+    await expect(
+      this.pagination.getByRole("link", { name: "Previous page" }),
+    ).toBeVisible();
+  }
+
+  async assertNextPaginationNotVisible(): Promise<void> {
+    await expect(
+      this.pagination.getByRole("link", { name: "Next page" }),
+    ).toHaveCount(0);
+  }
+
+  async assertOnPageTwo(): Promise<void> {
+    await expect(this.page).toHaveURL(/\/news\/page\/2\/$/);
+  }
+
   async openByTitle(title: string): Promise<void> {
     await expect(this.column).toBeVisible();
     await this.column.getByRole("link", { name: title }).click();
+  }
+
+  postByTitle(title: string): Locator {
+    return this.posts
+      .filter({
+        has: this.page.getByTestId("news-post-link").filter({ hasText: title }),
+      })
+      .first();
+  }
+
+  async assertPostVisible(title: string): Promise<void> {
+    await expect(this.postByTitle(title)).toBeVisible();
+  }
+
+  async assertPostCount(count: number): Promise<void> {
+    await expect(this.posts).toHaveCount(count);
+  }
+
+  async selectPost(title: string): Promise<void> {
+    const link = this.postByTitle(title).getByTestId("news-post-link");
+    await expect(link).toBeVisible();
+    await link.click();
   }
 }

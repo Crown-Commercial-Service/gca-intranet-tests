@@ -5,10 +5,14 @@ import type Post from "../models/Post";
 export default abstract class BasePage {
   protected readonly page: Page;
   readonly breadcrumbs: Locator;
+  readonly pagination: Locator;
 
   protected constructor(page: Page) {
     this.page = page;
     this.breadcrumbs = this.page.locator(".govuk-breadcrumbs");
+    this.pagination = this.page.locator(
+      ".pagination, [data-testid='news-pagination']",
+    );
   }
 
   async goto(path: string) {
@@ -21,6 +25,22 @@ export default abstract class BasePage {
 
   async a11y() {
     await expectNoSeriousA11yViolations(this.page);
+  }
+
+  async selectBreadcrumbLink(name: string): Promise<void> {
+    const link = this.breadcrumbs.getByRole("link", { name });
+    await expect(link).toBeVisible();
+    await link.click();
+  }
+
+  async assertPaginationVisible(): Promise<void> {
+    await expect(this.pagination).toBeVisible();
+  }
+
+  async selectPaginationLink(name: string | RegExp): Promise<void> {
+    const link = this.pagination.getByRole("link", { name });
+    await expect(link).toBeVisible();
+    await link.click();
   }
 
   async assertBreadcrumbs(post: Post): Promise<void> {

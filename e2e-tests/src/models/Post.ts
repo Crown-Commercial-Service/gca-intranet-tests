@@ -62,6 +62,20 @@ export default class Post {
     return new PostBuilder().withType("work_updates");
   }
 
+  static manyNews(
+    count: number,
+    titlePrefix: string = "E2E Latest Article",
+  ): Post[] {
+    return Array.from({ length: count }, (_, index) =>
+      Post.aPost()
+        .withType("news")
+        .withFixedTitle(`${titlePrefix} ${index + 1}`)
+        .withParagraphMaxChars(120)
+        .withStatus("publish")
+        .build(),
+    );
+  }
+
   static homepageSet(runId?: string): HomepageContent {
     const applyRunId = (builder: PostBuilder) => {
       if (runId) {
