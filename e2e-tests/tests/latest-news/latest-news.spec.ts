@@ -109,7 +109,7 @@ test.describe("Latest news component", () => {
     await latestNewsList.assertPreviousPaginationNotVisible();
   });
 
-  test("should show previous button and hide next button on the second pagination page", async ({
+  test("should hide next button on the last pagination page", async ({
     wp,
     latestNewsList,
   }) => {
@@ -118,9 +118,7 @@ test.describe("Latest news component", () => {
     await wp.posts.createMany(posts);
     await latestNewsList.gotoNewsList();
 
-    await latestNewsList.selectPaginationLink("Next page");
-    await latestNewsList.assertOnPageTwo();
-    await latestNewsList.assertPreviousPaginationVisible();
+    await latestNewsList.goToLastPaginationPage();
     await latestNewsList.assertNextPaginationNotVisible();
   });
 

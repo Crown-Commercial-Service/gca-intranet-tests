@@ -179,7 +179,7 @@ export default abstract class BasePage {
     container: Locator,
     text: string,
   ): Promise<void> {
-    await expect(container.filter({ hasText: text }).first()).toBeVisible();
+    await expect(container.filter({ hasText: text })).toBeVisible();
   }
 
   private getBreadcrumbSectionTitle(post: Post): string {
