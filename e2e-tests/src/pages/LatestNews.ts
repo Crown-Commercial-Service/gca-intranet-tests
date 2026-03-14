@@ -12,18 +12,20 @@ export default class LatestNews extends BasePage {
   readonly content: Locator;
   readonly publishedBy: Locator;
   readonly publishedByAuthor: Locator;
+  readonly tags: Locator;
 
   constructor(page: Page, baseUrl?: string) {
     super(page);
     this.baseUrl = baseUrl;
 
-    this.title = this.page.getByTestId('news-title');
+    this.title = this.page.getByTestId("news-title");
     this.main = this.page.getByTestId("news-main");
     this.featuredImage = this.page.getByTestId("news-featured-image");
     this.details = this.page.getByTestId("news-details");
     this.content = this.page.getByTestId("news-content");
     this.publishedBy = this.page.getByTestId("published-by");
     this.publishedByAuthor = this.page.getByTestId("published-by-author");
+    this.tags = this.details.locator(".govuk-tag");
   }
 
   async goto(pathname: string): Promise<void> {
@@ -35,7 +37,7 @@ export default class LatestNews extends BasePage {
       ? `${this.baseUrl.replace(/\/+$/, "")}/?p=${postId}`
       : `/?p=${postId}`;
     await this.page.goto(url, { waitUntil: "networkidle" });
-    await this.page.pause()
+    await this.page.pause();
   }
 
   async assertTitle(expected: string): Promise<void> {
@@ -49,6 +51,14 @@ export default class LatestNews extends BasePage {
 
   async assertAuthor(author: string): Promise<void> {
     await expect(this.publishedByAuthor).toHaveText(`By ${author}`);
+  }
+
+  async assertCategory(category: string): Promise<void> {
+    await expect(this.tags.filter({ hasText: category }).first()).toBeVisible();
+  }
+
+  async assertLabel(label: string): Promise<void> {
+    await expect(this.tags.filter({ hasText: label }).first()).toBeVisible();
   }
 
   async assertFeaturedImageVisible(): Promise<void> {

@@ -114,4 +114,21 @@ export default class LatestNewsList extends BasePage {
     await expect(link).toBeVisible();
     await link.click();
   }
+
+  async assertPostHasTag(title: string, tag: string): Promise<void> {
+    const post = this.postByTitle(title);
+    const tags = post.getByTestId("news-post-tags");
+
+    await expect(
+      tags.locator(".govuk-tag").filter({ hasText: tag }).first(),
+    ).toBeVisible();
+  }
+  
+  async assertPostHasCategory(title: string, category: string): Promise<void> {
+    await this.assertPostHasTag(title, category);
+  }
+
+  async assertPostHasLabel(title: string, label: string): Promise<void> {
+    await this.assertPostHasTag(title, label);
+  }
 }

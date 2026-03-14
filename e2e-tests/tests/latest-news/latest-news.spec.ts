@@ -9,6 +9,7 @@ const chance = new Chance();
 test.describe("Latest news component", () => {
   let post: Post;
   let postId: number;
+  let label = "CCS live";
 
   test.beforeEach(async ({ wp, wordpressLoginPage }) => {
     await wp.posts.clearByTypeAndAuthor("news");
@@ -28,7 +29,7 @@ test.describe("Latest news component", () => {
 
   test("should display news details", async ({ latestNews }) => {
     await latestNews.gotoEdit(postId);
-    await latestNews.selectLabel("CCS live");
+    await latestNews.selectLabel(label);
     await latestNews.update();
 
     await latestNews.gotoById(postId);
@@ -36,6 +37,8 @@ test.describe("Latest news component", () => {
     await latestNews.assertContent(post.content);
     await latestNews.assertAuthor(process.env.WP_ADMIN_USERNAME!);
     await latestNews.assertFeaturedImageVisible();
+    await latestNews.assertCategory(post.category!);
+    await latestNews.assertLabel(label);
     await expect(latestNews.details).toContainText(
       dayjs(post.createdAt).format("Do MMMM YYYY"),
     );
@@ -59,9 +62,16 @@ test.describe("Latest news component", () => {
 
   test("should display news details on the latest news list page", async ({
     latestNewsList,
+    latestNews,
   }) => {
+    await latestNews.gotoEdit(postId);
+    await latestNews.selectLabel(label);
+    await latestNews.update();
+
     await latestNewsList.gotoNewsList();
     await latestNewsList.assertPostVisible(post.title);
+    await latestNewsList.assertPostHasCategory(post.title, post.category!);
+    await latestNewsList.assertPostHasLabel(post.title, label);
     await expect(latestNewsList.postByTitle(post.title)).toContainText(
       dayjs(post.createdAt).format("Do MMMM YYYY"),
     );
