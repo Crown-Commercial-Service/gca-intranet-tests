@@ -1,6 +1,10 @@
 import dayjs from "dayjs";
 import { test, expect } from "../../src/wp.fixtures";
 import Post from "../../src/models/Post";
+import User from "../../src/models/User";
+import Chance from "chance";
+
+const chance = new Chance();
 
 test.describe("Latest news component", () => {
   let post: Post;
@@ -102,5 +106,35 @@ test.describe("Latest news component", () => {
     await latestNewsList.assertOnPageTwo();
     await latestNewsList.assertPreviousPaginationVisible();
     await latestNewsList.assertNextPaginationNotVisible();
+  });
+
+  test("should update the news author via WordPress UI", async ({
+    wp,
+    wordpressLoginPage,
+    latestNewsList,
+    latestNews,
+  }) => {
+    const username = chance.word({ length: 6 });
+
+    const newUser = User.anAdmin()
+      .withUsername(username)
+      .withEmail(`${username}@example.com`)
+      .withPassword("Password123!");
+
+    const postId = await wp.posts.create(post);
+    await wp.users.upsert(newUser);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await latestNews.gotoEdit(postId);
+    await latestNews.selectAuthor(newUser.username);
+    await latestNews.update();
+    
+    await latestNewsList.gotoNewsList();
+    await latestNewsList.assertPostVisible(post.title);
+
+    await latestNews.gotoById(postId);
+    await latestNews.assertAuthor(newUser.username);
   });
 });

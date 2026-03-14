@@ -1,10 +1,9 @@
 import { Page, Locator, expect } from "@playwright/test";
 import Event from "../../src/models/Events";
 import { toEditorDate } from "../../src/utils/formatters";
+import BasePage from "./BasePage";
 
-export default class EventEditorPage {
-  readonly page: Page;
-
+export default class EventEditorPage extends BasePage {
   readonly titleInput: Locator;
   readonly contentInput: Locator;
   readonly startDateInput: Locator;
@@ -21,8 +20,7 @@ export default class EventEditorPage {
   readonly updateButton: Locator;
 
   constructor(page: Page) {
-    this.page = page;
-
+    super(page);
     this.titleInput = page.locator("#title");
     this.contentInput = page.locator("#content");
     this.categoriesBox = page.locator("#categorychecklist");
@@ -133,25 +131,5 @@ export default class EventEditorPage {
     await input.press("Tab");
 
     await expect(input).toHaveValue(value);
-  }
-
-  async update(): Promise<void> {
-    await this.publishButton.click();
-    await this.waitForSaveToComplete();
-  }
-
-  async updateEventDetails(event: Event): Promise<void> {
-    await this.fillEventDetails(event);
-    await this.update();
-  }
-
-  private async waitForSaveToComplete(): Promise<void> {
-    await Promise.race([
-      this.page.waitForURL(/post\.php\?post=\d+&action=edit(&message=1)?/),
-      expect(this.publishMessage).toBeVisible(),
-    ]);
-
-    await this.page.waitForLoadState("domcontentloaded");
-    await expect(this.publishButton).toBeEnabled();
   }
 }
