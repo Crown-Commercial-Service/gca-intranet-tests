@@ -7,8 +7,6 @@ export default abstract class BasePage {
 
   readonly breadcrumbs: Locator;
   readonly pagination: Locator;
-  readonly paginationPageNumbers: Locator;
-  readonly visuallyHiddenText: Locator;
 
   // WordPress locators
   readonly posts: Locator;
@@ -34,10 +32,6 @@ export default abstract class BasePage {
     this.pagination = this.page.locator(
       ".pagination, [data-testid='news-pagination']",
     );
-    this.paginationPageNumbers = this.pagination.locator(
-      ".nav-links .page-numbers",
-    );
-    this.visuallyHiddenText = this.page.locator(".govuk-visually-hidden");
 
     this.posts = this.page.getByTestId("news-post");
     this.details = this.page.getByTestId("news-details");
@@ -103,42 +97,6 @@ export default abstract class BasePage {
     const link = this.pagination.getByRole("link", { name });
     await expect(link).toBeVisible();
     await link.click();
-  }
-
-  async assertNextPaginationVisible(): Promise<void> {
-    await expect(
-      this.pagination.getByRole("link", { name: "Next page" }),
-    ).toBeVisible();
-  }
-
-  async assertNextPaginationNotVisible(): Promise<void> {
-    await expect(
-      this.pagination.getByRole("link", { name: "Next page" }),
-    ).toHaveCount(0);
-  }
-
-  async assertPreviousPaginationVisible(): Promise<void> {
-    await expect(
-      this.pagination.getByRole("link", { name: "Previous page" }),
-    ).toBeVisible();
-  }
-
-  async assertPreviousPaginationNotVisible(): Promise<void> {
-    await expect(
-      this.pagination.getByRole("link", { name: "Previous page" }),
-    ).toHaveCount(0);
-  }
-
-  lastPaginationPageNumber(): Locator {
-    return this.paginationPageNumbers
-      .filter({ hasNot: this.visuallyHiddenText })
-      .last();
-  }
-
-  async goToLastPaginationPage(): Promise<void> {
-    const lastPage = this.lastPaginationPageNumber();
-    await expect(lastPage).toBeVisible();
-    await lastPage.click();
   }
 
   async update(): Promise<void> {
