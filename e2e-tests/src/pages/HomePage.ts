@@ -313,9 +313,12 @@ export default class HomePage {
     const snippet = plainText.slice(0, 40);
     return this.page.getByText(snippet);
   }
-
   async openLatestArticle(title: string): Promise<void> {
-    await this.articleLink(title).click();
+    const link = this.latestNewsColumn
+      .getByRole("link", { name: title })
+      .first();
+    await expect(link).toBeVisible();
+    await link.click();
   }
 
   async assertLatestNewsLayout(posts: Post[]): Promise<void> {
