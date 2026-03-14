@@ -25,6 +25,7 @@ export type PostProps = {
   createdAt: Date;
   category?: string;
   template?: string;
+    label?: string;
 };
 
 export default class Post {
@@ -37,6 +38,7 @@ export default class Post {
   readonly createdAt: Date;
   readonly category?: string;
   readonly template?: string;
+    readonly label?: string;
 
   constructor(props: PostProps) {
     this.title = props.title;
@@ -48,6 +50,7 @@ export default class Post {
     this.createdAt = props.createdAt;
     this.category = props.category;
     this.template = props.template;
+        this.label = props.label;
   }
 
   static aPost(): PostBuilder {
@@ -233,6 +236,11 @@ class PostBuilder {
 
   withTemplate(template: string): this {
     this.props.template = template;
+    return this;
+  }
+
+  withLabel(label: string): this {
+    this.props.label = label;
     return this;
   }
 

@@ -15,6 +15,7 @@ export default abstract class BasePage {
   readonly publishButton: Locator;
   readonly publishingSpinner: Locator;
   readonly publishMessage: Locator;
+  readonly categoriesBox: Locator;
 
   protected constructor(page: Page) {
     this.page = page;
@@ -29,6 +30,7 @@ export default abstract class BasePage {
     this.publishButton = page.locator("#publish");
     this.publishingSpinner = page.locator("#publishing-action .spinner");
     this.publishMessage = page.locator("#message.updated, #message.notice");
+    this.categoriesBox = page.locator("#categorychecklist");
   }
 
   async goto(path: string) {
@@ -43,7 +45,17 @@ export default abstract class BasePage {
 
   async selectAuthor(author: string): Promise<void> {
     await this.authorSection.scrollIntoViewIfNeeded();
-    await this.authorSelect.selectOption({ label: author });
+    await expect(this.authorSelect).toBeVisible();
+
+    const option = this.authorSelect
+      .locator("option")
+      .filter({ hasText: author })
+      .first();
+    const label = (await option.textContent())?.trim();
+
+    expect(label).toBeTruthy();
+
+    await this.authorSelect.selectOption({ label: label! });
   }
 
   async expectUrlToMatch(pattern: RegExp): Promise<void> {
@@ -70,17 +82,25 @@ export default abstract class BasePage {
     await link.click();
   }
 
-
   async update(): Promise<void> {
     await this.publishButton.click();
     await this.waitForSaveToComplete();
-    await this.page.pause();
   }
 
   // async updateEventDetails(event: Event): Promise<void> {
   //   await this.fillEventDetails(event);
   //   await this.update();
   // }
+
+  async selectCategory(categoryName: string): Promise<void> {
+    const categoryOption = this.categoriesBox
+      .locator("label")
+      .filter({ hasText: categoryName })
+      .first();
+
+    await expect(categoryOption).toBeVisible();
+    await categoryOption.click();
+  }
 
   private async waitForSaveToComplete(): Promise<void> {
     await Promise.race([

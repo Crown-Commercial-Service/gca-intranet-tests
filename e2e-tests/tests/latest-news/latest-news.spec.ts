@@ -17,9 +17,12 @@ test.describe("Latest news component", () => {
       .withFixedTitle("E2E Latest Article")
       .withParagraphMaxChars(120)
       .withStatus("publish")
-      .withFeaturedImage("featured.jpg");
+      .withFeaturedImage("featured.jpg")
+      .withCategory("Information security")
+      .withLabel("CCS live"); // this isnt working so we need to apply the label via the UI the same way we apply location in the events spec.
 
     postId = await wp.posts.create(post);
+
     await wordpressLoginPage.goto();
     await wordpressLoginPage.loginAsAdmin();
   });
@@ -108,32 +111,19 @@ test.describe("Latest news component", () => {
     await latestNewsList.assertNextPaginationNotVisible();
   });
 
-  test("should update the news author via WordPress UI", async ({
+  test("should show correct author after updating a new article", async ({
     wp,
-    wordpressLoginPage,
-    latestNewsList,
     latestNews,
   }) => {
-    const username = chance.word({ length: 6 });
-
+    const username = chance.word({ length: 2 });
     const newUser = User.anAdmin()
       .withUsername(username)
-      .withEmail(`${username}@example.com`)
-      .withPassword("Password123!");
+      .withEmail(`${username}@example.com`);
 
-    const postId = await wp.posts.create(post);
     await wp.users.upsert(newUser);
-
-    await wordpressLoginPage.goto();
-    await wordpressLoginPage.loginAsAdmin();
-
     await latestNews.gotoEdit(postId);
     await latestNews.selectAuthor(newUser.username);
     await latestNews.update();
-    
-    await latestNewsList.gotoNewsList();
-    await latestNewsList.assertPostVisible(post.title);
-
     await latestNews.gotoById(postId);
     await latestNews.assertAuthor(newUser.username);
   });

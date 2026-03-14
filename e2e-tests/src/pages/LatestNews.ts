@@ -35,6 +35,7 @@ export default class LatestNews extends BasePage {
       ? `${this.baseUrl.replace(/\/+$/, "")}/?p=${postId}`
       : `/?p=${postId}`;
     await this.page.goto(url, { waitUntil: "networkidle" });
+    await this.page.pause()
   }
 
   async assertTitle(expected: string): Promise<void> {

@@ -10,7 +10,6 @@ export default class EventEditorPage extends BasePage {
   readonly endDateInput: Locator;
   readonly ctaLabelInput: Locator;
   readonly ctaDestinationInput: Locator;
-  readonly categoriesBox: Locator;
   readonly eventLocationBox: Locator;
   readonly publishingSpinner: Locator;
   readonly publishMessage: Locator;
@@ -23,7 +22,6 @@ export default class EventEditorPage extends BasePage {
     super(page);
     this.titleInput = page.locator("#title");
     this.contentInput = page.locator("#content");
-    this.categoriesBox = page.locator("#categorychecklist");
     this.eventLocationBox = page.locator("#event_locationchecklist");
     this.publishingSpinner = page.locator("#publishing-action .spinner");
     this.publishMessage = page.locator("#message.updated, #message.notice");
@@ -63,15 +61,15 @@ export default class EventEditorPage extends BasePage {
     });
   }
 
-  async selectCategory(categoryName: string): Promise<void> {
-    const categoryOption = this.categoriesBox
-      .locator("label")
-      .filter({ hasText: categoryName })
-      .first();
+  // async selectCategory(categoryName: string): Promise<void> {
+  //   const categoryOption = this.categoriesBox
+  //     .locator("label")
+  //     .filter({ hasText: categoryName })
+  //     .first();
 
-    await expect(categoryOption).toBeVisible();
-    await categoryOption.click();
-  }
+  //   await expect(categoryOption).toBeVisible();
+  //   await categoryOption.click();
+  // }
 
   async selectEventLocation(eventLocation: string): Promise<void> {
     const eventLocationOption = this.eventLocationBox

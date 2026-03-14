@@ -11,7 +11,7 @@ export default defineConfig({
   testIgnore: ["**/a11y/**"],
   globalSetup: undefined,
 
-  timeout: 80_000,
+  timeout: 60_000,
   expect: { timeout: 10_000 },
 
   fullyParallel: true,
