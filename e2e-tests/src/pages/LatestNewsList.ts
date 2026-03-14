@@ -19,9 +19,6 @@ export default class LatestNewsList extends BasePage {
   readonly postDescriptions: Locator;
   readonly postMeta: Locator;
   readonly postTags: Locator;
-  readonly pagination: Locator;
-  readonly paginationPageNumbers: Locator;
-  readonly visuallyHiddenText: Locator;
 
   constructor(page: Page, baseUrl?: string) {
     super(page);
@@ -46,11 +43,6 @@ export default class LatestNewsList extends BasePage {
     this.postDescriptions = this.page.getByTestId("news-desc");
     this.postMeta = this.page.getByTestId("news-post-meta");
     this.postTags = this.page.getByTestId("news-post-tags");
-    this.pagination = this.page.getByTestId("news-pagination");
-    this.paginationPageNumbers = this.pagination.locator(
-      ".nav-links .page-numbers",
-    );
-    this.visuallyHiddenText = this.page.locator(".govuk-visually-hidden");
   }
 
   async goto(): Promise<void> {
@@ -64,24 +56,6 @@ export default class LatestNewsList extends BasePage {
       : "/news";
     await this.page.goto(url, { waitUntil: "networkidle" });
     await expect(this.main).toBeVisible();
-  }
-
-  async assertNextPaginationVisible(): Promise<void> {
-    await expect(
-      this.pagination.getByRole("link", { name: "Next page" }),
-    ).toBeVisible();
-  }
-
-  async assertPreviousPaginationNotVisible(): Promise<void> {
-    await expect(
-      this.pagination.getByRole("link", { name: "Previous page" }),
-    ).toHaveCount(0);
-  }
-
-  async assertPreviousPaginationVisible(): Promise<void> {
-    await expect(
-      this.pagination.getByRole("link", { name: "Previous page" }),
-    ).toBeVisible();
   }
 
   async assertOnPageTwo(): Promise<void> {
@@ -130,23 +104,5 @@ export default class LatestNewsList extends BasePage {
 
   async assertPostHasLabel(title: string, label: string): Promise<void> {
     await this.assertPostHasTag(title, label);
-  }
-
-  lastPaginationPageNumber(): Locator {
-    return this.paginationPageNumbers
-      .filter({ hasNot: this.visuallyHiddenText })
-      .last();
-  }
-
-  async goToLastPaginationPage(): Promise<void> {
-    const lastPage = this.lastPaginationPageNumber();
-    await expect(lastPage).toBeVisible();
-    await lastPage.click();
-  }
-
-  async assertNextPaginationNotVisible(): Promise<void> {
-    await expect(
-      this.pagination.getByRole("link", { name: "Next page" }),
-    ).toHaveCount(0);
   }
 }

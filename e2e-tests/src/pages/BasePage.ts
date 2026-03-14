@@ -24,6 +24,8 @@ export default abstract class BasePage {
   readonly details: Locator;
   readonly categoryTag: Locator;
   readonly taxonomyTag: Locator;
+  readonly paginationPageNumbers: Locator;
+  readonly visuallyHiddenText: Locator;
 
   protected constructor(page: Page) {
     this.page = page;
@@ -47,6 +49,11 @@ export default abstract class BasePage {
     this.publishMessage = page.locator("#message.updated, #message.notice");
     this.categoriesBox = page.locator("#categorychecklist");
     this.labelsBox = page.locator("#radio-labeldiv #labelchecklist");
+    this.pagination = this.page.getByTestId("news-pagination");
+    this.paginationPageNumbers = this.pagination.locator(
+      ".nav-links .page-numbers",
+    );
+    this.visuallyHiddenText = this.page.locator(".govuk-visually-hidden");
   }
 
   async goto(path: string): Promise<void> {
@@ -180,6 +187,42 @@ export default abstract class BasePage {
     text: string,
   ): Promise<void> {
     await expect(container.filter({ hasText: text })).toBeVisible();
+  }
+
+  lastPaginationPageNumber(): Locator {
+    return this.paginationPageNumbers
+      .filter({ hasNot: this.visuallyHiddenText })
+      .last();
+  }
+
+  async goToLastPaginationPage(): Promise<void> {
+    const lastPage = this.lastPaginationPageNumber();
+    await expect(lastPage).toBeVisible();
+    await lastPage.click();
+  }
+
+  async assertNextPaginationNotVisible(): Promise<void> {
+    await expect(
+      this.pagination.getByRole("link", { name: "Next page" }),
+    ).toHaveCount(0);
+  }
+
+  async assertNextPaginationVisible(): Promise<void> {
+    await expect(
+      this.pagination.getByRole("link", { name: "Next page" }),
+    ).toBeVisible();
+  }
+
+  async assertPreviousPaginationNotVisible(): Promise<void> {
+    await expect(
+      this.pagination.getByRole("link", { name: "Previous page" }),
+    ).toHaveCount(0);
+  }
+
+  async assertPreviousPaginationVisible(): Promise<void> {
+    await expect(
+      this.pagination.getByRole("link", { name: "Previous page" }),
+    ).toBeVisible();
   }
 
   private getBreadcrumbSectionTitle(post: Post): string {
