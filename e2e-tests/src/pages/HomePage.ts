@@ -468,15 +468,33 @@ export default class HomePage {
     title: string,
     expectedAuthor?: string,
   ): Promise<void> {
-    const card = this.blogCardByTitle(title);
-    await expect(card).toHaveCount(1);
-
     const author = expectedAuthor ?? process.env.WP_ADMIN_USERNAME;
     expect(author).toBeTruthy();
 
-    await expect(card.getByTestId(this.blogAuthorTestId)).toHaveText(
-      `By ${author}`,
-    );
+    await expect
+      .poll(
+        async () => {
+          await this.page.reload({ waitUntil: "domcontentloaded" });
+
+          const card = this.blogCardByTitle(title);
+          const count = await card.count();
+
+          if (count !== 1) {
+            return `count:${count}`;
+          }
+
+          return (
+            (await card.getByTestId(this.blogAuthorTestId).textContent()) ?? ""
+          )
+            .replace(/\s+/g, " ")
+            .trim();
+        },
+        {
+          timeout: 15000,
+          intervals: [500, 1000, 2000],
+        },
+      )
+      .toBe(`By ${author}`);
   }
 
   private blogCardByTitle(title: string): Locator {
