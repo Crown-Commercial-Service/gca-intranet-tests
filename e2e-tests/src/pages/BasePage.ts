@@ -193,9 +193,8 @@ export default abstract class BasePage {
   postByTitle(title: string): Locator {
     return this.posts
       .filter({
-        has: this.page.getByTestId("news-post-link").filter({ hasText: title }),
-      })
-      .first();
+        has: this.page.getByRole('heading', { name: title }),
+      });
   }
 
   async assertPostHasCategory(title: string, category: string): Promise<void> {
