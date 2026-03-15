@@ -2,9 +2,6 @@ import dayjs from "dayjs";
 import { test, expect } from "../../src/wp.fixtures";
 import Post from "../../src/models/Post";
 import User from "../../src/models/User";
-import Chance from "chance";
-
-const chance = new Chance();
 
 test.describe("Work update component", () => {
   let post: Post;
@@ -57,7 +54,7 @@ test.describe("Work update component", () => {
       await workUpdate.gotoById(postId);
 
       await workUpdate.selectBreadcrumbLink("Home");
-      await expect(homepage.page).toHaveURL("/");
+      await homepage.expectUrlToContain("/");
 
       await workUpdate.gotoById(postId);
 

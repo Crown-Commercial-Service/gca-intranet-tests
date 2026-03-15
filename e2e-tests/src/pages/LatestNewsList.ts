@@ -20,6 +20,9 @@ export default class LatestNewsList extends BasePage {
   readonly postMeta: Locator;
   readonly postTags: Locator;
 
+  // Accessibility Selectors
+  readonly latestNewsListSection: string;
+
   constructor(page: Page, baseUrl?: string) {
     super(page);
     this.baseUrl = baseUrl;
@@ -43,6 +46,7 @@ export default class LatestNewsList extends BasePage {
     this.postDescriptions = this.page.getByTestId("news-desc");
     this.postMeta = this.page.getByTestId("news-post-meta");
     this.postTags = this.page.getByTestId("news-post-tags");
+    this.latestNewsListSection = `[data-testid="${this.main}"]`;
   }
 
   async goto(): Promise<void> {

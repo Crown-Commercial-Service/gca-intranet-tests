@@ -5,11 +5,8 @@ import type Post from "../models/Post";
 import type TakeALook from "../models/TakeALook";
 import type QuickLinks from "../models/QuickLinks";
 import type EventModel from "../models/Events";
-import {
-  expectNoSeriousA11yViolations,
-  expectNoSeriousA11yViolationsForSelectors,
-} from "../a11y/assertions";
 import { htmlToPlainText, getVisibleTruncatedText } from "../utils/formatters";
+import BasePage from "./BasePage";
 
 dayjs.extend(advancedFormat);
 
@@ -18,8 +15,7 @@ type CharLimits = {
   paragraphMax: number;
 };
 
-export default class HomePage {
-  readonly page: Page;
+export default class HomePage extends BasePage {
   private readonly baseUrl?: string;
 
   readonly primaryNavigationSelector = "#primaryNav";
@@ -127,7 +123,7 @@ export default class HomePage {
       .first();
   }
   constructor(page: Page, baseUrl?: string) {
-    this.page = page;
+    super(page);
     this.baseUrl = baseUrl;
 
     this.primaryNavigation = this.page.locator(this.primaryNavigationSelector);
@@ -200,14 +196,6 @@ export default class HomePage {
 
   async goto(): Promise<void> {
     await this.page.goto(this.baseUrl ?? "/", { waitUntil: "networkidle" });
-  }
-
-  async checkAccessibility(): Promise<void> {
-    await expectNoSeriousA11yViolations(this.page);
-  }
-
-  async checkAccessibilityFor(selectors: string[]): Promise<void> {
-    await expectNoSeriousA11yViolationsForSelectors(this.page, selectors);
   }
 
   // ---------------------------------------------------------

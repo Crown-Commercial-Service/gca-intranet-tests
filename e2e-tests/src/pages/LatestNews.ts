@@ -13,6 +13,9 @@ export default class LatestNews extends BasePage {
   readonly publishedBy: Locator;
   readonly publishedByAuthor: Locator;
 
+  // Accessibility Selectors
+  readonly latestNewsSection: string;
+
   constructor(page: Page, baseUrl?: string) {
     super(page);
     this.baseUrl = baseUrl;
@@ -24,6 +27,7 @@ export default class LatestNews extends BasePage {
     this.content = this.page.getByTestId("news-content");
     this.publishedBy = this.page.getByTestId("published-by");
     this.publishedByAuthor = this.page.getByTestId("published-by-author");
+    this.latestNewsSection = `[data-testid="${this.main}"]`;
   }
 
   async goto(pathname: string): Promise<void> {

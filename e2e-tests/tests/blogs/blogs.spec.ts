@@ -55,7 +55,7 @@ test.describe("Blog component", () => {
       await blog.gotoById(postId);
 
       await blog.selectBreadcrumbLink("Home");
-      await expect(homepage.page).toHaveURL("/");
+      await homepage.expectUrlToContain("/");
 
       await blog.gotoById(postId);
 

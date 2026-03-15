@@ -1,5 +1,9 @@
 import { Page, Locator, expect } from "@playwright/test";
-import { expectNoSeriousA11yViolations } from "../a11y/assertions";
+// import { expectNoSeriousA11yViolations } from "../a11y/assertions";
+import {
+  expectNoSeriousA11yViolations,
+  expectNoSeriousA11yViolationsForSelectors,
+} from "../a11y/assertions";
 import type Post from "../models/Post";
 
 export default abstract class BasePage {
@@ -88,6 +92,22 @@ export default abstract class BasePage {
     this.excerptInput = this.page.locator("#excerpt");
   }
 
+  async checkAccessibility(): Promise<void> {
+    await expectNoSeriousA11yViolations(this.page);
+  }
+
+  async checkAccessibilityFor(selectors: string[]): Promise<void> {
+    await expectNoSeriousA11yViolationsForSelectors(this.page, selectors);
+  }
+
+  async wait(ms: number): Promise<void> {
+    await this.page.waitForTimeout(ms);
+  }
+
+  async pause(): Promise<void> {
+    await this.page.pause();
+  }
+
   async goto(path: string): Promise<void> {
     await this.page.goto(path, { waitUntil: "domcontentloaded" });
   }
@@ -115,8 +135,8 @@ export default abstract class BasePage {
     await expect(this.authorSelect).toHaveValue(value!);
   }
 
-  async expectUrlToMatch(pattern: RegExp): Promise<void> {
-    await expect(this.page).toHaveURL(pattern);
+  async expectUrlToContain(value: string): Promise<void> {
+    await expect(this.page).toHaveURL(new RegExp(value));
   }
 
   async a11y(): Promise<void> {

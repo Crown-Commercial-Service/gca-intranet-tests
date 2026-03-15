@@ -12,6 +12,9 @@ export default class BlogPage extends BasePage {
   readonly date: Locator;
   readonly blogLabel: Locator;
 
+  // Accessibility Selectors
+  readonly blogsSection: string;
+
   constructor(page: Page, baseUrl?: string) {
     super(page);
     this.baseUrl = baseUrl;
@@ -19,10 +22,11 @@ export default class BlogPage extends BasePage {
     this.main = this.page.getByTestId("blog-main");
     this.title = this.page.getByTestId("blog-title");
     this.content = this.page.getByTestId("blog-content");
-    this.author = this.page.getByTestId("blog-detials").locator('span').first();
+    this.author = this.page.getByTestId("blog-detials").locator("span").first();
     this.authorImage = this.page.locator(".profile_img_wrapper img");
     this.date = this.page.getByTestId("blog-date");
     this.blogLabel = this.page.getByTestId("blog-tax");
+    this.blogsSection = `[data-testid="${this.main}"]`;
   }
 
   async goto(slug: string): Promise<void> {

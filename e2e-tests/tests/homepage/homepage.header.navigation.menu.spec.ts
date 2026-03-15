@@ -1,12 +1,12 @@
 import { test, expect } from "../../src/wp.fixtures";
 import MenuPages from "../../src/models/MenuPages";
 
-test.describe("Header Navigation Menu", () => {
+test.describe("Header Navigation Menu", { tag: "@regression" }, () => {
   test.beforeEach(async ({ wp }) => {
     await wp.posts.clearByTypeAndAuthor("page");
   });
 
-  test("Can create a GCA Header navigation menu and navigate it",{ tag: '@regression' }, async ({
+  test("Can create a GCA Header navigation menu and navigate it", async ({
     wp,
     wordpressLoginPage,
     customizerPage,
@@ -31,6 +31,6 @@ test.describe("Header Navigation Menu", () => {
       "Child nav link 1",
     );
 
-    await expect(homepage.page).toHaveURL("child-nav-link-1/");
+    await homepage.expectUrlToContain("child-nav-link-1/");
   });
 });

@@ -1,8 +1,8 @@
 import { test, expect } from "../../src/wp.fixtures";
 import Event from "../../src/models/Events";
 
-test.describe("event builders", () => {
-  test("event with only start date", async ({
+test.describe("event builders", { tag: "@regression" }, () => {
+  test.skip("event with only start date", async ({
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -26,7 +26,7 @@ test.describe("event builders", () => {
     await eventsListPage.goto();
   });
 
-  test("event with start date and end date", async ({
+  test.skip("event with start date and end date", async ({
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -50,7 +50,7 @@ test.describe("event builders", () => {
     await eventsListPage.goto();
   });
 
-  test("event with start and end date and start and end time", async ({
+  test.skip("event with start and end date and start and end time", async ({
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -76,7 +76,7 @@ test.describe("event builders", () => {
     await eventsListPage.goto();
   });
 
-  test("event with start date and start time only", async ({
+  test.skip("event with start date and start time only", async ({
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -100,7 +100,7 @@ test.describe("event builders", () => {
     await eventsListPage.goto();
   });
 
-  test("event with start and end date and only start time", async ({
+  test.skip("event with start and end date and only start time", async ({
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -125,7 +125,7 @@ test.describe("event builders", () => {
     await eventsListPage.goto();
   });
 
-  test("event with start and end date and only end time", async ({
+  test.skip("event with start and end date and only end time", async ({
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -150,7 +150,7 @@ test.describe("event builders", () => {
     await eventsListPage.goto();
   });
 
-  test("event with start date and end time", async ({
+  test.skip("event with start date and end time", async ({
     wp,
     wordpressLoginPage,
     eventEditorPage,

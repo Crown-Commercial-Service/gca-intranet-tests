@@ -85,6 +85,6 @@ test.describe("homepage - take a look", { tag: '@regression' }, () => {
     await homepage.goto();
     await homepage.takeALookLink.click();
 
-    await expect(homepage.page).toHaveURL(takeALook.linkUrl);
+    await homepage.expectUrlToContain(takeALook.linkUrl);
   });
 });

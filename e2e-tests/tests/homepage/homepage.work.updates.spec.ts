@@ -61,13 +61,13 @@ test.describe("work updates", () => {
       .withStatus("publish");
 
     await wp.posts.create(post1);
-    await homepage.page.waitForTimeout(1000);
+    await homepage.wait(1000);
 
     await wp.posts.create(post2);
-    await homepage.page.waitForTimeout(1000);
+    await homepage.wait(1000);
 
     await wp.posts.create(post3);
-    await homepage.page.waitForTimeout(1000);
+    await homepage.wait(1000);
 
     await wp.posts.create(post4);
 
@@ -86,7 +86,7 @@ test.describe("work updates", () => {
     await homepage.goto();
     await homepage.selectWorkItemLink(post);
 
-    await workUpdate.expectUrlToMatch(/supplier-onboarding-improvements/);
+    await workUpdate.expectUrlToContain("supplier-onboarding-improvements/");
     await workUpdate.assertBreadcrumbs(post);
   });
 
@@ -105,7 +105,7 @@ test.describe("work updates", () => {
     await homepage.goto();
     await homepage.workUpdateSeeMoreLink.click();
 
-    await workUpdate.expectUrlToMatch(/work_update/);
+    await workUpdate.expectUrlToContain("work_update/");
   });
 
   test("can edit author details of a work update post", { tag: '@regression' }, async ({

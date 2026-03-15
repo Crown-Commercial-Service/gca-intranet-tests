@@ -143,19 +143,6 @@ export default class CustomizerPage {
     await this.addItemsButton.click();
   }
 
-  // async addPageToMenu(pageTitle: string): Promise<void> {
-  //   await expect(this.searchMenuItemsInput).toBeVisible();
-  //   await this.searchMenuItemsInput.fill(pageTitle);
-
-  //   const pageButton = this.page
-  //     .locator("#available-menu-items-search")
-  //     .getByText(pageTitle, { exact: true });
-
-  //   await expect(pageButton).toBeVisible();
-  //   await pageButton.click();
-  //   await this.searchMenuItemsInput.fill("");
-  // }
-
   async addPageToMenu(pageTitle: string): Promise<void> {
     await expect(this.searchMenuItemsInput).toBeVisible();
 

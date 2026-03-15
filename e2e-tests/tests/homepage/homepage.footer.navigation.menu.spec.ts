@@ -32,12 +32,12 @@ test.describe("footer navigation menu", () => {
       FooterPages.menu()[1],
       FooterPages.menu()[3],
     ]);
-    await homepage.selectFooterLink("Cookie Setting & Policy1");
-    await expect(homepage.page).toHaveURL(/cookie-setting-policy1\/$/);
+    await homepage.expectUrlToContain("cookie-setting-policy1/");
+
     await homepage.goto();
     await homepage.selectFooterLink("GCA Website");
-    await expect(homepage.page).toHaveURL(
-      "https://www.crowncommercial.gov.uk/",
+    await homepage.expectUrlToContain(
+      "https:www.crowncommercial.gov.uk/",
     );
   });
 

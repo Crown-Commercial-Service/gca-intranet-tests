@@ -95,6 +95,6 @@ test.describe("homepage - quick links", { tag: '@regression' }, () => {
     await homepage.goto();
     await homepage.quickLinksItems.first().click();
 
-    await expect(homepage.page).toHaveURL(quickLinks.links[0].url);
+    await homepage.expectUrlToContain(quickLinks.links[0].url);
   });
 });

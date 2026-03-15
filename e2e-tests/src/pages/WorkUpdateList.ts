@@ -14,6 +14,9 @@ export default class WorkUpdateList extends BasePage {
   readonly postLabels: Locator;
   readonly postTeams: Locator;
 
+  // Accessibility Selectors
+  readonly workUpdateListSection: string;
+
   constructor(page: Page, baseUrl?: string) {
     super(page);
     this.baseUrl = baseUrl;
@@ -27,6 +30,7 @@ export default class WorkUpdateList extends BasePage {
     this.postDates = this.page.getByTestId("work-update-post-date");
     this.postLabels = this.page.getByTestId("work-update-tax");
     this.postTeams = this.page.getByTestId("work-update-team");
+    this.workUpdateListSection = `[data-testid="${this.main}"]`;
   }
 
   async goto(): Promise<void> {

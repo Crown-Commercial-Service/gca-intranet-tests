@@ -5,7 +5,7 @@ import MenuPages from "../../src/models/MenuPages";
 import FooterPages from "../../src/models/FooterPages";
 import HomepageCustomizationSet from "../../src/models/HomepageCustomizationSet";
 
-test.describe("Accessibility - Homepage", () => {
+test.describe("Accessibility - Homepage components", () => {
   test.beforeEach(async ({ wp, runId }) => {
     await wp.posts.clearByRunId(runId);
     await wp.posts.clearByTypeAndAuthor("page");

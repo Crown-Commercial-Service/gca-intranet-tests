@@ -48,7 +48,7 @@ test.describe("blogs", { tag: '@regression' }, () => {
     await homepage.goto();
     await homepage.selectBlogLink(post);
 
-    await blog.expectUrlToMatch(/e2e-blog-navigation/);
+    await blog.expectUrlToContain("e2e-blog-navigation/");
     await blog.assertBreadcrumbs(post);
   });
 
@@ -63,7 +63,7 @@ test.describe("blogs", { tag: '@regression' }, () => {
     await homepage.goto();
     await homepage.blogSeeMoreLink.click();
 
-    expect(await blogList.expectUrlToMatch(/blog/));
+    expect(await blogList.expectUrlToContain("blog/"));
   });
 
   test("should show the latest blog on the homepage", async ({
@@ -81,9 +81,9 @@ test.describe("blogs", { tag: '@regression' }, () => {
       .withStatus("publish");
 
     await wp.posts.create(older);
-    await homepage.page.waitForTimeout(1000);
+    await homepage.wait(1000);
     await wp.posts.create(latest);
-    await homepage.page.waitForTimeout(1000);
+    await homepage.wait(1000);
 
     await homepage.goto();
     await homepage.assertBlogsOnHomepage(latest);
