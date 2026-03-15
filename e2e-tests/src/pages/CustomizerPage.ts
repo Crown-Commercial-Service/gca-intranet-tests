@@ -147,9 +147,27 @@ export default class CustomizerPage {
     await expect(this.searchMenuItemsInput).toBeVisible();
     await this.searchMenuItemsInput.fill(pageTitle);
 
+    await expect
+      .poll(
+        async () => {
+          const count = await this.page
+            .locator("#available-menu-items-search")
+            .getByText(pageTitle, { exact: true })
+            .count();
+
+          return count;
+        },
+        {
+          timeout: 10000,
+          intervals: [250, 500, 1000],
+        },
+      )
+      .toBeGreaterThan(0);
+
     const pageButton = this.page
       .locator("#available-menu-items-search")
-      .getByText(pageTitle, { exact: true });
+      .getByText(pageTitle, { exact: true })
+      .first();
 
     await expect(pageButton).toBeVisible();
     await pageButton.click();
@@ -316,7 +334,10 @@ export default class CustomizerPage {
 
     await expect(menuItem).toBeVisible();
     await menuItem.locator(this.menuItemEditButton).click();
-    const removeLink = menuItem.getByRole('button', { name: 'Remove', exact: true });
+    const removeLink = menuItem.getByRole("button", {
+      name: "Remove",
+      exact: true,
+    });
     await expect(removeLink).toBeVisible();
     await removeLink.click();
   }
