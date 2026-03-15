@@ -47,8 +47,26 @@ export default class LatestNews extends BasePage {
   }
 
   async assertAuthor(author: string): Promise<void> {
-    await expect(this.publishedByAuthor).toHaveText(`By ${author}`);
+    await expect
+      .poll(
+        async () => {
+          await this.page.reload({ waitUntil: "domcontentloaded" });
+
+          return ((await this.publishedByAuthor.textContent()) ?? "")
+            .replace(/\s+/g, " ")
+            .trim();
+        },
+        {
+          timeout: 15000,
+          intervals: [500, 1000, 2000],
+        },
+      )
+      .toBe(`By ${author}`);
   }
+
+  // async assertAuthor(author: string): Promise<void> {
+  //   await expect(this.publishedByAuthor).toHaveText(`By ${author}`);
+  // }
 
   async assertFeaturedImageVisible(): Promise<void> {
     await expect(this.featuredImage).toBeVisible();

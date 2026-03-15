@@ -107,11 +107,12 @@ export default abstract class BasePage {
       .filter({ hasText: author })
       .first();
 
-    const label = (await option.textContent())?.trim();
+    const value = await option.getAttribute("value");
 
-    expect(label).toBeTruthy();
+    expect(value).toBeTruthy();
 
-    await this.authorSelect.selectOption({ label: label! });
+    await this.authorSelect.selectOption(value!);
+    await expect(this.authorSelect).toHaveValue(value!);
   }
 
   async expectUrlToMatch(pattern: RegExp): Promise<void> {
@@ -285,14 +286,13 @@ export default abstract class BasePage {
   }
 
   private async waitForSaveToComplete(): Promise<void> {
-    await Promise.race([
-      this.page.waitForURL(/post\.php\?post=\d+&action=edit(&message=1)?/),
-      expect(this.publishMessage).toBeVisible(),
-    ]);
+    await expect(this.publishButton)
+      .toBeDisabled({ timeout: 10000 })
+      .catch(() => {});
 
-    await this.page.waitForLoadState("domcontentloaded");
-    await expect(this.publishButton).toBeEnabled();
-    await this.page.waitForTimeout(1000);
+    await expect(this.publishMessage).toBeVisible({ timeout: 15000 });
+    await this.page.waitForLoadState("networkidle");
+    await expect(this.publishButton).toBeEnabled({ timeout: 15000 });
   }
 
   private async assertTagVisible(

@@ -63,7 +63,7 @@ test.describe("blogs", { tag: '@regression' }, () => {
     await homepage.goto();
     await homepage.blogSeeMoreLink.click();
 
-    await expect(blogList.page).toHaveURL(/blog/);
+    expect(await blogList.expectUrlToMatch(/blog/));
   });
 
   test("should show the latest blog on the homepage", async ({
@@ -100,7 +100,7 @@ test.describe("blogs", { tag: '@regression' }, () => {
     await homepage.goto();
     await homepage.assertBlogAuthor(post.title);
 
-    const username = chance.word({ length: 6 });
+    const username = `e2e_author_${Date.now()}`;
 
     const newUser = User.anAdmin()
       .withUsername(username)

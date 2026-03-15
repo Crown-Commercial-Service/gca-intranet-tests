@@ -149,7 +149,7 @@ test.describe("Latest news component", () => {
     "should show correct author after updating a new article",
     { tag: "@regression" },
     async ({ wp, latestNews }) => {
-      const username = chance.word({ length: 2 });
+      const username = `e2e_author_${Date.now()}`;
       const newUser = User.anAdmin()
         .withUsername(username)
         .withEmail(`${username}@example.com`);

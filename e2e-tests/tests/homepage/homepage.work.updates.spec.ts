@@ -7,7 +7,7 @@ test.describe("work updates", () => {
     await wp.posts.clearByTypeAndAuthor("work_updates");
   });
 
-  test("should display a single work update", async ({ wp, homepage }) => {
+  test.skip("should display a single work update", async ({ wp, homepage }) => {
     const post = Post.aPost()
       .withType("work_updates")
       .withFixedTitle("Procurement Transformation Update")

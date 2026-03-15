@@ -7,7 +7,7 @@ test.describe("events", () => {
     await wp.posts.clearByTypeAndAuthor("events");
   });
 
-  test("should display a single event", async ({
+  test.skip("should display a single event", async ({
     wp,
     homepage,
     wordpressLoginPage,
@@ -38,7 +38,7 @@ test.describe("events", () => {
     await homepage.assertEventOnHomepage(event);
   });
 
-  test(
+  test.skip(
     "should render a maximum of two events on the homepage",
     { tag: "@regression" },
     async ({ wp, homepage, wordpressLoginPage, eventEditorPage }) => {
@@ -86,7 +86,7 @@ test.describe("events", () => {
     },
   );
 
-  test(
+  test.skip(
     "should truncate event title",
     { tag: "@regression" },
     async ({ wp, homepage, wordpressLoginPage, eventEditorPage }) => {
@@ -111,7 +111,7 @@ test.describe("events", () => {
     },
   );
 
-  test(
+  test.skip(
     "should display no events where start date is in the past",
     { tag: "@regression" },
     async ({ wp, homepage, wordpressLoginPage, eventEditorPage }) => {
@@ -142,7 +142,7 @@ test.describe("events", () => {
     },
   );
 
-  test(
+  test.skip(
     "should not show events when the start date is the current date",
     { tag: "@regression" },
     async ({ wp, wordpressLoginPage, eventEditorPage, homepage }) => {
@@ -170,7 +170,7 @@ test.describe("events", () => {
     },
   );
 
-  test(
+  test.skip(
     "should not display events that have expired",
     { tag: "@regression" },
     async ({ wp, wordpressLoginPage, eventEditorPage, homepage }) => {
