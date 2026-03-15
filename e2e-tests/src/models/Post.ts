@@ -83,6 +83,19 @@ export default class Post {
     );
   }
 
+  static manyWorkUpdates(
+    count: number,
+    titlePrefix: string = "E2E Work Update",
+  ): Post[] {
+    return Array.from({ length: count }, (_, index) =>
+      Post.aWorkUpdate()
+        .withFixedTitle(`${titlePrefix} ${index + 1}`)
+        .withParagraphMaxChars(120)
+        .withStatus("publish")
+        .build(),
+    );
+  }
+
   static homepageSet(runId?: string): HomepageContent {
     const applyRunId = (builder: PostBuilder) => {
       if (runId) {

@@ -79,4 +79,16 @@ test.describe("Work update component", () => {
     await workUpdateList.assertPostHasContent(post.title, post.content);
     await workUpdateList.assertPostHasAuthorImage(post.title);
   });
+
+  test("should display pagination when there are more than 10 work updates", async ({
+    wp,
+    workUpdateList,
+  }) => {
+    const posts = Post.manyWorkUpdates(11);
+
+    await wp.posts.createMany(posts);
+    await workUpdateList.gotoWorkUpdateList();
+
+    await workUpdateList.assertPaginationVisible();
+  });
 });
