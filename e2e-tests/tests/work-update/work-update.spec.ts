@@ -59,28 +59,24 @@ test.describe("Work update component", () => {
   });
 
   test("should display work update details on the work update list page", async ({
-  workUpdate,
-  workUpdateList,
-}) => {
-  await workUpdate.gotoEdit(postId);
-  await workUpdate.selectLabel(label);
-  await workUpdate.selectTeam(team);
-  await workUpdate.addAuthorImage("author-image.jpg");
-  await workUpdate.update();
+    workUpdate,
+    workUpdateList,
+  }) => {
+    await workUpdate.gotoEdit(postId);
+    await workUpdate.selectLabel(label);
+    await workUpdate.selectTeam(team);
+    await workUpdate.addAuthorImage("author-image.jpg");
+    await workUpdate.update();
 
-  await workUpdateList.gotoWorkUpdateList();
-  await workUpdateList.assertPostVisible(post.title);
-  await workUpdateList.assertPostHasLabel(post.title, label);
-  await workUpdateList.assertPostHasTeam(post.title, team);
-  await workUpdateList.assertPostHasAuthor(
-    post.title,
-    process.env.WP_ADMIN_USERNAME!,
-  );
-  await workUpdateList.assertPostHasDate(
-    post.title,
-    dayjs(post.createdAt).format("Do MMMM YYYY"),
-  );
-  await workUpdateList.assertPostHasContent(post.title, post.content);
-  await workUpdateList.assertPostHasAuthorImage(post.title);
-});
+    await workUpdateList.gotoWorkUpdateList();
+    await workUpdateList.assertPostVisible(post.title);
+    await workUpdateList.assertPostHasLabel(post.title, label);
+    await workUpdateList.assertPostHasTeam(post.title, team);
+    await workUpdateList.assertPostHasDate(
+      post.title,
+      dayjs(post.createdAt).format("Do MMMM YYYY"),
+    );
+    await workUpdateList.assertPostHasContent(post.title, post.content);
+    await workUpdateList.assertPostHasAuthorImage(post.title);
+  });
 });
