@@ -100,7 +100,7 @@ test.describe("blogs", { tag: '@regression' }, () => {
     await homepage.goto();
     await homepage.assertBlogAuthor(post.title);
 
-    const username = `e2e_author_${Date.now()}`;
+    const username = chance.word({ length: 6 });
 
     const newUser = User.anAdmin()
       .withUsername(username)
