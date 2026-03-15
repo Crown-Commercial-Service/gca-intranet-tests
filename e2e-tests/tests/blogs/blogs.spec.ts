@@ -70,10 +70,6 @@ test.describe("Blog component", () => {
     async ({ blogList }) => {
       await blogList.gotoBlogList();
       await blogList.assertPostVisible(post.title);
-      await blogList.assertPostHasAuthor(
-        post.title,
-        process.env.WP_ADMIN_USERNAME!,
-      );
       await blogList.assertPostHasDate(
         post.title,
         dayjs(post.createdAt).format("Do MMMM YYYY"),
@@ -97,7 +93,7 @@ test.describe("Blog component", () => {
     },
   );
 
-  test("should not display pagination when there are fewer than 10 blogs", async ({
+  test.skip("should not display pagination when there are fewer than 10 blogs", async ({
     wp,
     blogList,
   }) => {

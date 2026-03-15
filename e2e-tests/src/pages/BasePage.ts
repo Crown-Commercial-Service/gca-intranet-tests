@@ -66,7 +66,7 @@ export default abstract class BasePage {
     this.teamBox = page.locator(
       "#radio-responsible_teamdiv #responsible_teamchecklist",
     );
-    this.authorImageBox = this.page.locator("#acf-202603111125a");
+    this.authorImageBox = this.page.locator(".postbox.acf-postbox");
     this.addAuthorImageButton = this.authorImageBox.getByRole("link", {
       name: "Add Image",
     });

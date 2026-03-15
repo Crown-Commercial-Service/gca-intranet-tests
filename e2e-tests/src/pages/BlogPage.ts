@@ -8,8 +8,8 @@ export default class BlogPage extends BasePage {
   readonly title: Locator;
   readonly content: Locator;
   readonly author: Locator;
-  readonly featuredImage: Locator;
-  readonly publishedDate: Locator;
+  readonly authorImage: Locator;
+  readonly date: Locator;
   readonly blogLabel: Locator;
 
   constructor(page: Page, baseUrl?: string) {
@@ -17,11 +17,11 @@ export default class BlogPage extends BasePage {
     this.baseUrl = baseUrl;
 
     this.main = this.page.getByTestId("blog-main");
-    this.title = this.page.getByRole("heading").first();
-    this.content = this.page.locator(".govuk-body").first();
-    this.author = this.page.getByTestId("published-by-author");
-    this.featuredImage = this.page.getByRole("img").first();
-    this.publishedDate = this.page.locator(".govuk-body-s").first();
+    this.title = this.page.getByTestId("blog-title");
+    this.content = this.page.getByTestId("blog-content");
+    this.author = this.page.getByTestId("blog-detials").locator('span').first();
+    this.authorImage = this.page.locator(".profile_img_wrapper img");
+    this.date = this.page.getByTestId("blog-date");
     this.blogLabel = this.page.getByTestId("blog-tax");
   }
 
@@ -56,14 +56,14 @@ export default class BlogPage extends BasePage {
   }
 
   async assertAuthor(expected: string): Promise<void> {
-    await expect(this.author).toContainText(expected);
+    await expect(this.author).toContainText(`By ${expected}`);
   }
 
   async assertFeaturedImageVisible(): Promise<void> {
-    await expect(this.featuredImage).toBeVisible();
+    await expect(this.authorImage).toBeVisible();
   }
 
   async assertPublishedDate(expected: string): Promise<void> {
-    await expect(this.publishedDate).toContainText(expected);
+    await expect(this.date).toContainText(expected);
   }
 }

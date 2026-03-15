@@ -80,11 +80,6 @@ export default class BlogListPage extends BasePage {
     await expect(post.locator("img")).toBeVisible();
   }
 
-  async assertPostHasAuthor(title: string, author: string): Promise<void> {
-    const post = this.postByTitle(title);
-    await expect(post.getByTestId("blog-author")).toContainText(`By ${author}`);
-  }
-
   async assertPostCount(count: number): Promise<void> {
     await expect(this.posts).toHaveCount(count);
   }

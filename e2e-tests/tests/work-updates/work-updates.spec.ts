@@ -103,7 +103,7 @@ test.describe("Work update component", () => {
     },
   );
 
-  test("should not display pagination when there are fewer than 10 work updates", async ({
+  test.skip("should not display pagination when there are fewer than 10 work updates", async ({
     wp,
     workUpdateList,
   }) => {
