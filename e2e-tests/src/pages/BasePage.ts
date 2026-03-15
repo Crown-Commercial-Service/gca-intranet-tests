@@ -292,6 +292,7 @@ export default abstract class BasePage {
 
     await this.page.waitForLoadState("domcontentloaded");
     await expect(this.publishButton).toBeEnabled();
+    await this.page.waitForTimeout(1000);
   }
 
   private async assertTagVisible(
