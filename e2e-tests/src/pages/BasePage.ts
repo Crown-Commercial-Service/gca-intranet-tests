@@ -43,9 +43,7 @@ export default abstract class BasePage {
     this.page = page;
 
     this.breadcrumbs = this.page.locator(".govuk-breadcrumbs");
-    this.pagination = this.page.locator(
-      ".pagination, [data-testid='news-pagination']",
-    );
+    this.pagination = this.page.locator(".pagination");
     this.paginationPageNumbers = this.pagination.locator(
       ".nav-links .page-numbers",
     );

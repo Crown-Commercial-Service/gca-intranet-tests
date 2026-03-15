@@ -27,7 +27,7 @@ test.describe("Latest news component", () => {
     await wordpressLoginPage.loginAsAdmin();
   });
 
-  test("should display news details", async ({ latestNews }) => {
+  test("should display news details", { tag: '@regression' }, async ({ latestNews }) => {
     await latestNews.gotoEdit(postId);
     await latestNews.selectLabel(label);
     await latestNews.update();
@@ -44,7 +44,7 @@ test.describe("Latest news component", () => {
     );
   });
 
-  test("can navigate using breadcrumb", async ({
+  test("can navigate using breadcrumb", { tag: '@regression' }, async ({
     latestNews,
     homepage,
     latestNewsList,
@@ -59,8 +59,8 @@ test.describe("Latest news component", () => {
     await latestNews.selectBreadcrumbLink("News");
     await expect(latestNewsList.main).toBeVisible();
   });
-
-  test("should display news details on the latest news list page", async ({
+  
+  test("should display news details on the latest news list page", { tag: '@regression' }, async ({
     latestNewsList,
     latestNews,
   }) => {
@@ -83,7 +83,7 @@ test.describe("Latest news component", () => {
     ).toBeVisible();
   });
 
-  test("should display 10 news posts and show pagination when there are more than 10 news posts", async ({
+  test("should display 10 news posts and show pagination when there are more than 10 news posts", { tag: '@regression' }, async ({
     wp,
     latestNewsList,
   }) => {
@@ -100,7 +100,8 @@ test.describe("Latest news component", () => {
     wp,
     latestNewsList,
   }) => {
-    const posts = Post.manyNews(9);
+    await wp.posts.clearByTypeAndAuthor("news"); // call this so to delete what got create in beforeEach
+    const posts = Post.manyNews(3);
 
     await wp.posts.createMany(posts);
     await latestNewsList.gotoNewsList();
@@ -109,7 +110,7 @@ test.describe("Latest news component", () => {
     await latestNewsList.assertPaginationNotVisible();
   });
 
-  test("should show next button but not previous button on the first pagination page", async ({
+  test("should show next button but not previous button on the first pagination page", { tag: '@regression' }, async ({
     wp,
     latestNewsList,
   }) => {
@@ -123,7 +124,7 @@ test.describe("Latest news component", () => {
     await latestNewsList.assertPreviousPaginationNotVisible();
   });
 
-  test("should hide next button on the last pagination page", async ({
+  test("should hide next button on the last pagination page", { tag: '@regression' }, async ({
     wp,
     latestNewsList,
   }) => {
@@ -136,7 +137,7 @@ test.describe("Latest news component", () => {
     await latestNewsList.assertNextPaginationNotVisible();
   });
 
-  test("should show correct author after updating a new article", async ({
+  test("should show correct author after updating a new article", { tag: '@regression' }, async ({
     wp,
     latestNews,
   }) => {
