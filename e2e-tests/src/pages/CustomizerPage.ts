@@ -143,19 +143,34 @@ export default class CustomizerPage {
     await this.addItemsButton.click();
   }
 
+  // async addPageToMenu(pageTitle: string): Promise<void> {
+  //   await expect(this.searchMenuItemsInput).toBeVisible();
+  //   await this.searchMenuItemsInput.fill(pageTitle);
+
+  //   const pageButton = this.page
+  //     .locator("#available-menu-items-search")
+  //     .getByText(pageTitle, { exact: true });
+
+  //   await expect(pageButton).toBeVisible();
+  //   await pageButton.click();
+  //   await this.searchMenuItemsInput.fill("");
+  // }
+
   async addPageToMenu(pageTitle: string): Promise<void> {
     await expect(this.searchMenuItemsInput).toBeVisible();
+
+    await this.searchMenuItemsInput.fill("");
     await this.searchMenuItemsInput.fill(pageTitle);
+
+    const pageButton = this.page
+      .locator(".accordion-section.open, .control-section.open")
+      .getByText(pageTitle, { exact: true })
+      .first();
 
     await expect
       .poll(
         async () => {
-          const count = await this.page
-            .locator("#available-menu-items-search")
-            .getByText(pageTitle, { exact: true })
-            .count();
-
-          return count;
+          return await pageButton.count();
         },
         {
           timeout: 10000,
@@ -164,13 +179,9 @@ export default class CustomizerPage {
       )
       .toBeGreaterThan(0);
 
-    const pageButton = this.page
-      .locator("#available-menu-items-search")
-      .getByText(pageTitle, { exact: true })
-      .first();
-
     await expect(pageButton).toBeVisible();
     await pageButton.click();
+
     await this.searchMenuItemsInput.fill("");
   }
 
