@@ -83,7 +83,7 @@ test.describe("Latest news component", () => {
     ).toBeVisible();
   });
 
-  test("should display pagination when there are more than 10 news posts", async ({
+  test("should display 10 news posts and show pagination when there are more than 10 news posts", async ({
     wp,
     latestNewsList,
   }) => {
@@ -92,7 +92,21 @@ test.describe("Latest news component", () => {
     await wp.posts.createMany(posts);
     await latestNewsList.gotoNewsList();
 
+    await latestNewsList.assertPostCount(10);
     await latestNewsList.assertPaginationVisible();
+  });
+
+  test("should not display pagination when there are fewer than 10 news posts", async ({
+    wp,
+    latestNewsList,
+  }) => {
+    const posts = Post.manyNews(9);
+
+    await wp.posts.createMany(posts);
+    await latestNewsList.gotoNewsList();
+
+    await latestNewsList.assertPostCount(9);
+    await latestNewsList.assertPaginationNotVisible();
   });
 
   test("should show next button but not previous button on the first pagination page", async ({
