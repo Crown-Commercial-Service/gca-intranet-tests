@@ -81,6 +81,7 @@ export default abstract class BasePage {
     this.mediaAttachments = this.mediaModal.locator(".attachment");
     this.selectMediaButton = this.mediaModal.getByRole("button", {
       name: "Select",
+      exact: true,
     });
     this.uploadFilesTab = this.mediaModal.getByRole("tab", {
       name: "Upload files",
@@ -300,7 +301,7 @@ export default abstract class BasePage {
     await expect(this.mediaFileInput).toBeAttached();
     await this.mediaFileInput.setInputFiles(`assets/images/${fileName}`);
 
-    await expect(this.selectMediaButton).toBeEnabled({ timeout: 15000 });
+    await expect(this.selectMediaButton).toBeEnabled({ timeout: 15000 }); // this is failing.
     await this.selectMediaButton.click();
   }
 }

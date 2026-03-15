@@ -8,7 +8,7 @@ test.describe("Work update component", () => {
   let label = "CCS live";
   let team = "Finance";
 
-  test.beforeEach(async ({ wp }) => {
+  test.beforeEach(async ({ wp, wordpressLoginPage }) => {
     await wp.posts.clearByTypeAndAuthor("work_updates");
 
     post = Post.aPost()
@@ -18,6 +18,9 @@ test.describe("Work update component", () => {
       .withStatus("publish");
 
     postId = await wp.posts.create(post);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
   });
 
   test("should display work update details", async ({ workUpdate }) => {
