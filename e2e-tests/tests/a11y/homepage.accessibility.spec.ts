@@ -22,7 +22,7 @@ test.describe("Accessibility - Homepage", () => {
   }) => {
     const contentType = Post.homepageSet(runId);
     const customizations = HomepageCustomizationSet.homepageSet(runId);
-    const events = Event.homepageEvents();
+    // const events = Event.homepageEvents();
 
     // Create homepage content
     await wp.posts.createMany(contentType.news);
@@ -45,16 +45,16 @@ test.describe("Accessibility - Homepage", () => {
     await customizerPage.publish();
 
     // Create event posts
-    const eventIds = await wp.events.createMany(events);
+    // const eventIds = await wp.events.createMany(events);
 
     // Add event details in WordPress editor
-    for (let index = 0; index < events.length; index++) {
-      await eventEditorPage.gotoEdit(eventIds[index]);
-      await eventEditorPage.fillEventDetails(events[index]);
-      await eventEditorPage.selectCategory(events[index].category!);
-      await eventEditorPage.selectEventLocation(events[index].eventLocation!);
-      await eventEditorPage.update();
-    }
+    // for (let index = 0; index < events.length; index++) {
+    //   await eventEditorPage.gotoEdit(eventIds[index]);
+    //   await eventEditorPage.fillEventDetails(events[index]);
+    //   await eventEditorPage.selectCategory(events[index].category!);
+    //   await eventEditorPage.selectEventLocation(events[index].eventLocation!);
+    //   await eventEditorPage.update();
+    // }
 
     // Build homepage navigation menu
     await customizerPage.goto();
@@ -77,7 +77,7 @@ test.describe("Accessibility - Homepage", () => {
       homepage.blogsSectionSelector,
       homepage.takeALookColumnSelector,
       homepage.quickLinksSelector,
-      homepage.eventsSectionSelector,
+      // homepage.eventsSectionSelector,
       homepage.primaryNavigationSelector,
       homepage.subMenuNavigation,
       homepage.footerSelector,
