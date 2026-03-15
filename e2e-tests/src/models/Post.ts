@@ -1,4 +1,5 @@
 import Chance from "chance";
+import dayjs from "dayjs";
 
 const chance = new Chance();
 
@@ -25,7 +26,8 @@ export type PostProps = {
   createdAt: Date;
   category?: string;
   template?: string;
-    label?: string;
+  label?: string;
+  excerpt?: string;
 };
 
 export default class Post {
@@ -38,7 +40,8 @@ export default class Post {
   readonly createdAt: Date;
   readonly category?: string;
   readonly template?: string;
-    readonly label?: string;
+  readonly label?: string;
+  readonly excerpt?: string;
 
   constructor(props: PostProps) {
     this.title = props.title;
@@ -50,7 +53,8 @@ export default class Post {
     this.createdAt = props.createdAt;
     this.category = props.category;
     this.template = props.template;
-        this.label = props.label;
+    this.label = props.label;
+    this.excerpt = props.excerpt;
   }
 
   static aPost(): PostBuilder {
@@ -165,9 +169,10 @@ class PostBuilder {
     content: this.randomParagraphWithin(400),
     status: "draft",
     type: "post",
-    createdAt: new Date(),
+    createdAt: dayjs().toDate(),
     category: undefined,
     template: undefined,
+    excerpt: this.randomParagraphWithin(140),
   };
 
   private applyRunId(value: string): string {
@@ -184,6 +189,10 @@ class PostBuilder {
     return this;
   }
 
+  withExcerpt(excerpt: string): this {
+    this.props.excerpt = excerpt;
+    return this;
+  }
   withTitle(title: string): this {
     this.props.title = this.applyRunId(title);
     return this;
@@ -288,6 +297,10 @@ class PostBuilder {
 
   get type() {
     return this.props.type;
+  }
+
+  get excerpt() {
+    return this.props.excerpt;
   }
 
   get author() {

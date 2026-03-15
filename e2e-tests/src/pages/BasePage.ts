@@ -19,6 +19,18 @@ export default abstract class BasePage {
   readonly publishMessage: Locator;
   readonly categoriesBox: Locator;
   readonly labelsBox: Locator;
+  readonly teamBox: Locator;
+  readonly authorImageBox: Locator;
+  readonly addAuthorImageButton: Locator;
+  readonly mediaModal: Locator;
+  readonly mediaLibraryTab: Locator;
+  readonly mediaSearchInput: Locator;
+  readonly mediaAttachments: Locator;
+  readonly selectMediaButton: Locator;
+  readonly uploadFilesTab: Locator;
+  readonly mediaFileInput: Locator;
+  readonly excerptBox: Locator;
+  readonly excerptInput: Locator;
 
   // News detail/list locators
   readonly details: Locator;
@@ -49,11 +61,33 @@ export default abstract class BasePage {
     this.publishMessage = page.locator("#message.updated, #message.notice");
     this.categoriesBox = page.locator("#categorychecklist");
     this.labelsBox = page.locator("#radio-labeldiv #labelchecklist");
+    this.teamBox = page.locator(
+      "#radio-responsible_teamdiv #responsible_teamchecklist",
+    );
     this.pagination = this.page.getByTestId("news-pagination");
     this.paginationPageNumbers = this.pagination.locator(
       ".nav-links .page-numbers",
     );
     this.visuallyHiddenText = this.page.locator(".govuk-visually-hidden");
+    this.authorImageBox = this.page.locator("#acf-202603111125a");
+    this.addAuthorImageButton = this.authorImageBox.getByRole("link", {
+      name: "Add Image",
+    });
+    this.mediaModal = this.page.locator(".media-modal");
+    this.mediaLibraryTab = this.mediaModal.getByRole("tab", {
+      name: "Media Library",
+    });
+    this.mediaSearchInput = this.mediaModal.getByPlaceholder("Search");
+    this.mediaAttachments = this.mediaModal.locator(".attachment");
+    this.selectMediaButton = this.mediaModal.getByRole("button", {
+      name: "Select",
+    });
+    this.uploadFilesTab = this.mediaModal.getByRole("tab", {
+      name: "Upload files",
+    });
+    this.mediaFileInput = this.mediaModal.locator('input[type="file"]');
+    this.excerptBox = this.page.locator("#postexcerpt");
+    this.excerptInput = this.page.locator("#excerpt");
   }
 
   async goto(path: string): Promise<void> {
@@ -96,6 +130,12 @@ export default abstract class BasePage {
     await link.click();
   }
 
+  async fillExcerpt(post: Post): Promise<void> {
+    await this.excerptBox.scrollIntoViewIfNeeded();
+    await expect(this.excerptInput).toBeVisible();
+    await this.excerptInput.fill(post.excerpt ?? "");
+  }
+
   async assertPaginationVisible(): Promise<void> {
     await expect(this.pagination).toBeVisible();
   }
@@ -129,6 +169,16 @@ export default abstract class BasePage {
 
     await expect(labelOption).toBeVisible();
     await labelOption.click();
+  }
+
+  async selectTeam(teamName: string): Promise<void> {
+    const teamOption = this.teamBox
+      .locator("label.selectit")
+      .filter({ hasText: teamName })
+      .first();
+
+    await expect(teamOption).toBeVisible();
+    await teamOption.click();
   }
 
   async assertCategory(category: string): Promise<void> {
@@ -236,5 +286,21 @@ export default abstract class BasePage {
       default:
         throw new Error(`Unsupported breadcrumb type: ${post.type}`);
     }
+  }
+
+  async addAuthorImage(fileName: string): Promise<void> {
+    await this.authorImageBox.scrollIntoViewIfNeeded();
+    await expect(this.addAuthorImageButton).toBeVisible();
+    await this.addAuthorImageButton.click();
+
+    await expect(this.mediaModal).toBeVisible();
+    await expect(this.uploadFilesTab).toBeVisible();
+    await this.uploadFilesTab.click();
+
+    await expect(this.mediaFileInput).toBeAttached();
+    await this.mediaFileInput.setInputFiles(`assets/images/${fileName}`);
+
+    await expect(this.selectMediaButton).toBeEnabled({ timeout: 15000 });
+    await this.selectMediaButton.click();
   }
 }
