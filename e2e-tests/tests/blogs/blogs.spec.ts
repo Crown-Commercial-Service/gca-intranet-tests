@@ -2,9 +2,6 @@ import dayjs from "dayjs";
 import { test, expect } from "../../src/wp.fixtures";
 import Post from "../../src/models/Post";
 import User from "../../src/models/User";
-import Chance from "chance";
-
-const chance = new Chance();
 
 test.describe("Blog component", () => {
   let post: Post;
@@ -25,6 +22,10 @@ test.describe("Blog component", () => {
 
     await wordpressLoginPage.goto();
     await wordpressLoginPage.loginAsAdmin();
+  });
+
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("blogs");
   });
 
   test(

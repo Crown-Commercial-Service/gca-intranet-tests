@@ -12,6 +12,11 @@ test.describe("Accessibility - Homepage components", () => {
     await wp.posts.clearByTypeAndAuthor("events");
   });
 
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("page");
+    await wp.posts.clearByTypeAndAuthor("events");
+  });
+
   test("Components on the homepage should have no serious or critical violations", async ({
     homepage,
     wp,

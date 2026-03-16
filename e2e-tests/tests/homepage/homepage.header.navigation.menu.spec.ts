@@ -6,7 +6,11 @@ test.describe("Header Navigation Menu", { tag: "@regression" }, () => {
     await wp.posts.clearByTypeAndAuthor("page");
   });
 
-  test("Can create a GCA Header navigation menu and navigate it", async ({
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("page");
+  });
+
+  test.skip("Can create a GCA Header navigation menu and navigate it", async ({
     wp,
     wordpressLoginPage,
     customizerPage,

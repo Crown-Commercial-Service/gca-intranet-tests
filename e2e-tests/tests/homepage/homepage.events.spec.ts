@@ -7,6 +7,10 @@ test.describe("events", () => {
     await wp.posts.clearByTypeAndAuthor("events");
   });
 
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("events");
+  });
+
   test.skip("should display a single event", async ({
     wp,
     homepage,

@@ -24,6 +24,10 @@ test.describe("Work update component", () => {
     await wordpressLoginPage.loginAsAdmin();
   });
 
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("work_updates");
+  });
+
   test(
     "should display work update details",
     { tag: "@regression" },

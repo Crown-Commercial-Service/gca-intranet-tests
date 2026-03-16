@@ -7,6 +7,10 @@ test.describe("work updates", () => {
     await wp.posts.clearByTypeAndAuthor("work_updates");
   });
 
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("work_updates");
+  });
+
   test.skip("should display a single work update", async ({ wp, homepage }) => {
     const post = Post.aPost()
       .withType("work_updates")
@@ -20,156 +24,165 @@ test.describe("work updates", () => {
     await homepage.assertWorkUpdateOnHomepage(post);
   });
 
-  test("should enforce character limits for work update on homepage", { tag: '@regression' }, async ({
-    wp,
-    homepage,
-  }) => {
-    const post = Post.aPost()
-      .withType("work_updates")
-      .withTitleOver100Chars()
-      .withParagraphMaxChars(180)
-      .withStatus("publish");
+  test(
+    "should enforce character limits for work update on homepage",
+    { tag: "@regression" },
+    async ({ wp, homepage }) => {
+      const post = Post.aPost()
+        .withType("work_updates")
+        .withTitleOver100Chars()
+        .withParagraphMaxChars(180)
+        .withStatus("publish");
 
-    await wp.posts.create(post);
+      await wp.posts.create(post);
 
-    await homepage.goto();
-    await homepage.assertWorkUpdateCharLimits(post);
-  });
+      await homepage.goto();
+      await homepage.assertWorkUpdateCharLimits(post);
+    },
+  );
 
-  test("should display work updates in order (latest first and oldest last)", { tag: '@regression' }, async ({
-    wp,
-    homepage,
-  }) => {
-    const post1 = Post.aPost()
-      .withType("work_updates")
-      .withFixedTitle("Commercial Systems Rollout")
-      .withStatus("publish");
+  test(
+    "should display work updates in order (latest first and oldest last)",
+    { tag: "@regression" },
+    async ({ wp, homepage }) => {
+      const post1 = Post.aPost()
+        .withType("work_updates")
+        .withFixedTitle("Commercial Systems Rollout")
+        .withStatus("publish");
 
-    const post2 = Post.aPost()
-      .withType("work_updates")
-      .withFixedTitle("Recruitment Campaign Progress")
-      .withStatus("publish");
+      const post2 = Post.aPost()
+        .withType("work_updates")
+        .withFixedTitle("Recruitment Campaign Progress")
+        .withStatus("publish");
 
-    const post3 = Post.aPost()
-      .withType("work_updates")
-      .withFixedTitle("Digital Delivery Milestones")
-      .withStatus("publish");
+      const post3 = Post.aPost()
+        .withType("work_updates")
+        .withFixedTitle("Digital Delivery Milestones")
+        .withStatus("publish");
 
-    const post4 = Post.aPost()
-      .withType("work_updates")
-      .withFixedTitle("Procurement Policy Refresh")
-      .withStatus("publish");
+      const post4 = Post.aPost()
+        .withType("work_updates")
+        .withFixedTitle("Procurement Policy Refresh")
+        .withStatus("publish");
 
-    await wp.posts.create(post1);
-    await homepage.wait(1000);
+      await wp.posts.create(post1);
+      await homepage.wait(1000);
 
-    await wp.posts.create(post2);
-    await homepage.wait(1000);
+      await wp.posts.create(post2);
+      await homepage.wait(1000);
 
-    await wp.posts.create(post3);
-    await homepage.wait(1000);
+      await wp.posts.create(post3);
+      await homepage.wait(1000);
 
-    await wp.posts.create(post4);
+      await wp.posts.create(post4);
 
-    await homepage.goto();
-    await homepage.assertWorkUpdatesOrder([post4, post3]);
-  });
+      await homepage.goto();
+      await homepage.assertWorkUpdatesOrder([post4, post3]);
+    },
+  );
 
-  test("should open work update page", { tag: '@regression' }, async ({ wp, homepage, workUpdate }) => {
-    const post = Post.aPost()
-      .withType("work_updates")
-      .withFixedTitle("Supplier Onboarding Improvements")
-      .withStatus("publish");
+  test(
+    "should open work update page",
+    { tag: "@regression" },
+    async ({ wp, homepage, workUpdate }) => {
+      const post = Post.aPost()
+        .withType("work_updates")
+        .withFixedTitle("Supplier Onboarding Improvements")
+        .withStatus("publish");
 
-    await wp.posts.create(post);
+      await wp.posts.create(post);
 
-    await homepage.goto();
-    await homepage.selectWorkItemLink(post);
+      await homepage.goto();
+      await homepage.selectWorkItemLink(post);
 
-    await workUpdate.expectUrlToContain("supplier-onboarding-improvements/");
-    await workUpdate.assertBreadcrumbs(post);
-  });
+      await workUpdate.expectUrlToContain("supplier-onboarding-improvements/");
+      await workUpdate.assertBreadcrumbs(post);
+    },
+  );
 
-  test("should open work update list page", { tag: '@regression' }, async ({
-    wp,
-    homepage,
-    workUpdate,
-  }) => {
-    const post = Post.aPost()
-      .withType("work_updates")
-      .withFixedTitle("Quarterly Delivery Update")
-      .withStatus("publish");
+  test(
+    "should open work update list page",
+    { tag: "@regression" },
+    async ({ wp, homepage, workUpdate }) => {
+      const post = Post.aPost()
+        .withType("work_updates")
+        .withFixedTitle("Quarterly Delivery Update")
+        .withStatus("publish");
 
-    await wp.posts.create(post);
+      await wp.posts.create(post);
 
-    await homepage.goto();
-    await homepage.workUpdateSeeMoreLink.click();
+      await homepage.goto();
+      await homepage.workUpdateSeeMoreLink.click();
 
-    await workUpdate.expectUrlToContain("work_update/");
-  });
+      await workUpdate.expectUrlToContain("work_update/");
+    },
+  );
 
-  test("can edit author details of a work update post", { tag: '@regression' }, async ({
-    wp,
-    homepage,
-  }) => {
-    const post = Post.aPost()
-      .withType("work_updates")
-      .withFixedTitle("Contract Management Update")
-      .withStatus("publish");
+  test(
+    "can edit author details of a work update post",
+    { tag: "@regression" },
+    async ({ wp, homepage }) => {
+      const post = Post.aPost()
+        .withType("work_updates")
+        .withFixedTitle("Contract Management Update")
+        .withStatus("publish");
 
-    const postId = await wp.posts.create(post);
+      const postId = await wp.posts.create(post);
 
-    await homepage.goto();
-    await homepage.assertWorkUpdateAuthor(post.title);
+      await homepage.goto();
+      await homepage.assertWorkUpdateAuthor(post.title);
 
-    const newUser = User.anAdmin()
-      .withUsername("editor1")
-      .withEmail("editor1@example.com")
-      .withPassword("Password123!");
+      const newUser = User.anAdmin()
+        .withUsername("editor1")
+        .withEmail("editor1@example.com")
+        .withPassword("Password123!");
 
-    await wp.users.upsert(newUser);
+      await wp.users.upsert(newUser);
 
-    await wp.posts.updatePostAuthor(postId, "work_updates", newUser.username);
+      await wp.posts.updatePostAuthor(postId, "work_updates", newUser.username);
 
-    await homepage.goto();
-    await homepage.assertWorkUpdateAuthor(post.title, newUser.username);
-  });
+      await homepage.goto();
+      await homepage.assertWorkUpdateAuthor(post.title, newUser.username);
+    },
+  );
 
-  test("should truncate work update author when it is too long", { tag: '@regression' }, async ({
-    wp,
-    homepage,
-  }) => {
-    const post = Post.aPost()
-      .withType("work_updates")
-      .withFixedTitle("Contract Delivery Update")
-      .withStatus("publish");
+  test(
+    "should truncate work update author when it is too long",
+    { tag: "@regression" },
+    async ({ wp, homepage }) => {
+      const post = Post.aPost()
+        .withType("work_updates")
+        .withFixedTitle("Contract Delivery Update")
+        .withStatus("publish");
 
-    const postId = await wp.posts.create(post);
+      const postId = await wp.posts.create(post);
 
-    const newUser = User.anAdmin()
-      .withUsername("verylongworkupdateauthorname")
-      .withEmail("verylongworkupdateauthorname@example.com")
-      .withPassword("Password123!");
+      const newUser = User.anAdmin()
+        .withUsername("verylongworkupdateauthorname")
+        .withEmail("verylongworkupdateauthorname@example.com")
+        .withPassword("Password123!");
 
-    await wp.users.upsert(newUser);
-    await wp.posts.updatePostAuthor(postId, "work_updates", newUser.username);
+      await wp.users.upsert(newUser);
+      await wp.posts.updatePostAuthor(postId, "work_updates", newUser.username);
 
-    await homepage.goto();
-    await homepage.assertWorkUpdateAuthorIsTruncated(newUser.username);
-  });
+      await homepage.goto();
+      await homepage.assertWorkUpdateAuthorIsTruncated(newUser.username);
+    },
+  );
 
-  test("should truncate work update title when it is too long", { tag: '@regression' }, async ({
-    wp,
-    homepage,
-  }) => {
-    const post = Post.aPost()
-      .withType("work_updates")
-      .withTitleOver100Chars()
-      .withStatus("publish");
+  test(
+    "should truncate work update title when it is too long",
+    { tag: "@regression" },
+    async ({ wp, homepage }) => {
+      const post = Post.aPost()
+        .withType("work_updates")
+        .withTitleOver100Chars()
+        .withStatus("publish");
 
-    await wp.posts.create(post);
+      await wp.posts.create(post);
 
-    await homepage.goto();
-    await homepage.assertWorkUpdateTitleIsTruncated(post);
-  });
+      await homepage.goto();
+      await homepage.assertWorkUpdateTitleIsTruncated(post);
+    },
+  );
 });

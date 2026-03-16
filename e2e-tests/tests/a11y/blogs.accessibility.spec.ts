@@ -27,6 +27,10 @@ test.describe("Accessibility - Blog component", () => {
     await blog.update();
   });
 
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("blogs");
+  });
+
   test(
     "blog page should have no serious or critical accessibility violations",
     { tag: "@regression" },

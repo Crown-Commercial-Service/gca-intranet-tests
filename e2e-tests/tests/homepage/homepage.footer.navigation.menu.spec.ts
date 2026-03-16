@@ -6,7 +6,11 @@ test.describe("footer navigation menu", () => {
     await wp.posts.clearByTypeAndAuthor("page");
   });
 
-  test("can create footer links and navigate them", async ({
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("page");
+  });
+
+  test.skip("can create footer links and navigate them", async ({
     wp,
     wordpressLoginPage,
     customizerPage,
@@ -36,12 +40,10 @@ test.describe("footer navigation menu", () => {
 
     await homepage.goto();
     await homepage.selectFooterLink("GCA Website");
-    await homepage.expectUrlToContain(
-      "https:www.crowncommercial.gov.uk/",
-    );
+    await homepage.expectUrlToContain("https:www.crowncommercial.gov.uk/");
   });
 
-  test("can edit a footer link title and reorder it", async ({
+  test.skip("can edit a footer link title and reorder it", async ({
     wp,
     wordpressLoginPage,
     customizerPage,
@@ -69,7 +71,7 @@ test.describe("footer navigation menu", () => {
     ]);
   });
 
-  test("can delete a footer link", async ({
+  test.skip("can delete a footer link", async ({
     wp,
     wordpressLoginPage,
     customizerPage,

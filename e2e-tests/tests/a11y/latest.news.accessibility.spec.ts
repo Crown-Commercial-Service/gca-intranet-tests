@@ -25,6 +25,10 @@ test.describe("Accessibility - Latest news component", () => {
     await latestNews.update();
   });
 
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("news");
+  });
+
   test("latest news page should have no serious or critical accessibility violations", async ({
     latestNews,
   }) => {

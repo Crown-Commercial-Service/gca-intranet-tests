@@ -24,6 +24,10 @@ test.describe("Latest news component", () => {
     await wordpressLoginPage.loginAsAdmin();
   });
 
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("news");
+  });
+
   test(
     "should display news details",
     { tag: "@regression" },

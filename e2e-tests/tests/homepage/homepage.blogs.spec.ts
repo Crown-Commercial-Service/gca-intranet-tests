@@ -5,10 +5,15 @@ import Chance from "chance";
 
 const chance = new Chance();
 
-test.describe("blogs", { tag: '@regression' }, () => {
+test.describe("blogs", { tag: "@regression" }, () => {
   test.beforeEach(async ({ wp }) => {
     await wp.posts.clearByTypeAndAuthor("blogs");
   });
+
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("blogs");
+  });
+
   test("should display a single blog", async ({ wp, homepage }) => {
     const post = Post.aPost()
       .withType("blogs")
@@ -116,40 +121,40 @@ test.describe("blogs", { tag: '@regression' }, () => {
   });
 
   test("should truncate blog author when it is too long", async ({
-  wp,
-  homepage,
-}) => {
-  const post = Post.aPost()
-    .withType("blogs")
-    .withFixedTitle("Digital Procurement Insights")
-    .withStatus("publish");
+    wp,
+    homepage,
+  }) => {
+    const post = Post.aPost()
+      .withType("blogs")
+      .withFixedTitle("Digital Procurement Insights")
+      .withStatus("publish");
 
-  const postId = await wp.posts.create(post);
+    const postId = await wp.posts.create(post);
 
-  const newUser = User.anAdmin()
-    .withUsername("verylongblogauthorname")
-    .withEmail("verylongblogauthorname@example.com")
-    .withPassword("Password123!");
+    const newUser = User.anAdmin()
+      .withUsername("verylongblogauthorname")
+      .withEmail("verylongblogauthorname@example.com")
+      .withPassword("Password123!");
 
-  await wp.users.upsert(newUser);
-  await wp.posts.updatePostAuthor(postId, "blogs", newUser.username);
+    await wp.users.upsert(newUser);
+    await wp.posts.updatePostAuthor(postId, "blogs", newUser.username);
 
-  await homepage.goto();
-  await homepage.assertBlogAuthorIsTruncated(newUser.username);
-});
+    await homepage.goto();
+    await homepage.assertBlogAuthorIsTruncated(newUser.username);
+  });
 
-test("should truncate blog title when it is too long", async ({
-  wp,
-  homepage,
-}) => {
-  const post = Post.aPost()
-    .withType("blogs")
-    .withTitleOver100Chars()
-    .withStatus("publish");
+  test("should truncate blog title when it is too long", async ({
+    wp,
+    homepage,
+  }) => {
+    const post = Post.aPost()
+      .withType("blogs")
+      .withTitleOver100Chars()
+      .withStatus("publish");
 
-  await wp.posts.create(post);
+    await wp.posts.create(post);
 
-  await homepage.goto();
-  await homepage.assertBlogTitleIsTruncated(post);
-});
+    await homepage.goto();
+    await homepage.assertBlogTitleIsTruncated(post);
+  });
 });

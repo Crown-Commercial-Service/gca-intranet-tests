@@ -28,6 +28,10 @@ test.describe("Accessibility - Work update component", () => {
     await workUpdate.update();
   });
 
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("work_updates");
+  });
+
   test("work update page should have no serious or critical accessibility violations", async ({
     workUpdate,
   }) => {
