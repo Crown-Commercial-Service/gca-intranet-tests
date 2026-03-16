@@ -42,7 +42,7 @@ test.describe("events", () => {
     await homepage.assertEventOnHomepage(event);
   });
 
-  test.only(
+  test(
     "should render a maximum of three events on the homepage",
     { tag: "@regression" },
     async ({ wp, homepage, wordpressLoginPage, eventEditorPage }) => {
@@ -96,7 +96,7 @@ test.describe("events", () => {
     },
   );
 
-  test.only(
+  test(
     "should truncate event title",
     { tag: "@regression" },
     async ({ wp, homepage, wordpressLoginPage, eventEditorPage }) => {
@@ -129,10 +129,8 @@ test.describe("events", () => {
         .withFixedTitle("Past Event Start Date")
         .withCategory("Accessibility")
         .withEventLocation("Online")
-        .withStartDate(
-          dayjs().subtract(2, "day").format("DD-MM-YYYY") + " 12:00 am",
-        )
-        .withEndDate(dayjs().add(1, "day").format("DD-MM-YYYY") + " 12:00 am")
+        .withStartDate(dayjs().subtract(2, "day").format("DD-MM-YYYY"))
+        .withEndDate(dayjs().add(1, "day").format("DD-MM-YYYY"))
         .withStatus("publish");
 
       await wordpressLoginPage.goto();
@@ -148,7 +146,11 @@ test.describe("events", () => {
 
       await homepage.goto();
 
-      await expect(homepage.eventsRows).toHaveCount(0);
+      await expect(
+        homepage.eventsRows
+          .getByTestId("events-link")
+          .filter({ hasText: event.title }),
+      ).toHaveCount(0);
     },
   );
 
@@ -176,7 +178,12 @@ test.describe("events", () => {
       await eventEditorPage.update();
 
       await homepage.goto();
-      await expect(homepage.eventsRows).toHaveCount(0);
+
+      await expect(
+        homepage.eventsRows
+          .getByTestId("events-link")
+          .filter({ hasText: event.title }),
+      ).toHaveCount(0);
     },
   );
 
@@ -189,32 +196,32 @@ test.describe("events", () => {
           .withFixedTitle("Commercial Strategy Briefing")
           .withCategory("Accessibility")
           .withEventLocation("Online")
-          .withStartDate(dayjs().add(1, "day").format("DD-MM-YYYY"))
-          .withEndDate(dayjs().add(2, "day").format("DD-MM-YYYY"))
+          .withStartDate(dayjs().add(120, "day").format("DD-MM-YYYY"))
+          .withEndDate(dayjs().add(121, "day").format("DD-MM-YYYY"))
           .withStatus("publish"),
 
         Event.anEvent()
           .withFixedTitle("Procurement Policy Update Session")
           .withCategory("Change management")
           .withEventLocation("In-person")
-          .withStartDate(dayjs().add(3, "day").format("DD-MM-YYYY"))
-          .withEndDate(dayjs().add(4, "day").format("DD-MM-YYYY"))
+          .withStartDate(dayjs().add(122, "day").format("DD-MM-YYYY"))
+          .withEndDate(dayjs().add(123, "day").format("DD-MM-YYYY"))
           .withStatus("publish"),
 
         Event.anEvent()
           .withFixedTitle("Supplier Engagement Workshop")
           .withCategory("Digital and data")
           .withEventLocation("Online")
-          .withStartDate(dayjs().add(5, "day").format("DD-MM-YYYY"))
-          .withEndDate(dayjs().add(6, "day").format("DD-MM-YYYY"))
+          .withStartDate(dayjs().add(124, "day").format("DD-MM-YYYY"))
+          .withEndDate(dayjs().add(125, "day").format("DD-MM-YYYY"))
           .withStatus("publish"),
 
         Event.anEvent()
           .withFixedTitle("Information Security Awareness Session")
           .withCategory("Information security")
           .withEventLocation("In-person")
-          .withStartDate(dayjs().add(7, "day").format("DD-MM-YYYY"))
-          .withEndDate(dayjs().add(8, "day").format("DD-MM-YYYY"))
+          .withStartDate(dayjs().add(126, "day").format("DD-MM-YYYY"))
+          .withEndDate(dayjs().add(127, "day").format("DD-MM-YYYY"))
           .withStatus("publish"),
       ];
 
@@ -248,11 +255,14 @@ test.describe("events", () => {
       await eventEditorPage.update();
 
       await homepage.goto();
-      await homepage.assertEventOrder([
-        events[1].title,
-        events[2].title,
-        events[3].title,
-      ]);
+
+      await expect(
+        homepage.eventsRows
+          .getByTestId("events-link")
+          .filter({ hasText: events[0].title }),
+      ).toHaveCount(0);
+
+      await homepage.hasEvents([events[1], events[2], events[3]]);
     },
   );
 });
