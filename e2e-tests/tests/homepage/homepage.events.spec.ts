@@ -42,8 +42,8 @@ test.describe("events", () => {
     await homepage.assertEventOnHomepage(event);
   });
 
-  test.skip(
-    "should render a maximum of two events on the homepage",
+  test.only(
+    "should render a maximum of three events on the homepage",
     { tag: "@regression" },
     async ({ wp, homepage, wordpressLoginPage, eventEditorPage }) => {
       const events = [
@@ -84,9 +84,15 @@ test.describe("events", () => {
         await eventEditorPage.selectEventLocation(events[index].eventLocation!);
         await eventEditorPage.update();
       }
+
       await homepage.goto();
+      await homepage.hasEvents(events.slice(0, 3));
       await expect(homepage.eventsRows).toHaveCount(3);
-      await homepage.assertEventsOnHomepage(events.slice(0, 3));
+      await homepage.assertEventOrder([
+        events[0].title,
+        events[1].title,
+        events[2].title,
+      ]);
     },
   );
 

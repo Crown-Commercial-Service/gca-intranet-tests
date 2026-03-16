@@ -701,6 +701,38 @@ export default class HomePage extends BasePage {
     }
   }
 
+  async hasEvents(events: EventModel[]): Promise<void> {
+    await expect(this.eventsRows).toHaveCount(events.length);
+
+    for (let i = 0; i < events.length; i++) {
+      const card = this.eventsRows.nth(i);
+      const event = events[i];
+
+      const link = card.getByTestId(this.eventsLinkTestId);
+
+      const actualTitle = ((await link.textContent()) ?? "").trim();
+      const visiblePart = getVisibleTruncatedText(actualTitle);
+
+      expect(event.title.startsWith(visiblePart)).toBe(true);
+
+      const date = (
+        (await card.getByTestId(this.eventsDateTestId).textContent()) ?? ""
+      ).trim();
+
+      expect(date).toBe(formatHomepageEventDate(event.startDate));
+
+      if (event.category) {
+        await expect(this.eventCategoryTag(card)).toHaveText(event.category);
+      }
+
+      if (event.eventLocation) {
+        await expect(this.eventLocationTag(card)).toHaveText(
+          event.eventLocation,
+        );
+      }
+    }
+  }
+
   async assertEventTitleIsTruncated(event: EventModel): Promise<void> {
     const card = this.eventCardByTitle(event.title);
 
