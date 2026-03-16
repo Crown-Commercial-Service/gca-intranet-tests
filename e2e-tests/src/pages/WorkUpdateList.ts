@@ -30,7 +30,7 @@ export default class WorkUpdateList extends BasePage {
     this.postDates = this.page.getByTestId("work-update-post-date");
     this.postLabels = this.page.getByTestId("work-update-tax");
     this.postTeams = this.page.getByTestId("work-update-team");
-    this.workUpdateListSection = `[data-testid="${this.main}"]`;
+    this.workUpdateListSection = "[data-testid='work-update-main']";
   }
 
   async goto(): Promise<void> {

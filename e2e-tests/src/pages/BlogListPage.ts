@@ -26,7 +26,7 @@ export default class BlogListPage extends BasePage {
     this.postDescriptions = this.page.getByTestId("blog-decs");
     this.postDates = this.page.getByTestId("blog-post-date");
     this.postLabels = this.page.getByTestId("blog-tax");
-    this.blogsListSection = `[data-testid="${this.main}"]`;
+    this.blogsListSection = "[data-testid='blog-main']";
   }
 
   async goto(): Promise<void> {

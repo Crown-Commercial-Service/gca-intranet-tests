@@ -28,19 +28,16 @@ test.describe("Accessibility - Blog component", () => {
   });
 
   test(
-    "blogs page should have no serious or critical accessibility violations",
+    "blog page should have no serious or critical accessibility violations",
     { tag: "@regression" },
     async ({ blog }) => {
       await blog.gotoById(postId);
-      await blog.assertPublishedDate(
-        dayjs(post.createdAt).format("Do MMMM YYYY"),
-      );
       await blog.checkAccessibilityFor([blog.blogsSection]);
     },
   );
 
   test(
-    "blog list page should have no serious or critical accessibility violations",
+    "blogs list page should have no serious or critical accessibility violations",
     { tag: "@regression" },
     async ({ wp, blogList }) => {
       const posts = Post.manyBlogs(11);

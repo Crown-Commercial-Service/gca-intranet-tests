@@ -27,7 +27,7 @@ export default class LatestNews extends BasePage {
     this.content = this.page.getByTestId("news-content");
     this.publishedBy = this.page.getByTestId("published-by");
     this.publishedByAuthor = this.page.getByTestId("published-by-author");
-    this.latestNewsSection = `[data-testid="${this.main}"]`;
+    this.latestNewsSection = "[data-testid='news-main']";
   }
 
   async goto(pathname: string): Promise<void> {

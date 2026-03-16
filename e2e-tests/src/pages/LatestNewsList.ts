@@ -46,7 +46,7 @@ export default class LatestNewsList extends BasePage {
     this.postDescriptions = this.page.getByTestId("news-desc");
     this.postMeta = this.page.getByTestId("news-post-meta");
     this.postTags = this.page.getByTestId("news-post-tags");
-    this.latestNewsListSection = `[data-testid="${this.main}"]`;
+    this.latestNewsListSection = "[data-testid='news-main']";
   }
 
   async goto(): Promise<void> {

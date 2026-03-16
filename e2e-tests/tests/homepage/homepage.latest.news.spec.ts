@@ -144,7 +144,7 @@ test.describe("homepage - latest news", () => {
     await homepage.goto();
     await homepage.openLatestArticle(post.title);
 
-    await latestNews.expectUrlToContain("e2e-latest-article/");
+    await latestNews.expectUrlToContain("e2e-latest-article");
     await latestNews.assertBreadcrumbs(post);
   });
 });

@@ -26,7 +26,7 @@ export default class BlogPage extends BasePage {
     this.authorImage = this.page.locator(".profile_img_wrapper img");
     this.date = this.page.getByTestId("blog-date");
     this.blogLabel = this.page.getByTestId("blog-tax");
-    this.blogsSection = `[data-testid="${this.main}"]`;
+    this.blogsSection = "[data-testid='blog-main']";
   }
 
   async goto(slug: string): Promise<void> {

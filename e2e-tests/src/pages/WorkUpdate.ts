@@ -32,7 +32,7 @@ export default class WorkUpdate extends BasePage {
     this.content = this.page.getByTestId("work-update-content");
     this.author = this.details.locator("span").first();
     this.authorImage = this.page.locator(".profile_img_wrapper img");
-    this.workUpdateSection = `[data-testid="${this.main}"]`;
+    this.workUpdateSection = "[data-testid='work-update-main']";
   }
 
   async goto(pathname: string): Promise<void> {
