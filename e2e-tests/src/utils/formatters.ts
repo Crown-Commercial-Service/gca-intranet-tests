@@ -104,5 +104,5 @@ export function formatHomepageArticleDate(value: string | Date): string {
 }
 
 export function formatHomepageEventDate(value: string | Date): string {
-  return dayjs(value).format("D MMMM YYYY");
+  return dayjs(value, "DD-MM-YYYY").format("D MMMM YYYY");
 }

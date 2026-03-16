@@ -690,7 +690,7 @@ export default class HomePage extends BasePage {
       (await card.getByTestId(this.eventsDateTestId).textContent()) ?? ""
     ).trim();
 
-    expect(date).toBe(formatHomepageEventDate(event.startDate));
+    expect(date).toBe(formatHomepageEventDate(event.startDate).trim());
 
     if (event.category) {
       await expect(this.eventCategoryTag(card)).toHaveText(event.category);
