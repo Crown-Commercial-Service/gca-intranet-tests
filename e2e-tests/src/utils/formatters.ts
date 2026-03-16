@@ -1,5 +1,8 @@
 import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import { htmlToText } from "html-to-text";
+
+dayjs.extend(customParseFormat);
 
 function getOrdinal(dayNumber: number) {
   if (dayNumber > 3 && dayNumber < 21) return "th";
@@ -94,4 +97,12 @@ export function toEditorTime(value: string): string {
   ]);
 
   return parsed.isValid() ? parsed.format("HH:mm") : value;
+}
+
+export function formatHomepageArticleDate(value: string | Date): string {
+  return dayjs(value).format("Do MMMM YYYY");
+}
+
+export function formatHomepageEventDate(value: string | Date): string {
+  return dayjs(value).format("D MMMM YYYY");
 }

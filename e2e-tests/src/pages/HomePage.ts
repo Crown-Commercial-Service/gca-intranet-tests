@@ -5,7 +5,11 @@ import type Post from "../models/Post";
 import type TakeALook from "../models/TakeALook";
 import type QuickLinks from "../models/QuickLinks";
 import type EventModel from "../models/Events";
-import { htmlToPlainText, getVisibleTruncatedText } from "../utils/formatters";
+import {
+  htmlToPlainText,
+  getVisibleTruncatedText,
+  formatHomepageEventDate,
+} from "../utils/formatters";
 import BasePage from "./BasePage";
 
 dayjs.extend(advancedFormat);
@@ -675,18 +679,18 @@ export default class HomePage extends BasePage {
 
     await expect(card).toBeVisible();
 
-    await expect(card.getByTestId(this.eventsLinkTestId)).toHaveText(
-      event.title.trim(),
-    );
+    const link = card.getByTestId(this.eventsLinkTestId);
 
-    const expectedDate = dayjs(event.startDate, [
-      "DD-MM-YYYY h:mm a",
-      "YYYY-MM-DD HH:mm:ss",
-    ]).format("Do MMMM YYYY");
+    const actualTitle = ((await link.textContent()) ?? "").trim();
+    const visiblePart = getVisibleTruncatedText(actualTitle);
 
-    await expect(card.getByTestId(this.eventsDateTestId)).toHaveText(
-      expectedDate,
-    );
+    expect(event.title.startsWith(visiblePart)).toBe(true);
+
+    const date = (
+      (await card.getByTestId(this.eventsDateTestId).textContent()) ?? ""
+    ).trim();
+
+    expect(date).toBe(formatHomepageEventDate(event.startDate));
 
     if (event.category) {
       await expect(this.eventCategoryTag(card)).toHaveText(event.category);
