@@ -96,7 +96,7 @@ test.describe("events", () => {
     },
   );
 
-  test.skip(
+  test.only(
     "should truncate event title",
     { tag: "@regression" },
     async ({ wp, homepage, wordpressLoginPage, eventEditorPage }) => {

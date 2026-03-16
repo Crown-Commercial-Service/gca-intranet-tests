@@ -737,10 +737,21 @@ export default class HomePage extends BasePage {
     }
   }
 
-  async assertEventTitleIsTruncated(event: EventModel): Promise<void> {
-    const card = this.eventCardByTitle(event.title);
+  // async assertEventTitleIsTruncated(event: EventModel): Promise<void> {
+  //   const card = this.eventCardByTitle(event.title);
 
-    const link = card.getByTestId(this.eventsLinkTestId);
+  //   const link = card.getByTestId(this.eventsLinkTestId);
+
+  //   await this.assertTextIsTruncated(link, event.title);
+  // }
+
+  async assertEventTitleIsTruncated(event: EventModel): Promise<void> {
+    const prefix = event.title.trim().slice(0, 25);
+
+    const link = this.eventsRows
+      .getByTestId(this.eventsLinkTestId)
+      .filter({ hasText: prefix })
+      .first();
 
     await this.assertTextIsTruncated(link, event.title);
   }
