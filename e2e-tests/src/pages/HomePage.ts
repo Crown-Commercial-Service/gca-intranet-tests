@@ -711,9 +711,13 @@ export default class HomePage extends BasePage {
       const link = card.getByTestId(this.eventsLinkTestId);
 
       const actualTitle = ((await link.textContent()) ?? "").trim();
-      const visiblePart = getVisibleTruncatedText(actualTitle);
 
-      expect(event.title.startsWith(visiblePart)).toBe(true);
+      if (actualTitle.endsWith("...")) {
+        const visiblePart = getVisibleTruncatedText(actualTitle);
+        expect(event.title.startsWith(visiblePart)).toBe(true);
+      } else {
+        expect(actualTitle).toBe(event.title.trim());
+      }
 
       const date = (
         (await card.getByTestId(this.eventsDateTestId).textContent()) ?? ""
