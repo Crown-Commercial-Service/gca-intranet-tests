@@ -187,7 +187,7 @@ test.describe("events", () => {
     },
   );
 
-  test.only(
+  test(
     "should not display events that have expired",
     { tag: "@regression" },
     async ({ wp, wordpressLoginPage, eventEditorPage, homepage }) => {

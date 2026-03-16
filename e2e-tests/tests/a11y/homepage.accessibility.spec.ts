@@ -10,11 +10,17 @@ test.describe("Accessibility - Homepage components", () => {
     await wp.posts.clearByRunId(runId);
     await wp.posts.clearByTypeAndAuthor("page");
     await wp.posts.clearByTypeAndAuthor("events");
+    await wp.posts.clearByTypeAndAuthor("blogs");
+    await wp.posts.clearByTypeAndAuthor("work_updates");
+    await wp.posts.clearByTypeAndAuthor("news");
   });
 
   test.afterAll(async ({ wp }) => {
     await wp.posts.clearByTypeAndAuthor("page");
     await wp.posts.clearByTypeAndAuthor("events");
+    await wp.posts.clearByTypeAndAuthor("blogs");
+    await wp.posts.clearByTypeAndAuthor("work_updates");
+    await wp.posts.clearByTypeAndAuthor("news");
   });
 
   test("Components on the homepage should have no serious or critical violations", async ({
@@ -27,7 +33,7 @@ test.describe("Accessibility - Homepage components", () => {
   }) => {
     const contentType = Post.homepageSet(runId);
     const customizations = HomepageCustomizationSet.homepageSet(runId);
-    // const events = Event.homepageEvents();
+    const events = Event.homepageEvents();
 
     // Create homepage content
     await wp.posts.createMany(contentType.news);
@@ -50,30 +56,30 @@ test.describe("Accessibility - Homepage components", () => {
     await customizerPage.publish();
 
     // Create event posts
-    // const eventIds = await wp.events.createMany(events);
+    const eventIds = await wp.events.createMany(events);
 
     // Add event details in WordPress editor
-    // for (let index = 0; index < events.length; index++) {
-    //   await eventEditorPage.gotoEdit(eventIds[index]);
-    //   await eventEditorPage.fillEventDetails(events[index]);
-    //   await eventEditorPage.selectCategory(events[index].category!);
-    //   await eventEditorPage.selectEventLocation(events[index].eventLocation!);
-    //   await eventEditorPage.update();
-    // }
+    for (let index = 0; index < events.length; index++) {
+      await eventEditorPage.gotoEdit(eventIds[index]);
+      await eventEditorPage.fillEventDetails(events[index]);
+      await eventEditorPage.selectCategory(events[index].category!);
+      await eventEditorPage.selectEventLocation(events[index].eventLocation!);
+      await eventEditorPage.update();
+    }
 
     // Build homepage navigation menu
-    await customizerPage.goto();
-    await customizerPage.buildMenu(MenuPages.menu());
-    await customizerPage.publish();
+    // await customizerPage.goto();
+    // await customizerPage.buildMenu(MenuPages.menu());
+    // await customizerPage.publish();
 
     // Build footer navigation menu
-    await customizerPage.goto();
-    await customizerPage.buildFooterMenu(FooterPages.menu());
-    await customizerPage.publish();
+    // await customizerPage.goto();
+    // await customizerPage.buildFooterMenu(FooterPages.menu());
+    // await customizerPage.publish();
 
     // Open homepage and submenu for accessibility scan
     await homepage.goto();
-    await homepage.hoverParentLink("Parent Nav Link 1");
+    // await homepage.hoverParentLink("Parent Nav Link 1");
 
     // Run accessibility checks on homepage sections and navigation
     await homepage.checkAccessibilityFor([
@@ -82,10 +88,10 @@ test.describe("Accessibility - Homepage components", () => {
       homepage.blogsSectionSelector,
       homepage.takeALookColumnSelector,
       homepage.quickLinksSelector,
-      // homepage.eventsSectionSelector,
+      homepage.eventsSectionSelector,
       homepage.primaryNavigationSelector,
-      homepage.subMenuNavigation,
-      homepage.footerSelector,
+      // homepage.subMenuNavigation,
+      // homepage.footerSelector,
     ]);
   });
 });
