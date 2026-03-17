@@ -168,4 +168,247 @@ test.describe("search", () => {
     await searchResultsPage.assertSearchInputVisible();
     await searchResultsPage.assertNoResultsMessageVisible(query);
   });
+
+  test("should allow searching by pressing Enter from the homepage header", async ({
+    wp,
+    homepage,
+    searchResultsPage,
+    wordpressLoginPage,
+    runId,
+  }) => {
+    const keyword = `Procurement-${runId}`;
+    const seed = createSearchSeed(keyword);
+
+    await seedSearchData(wp, seed);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await homepage.goto();
+    await homepage.searchWithEnter(seed.keyword);
+
+    await searchResultsPage.assertHeadingContainsQuery(seed.keyword);
+    await searchResultsPage.assertSearchInputVisible();
+    await searchResultsPage.assertResultsCountVisible();
+    await searchResultsPage.assertResultCount(8);
+  });
+
+  test("should allow searching again from the search results page", async ({
+    wp,
+    homepage,
+    searchResultsPage,
+    wordpressLoginPage,
+    runId,
+  }) => {
+    const firstKeyword = `Procurement-${runId}`;
+    const secondKeyword = `Governance-${runId}`;
+
+    const firstSeed = createSearchSeed(firstKeyword);
+    const secondSeed = createSearchSeed(secondKeyword);
+
+    await seedSearchData(wp, firstSeed);
+    await seedSearchData(wp, secondSeed);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await homepage.goto();
+    await homepage.search(firstSeed.keyword);
+
+    await searchResultsPage.assertHeadingContainsQuery(firstSeed.keyword);
+    await searchResultsPage.search(secondSeed.keyword);
+
+    await searchResultsPage.assertHeadingContainsQuery(secondSeed.keyword);
+    await searchResultsPage.assertSearchInputValue(secondSeed.keyword);
+    await searchResultsPage.assertResultsCountVisible();
+  });
+
+  test("should hide the header search and show the search results page search box", async ({
+    wp,
+    homepage,
+    searchResultsPage,
+    wordpressLoginPage,
+    runId,
+  }) => {
+    const keyword = `Procurement-${runId}`;
+    const seed = createSearchSeed(keyword);
+
+    await seedSearchData(wp, seed);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await homepage.goto();
+    await homepage.search(seed.keyword);
+
+    await searchResultsPage.assertSearchInputVisible();
+    await homepage.assertHeaderSearchNotVisible();
+  });
+
+  test("should show results in the correct order", async ({
+    wp,
+    homepage,
+    searchResultsPage,
+    wordpressLoginPage,
+    runId,
+  }) => {
+    const keyword = `Ordering-${runId}`;
+
+    const first = Post.aPost()
+      .withType("news")
+      .withFixedTitle(`${keyword} First result`)
+      .withContent(`${keyword} first result content`)
+      .withStatus("publish")
+      .withFeaturedImage("featured.jpg");
+
+    const second = Post.aPost()
+      .withType("news")
+      .withFixedTitle(`${keyword} Second result`)
+      .withContent(`${keyword} second result content`)
+      .withStatus("publish")
+      .withFeaturedImage("featured.jpg");
+
+    const third = Post.aPost()
+      .withType("news")
+      .withFixedTitle(`${keyword} Third result`)
+      .withContent(`${keyword} third result content`)
+      .withStatus("publish")
+      .withFeaturedImage("featured.jpg");
+
+    await wp.posts.create(first);
+    await wp.posts.create(second);
+    await wp.posts.create(third);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await homepage.goto();
+    await homepage.search(keyword);
+
+    await searchResultsPage.assertResultsInOrder([
+      first.title,
+      second.title,
+      third.title,
+    ]);
+  });
+
+  test("should truncate result title to 85 characters", async ({
+    wp,
+    homepage,
+    searchResultsPage,
+    wordpressLoginPage,
+    runId,
+  }) => {
+    const keyword = `TitleTruncation-${runId}`;
+
+    const post = Post.aPost()
+      .withType("news")
+      .withFixedTitle(
+        `${keyword} this is a very long search result title designed to exceed the eighty five character limit on the search results page`,
+      )
+      .withContent(`${keyword} title truncation content`)
+      .withStatus("publish")
+      .withFeaturedImage("featured.jpg");
+
+    await wp.posts.create(post);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await homepage.goto();
+    await homepage.search(keyword);
+
+    await searchResultsPage.assertResultTitleIsTruncated(post.title);
+  });
+
+  test("should truncate result description to 125 characters", async ({
+    wp,
+    homepage,
+    searchResultsPage,
+    wordpressLoginPage,
+    runId,
+  }) => {
+    const keyword = `ExcerptTruncation-${runId}`;
+
+    const post = Post.aPost()
+      .withType("news")
+      .withFixedTitle(`${keyword} result`)
+      .withContent(
+        `${keyword} this is a very long excerpt designed to exceed one hundred and twenty five characters so that the search results page has to truncate the visible description for the user`,
+      )
+      .withStatus("publish")
+      .withFeaturedImage("featured.jpg");
+
+    await wp.posts.create(post);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await homepage.goto();
+    await homepage.search(keyword);
+
+    await searchResultsPage.assertResultExcerptIsTruncated(post.title);
+  });
+
+  test("should display categories or terms for each result", async ({
+    wp,
+    homepage,
+    searchResultsPage,
+    wordpressLoginPage,
+    runId,
+  }) => {
+    const keyword = `Terms-${runId}`;
+    const seed = createSearchSeed(keyword);
+
+    await seedSearchData(wp, seed);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await homepage.goto();
+    await homepage.search(seed.keyword);
+
+    await searchResultsPage.assertResultHasTerm(
+      seed.pages[0].title,
+      "Customers and suppliers",
+    );
+    await searchResultsPage.assertResultHasTerm(
+      seed.news[0].title,
+      "Information security",
+    );
+    await searchResultsPage.assertResultHasTerm(
+      seed.blogs[0].title,
+      "Digital and data",
+    );
+    await searchResultsPage.assertResultHasTerm(
+      seed.workUpdates[0].title,
+      "Marketing and communications",
+    );
+  });
+
+  test("should display page results using the category content type label", async ({
+    wp,
+    homepage,
+    searchResultsPage,
+    wordpressLoginPage,
+    runId,
+  }) => {
+    const keyword = `Guidance-${runId}`;
+    const seed = createSearchSeed(keyword);
+
+    await seedSearchData(wp, seed);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await homepage.goto();
+    await homepage.search(seed.keyword);
+
+    await searchResultsPage.assertResultHasType(
+      seed.pages[0].title,
+      "Guidance",
+    );
+    await searchResultsPage.assertResultHasLink(seed.pages[0].title);
+    await searchResultsPage.assertResultHasExcerpt(seed.pages[0].title);
+  });
 });

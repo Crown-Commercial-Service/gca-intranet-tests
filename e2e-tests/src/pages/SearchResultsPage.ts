@@ -25,6 +25,7 @@ export default class SearchResultsPage extends BasePage {
   readonly resultLinks: Locator;
   readonly resultExcerpts: Locator;
   readonly resultTerms: Locator;
+  readonly resultTitleLinks: Locator;
 
   constructor(page: Page, baseUrl?: string) {
     super(page);
@@ -53,6 +54,7 @@ export default class SearchResultsPage extends BasePage {
     this.resultLinks = this.page.getByTestId("search-result-link");
     this.resultExcerpts = this.page.getByTestId("search-result-excerpt");
     this.resultTerms = this.page.getByTestId("search-result-terms");
+    this.resultTitleLinks = this.page.getByTestId("search-result-link");
   }
 
   async goto(query: string): Promise<void> {
@@ -157,5 +159,39 @@ export default class SearchResultsPage extends BasePage {
 
   async assertPaginationNotVisible(): Promise<void> {
     await expect(this.pagination).not.toBeVisible();
+  }
+
+  async assertResultsInOrder(titles: string[]): Promise<void> {
+    await expect(this.resultCards).toHaveCount(titles.length);
+
+    for (let index = 0; index < titles.length; index++) {
+      await expect(
+        this.resultCards.nth(index).getByTestId("search-result-link"),
+      ).toContainText(titles[index]);
+    }
+  }
+
+  async assertResultTitleIsTruncated(fullTitle: string): Promise<void> {
+    const result = this.resultByTitle(fullTitle);
+    const link = result.getByTestId("search-result-link");
+
+    await expect(link).toBeVisible();
+
+    const actual = ((await link.textContent()) ?? "").trim();
+
+    expect(actual).not.toBe(fullTitle);
+    expect(actual.endsWith("...")).toBe(true);
+    expect(fullTitle.startsWith(actual.slice(0, -3).trim())).toBe(true);
+  }
+
+  async assertResultExcerptIsTruncated(title: string): Promise<void> {
+    const result = this.resultByTitle(title);
+    const excerpt = result.getByTestId("search-result-excerpt");
+
+    await expect(excerpt).toBeVisible();
+
+    const actual = ((await excerpt.textContent()) ?? "").trim();
+
+    expect(actual.endsWith("...")).toBe(true);
   }
 }

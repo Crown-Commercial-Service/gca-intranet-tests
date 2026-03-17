@@ -213,6 +213,15 @@ export default class HomePage extends BasePage {
     await this.searchButton.click();
   }
 
+  async searchWithEnter(query: string): Promise<void> {
+    await expect(this.searchInput).toBeVisible();
+    await this.searchInput.fill(query);
+    await this.searchInput.press("Enter");
+  }
+
+  async assertHeaderSearchNotVisible(): Promise<void> {
+    await expect(this.searchInput).toHaveCount(0);
+  }
   // ---------------------------------------------------------
   // Take a look assertions
   // ---------------------------------------------------------
