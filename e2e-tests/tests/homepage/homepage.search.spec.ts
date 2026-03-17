@@ -20,11 +20,16 @@ test.describe("search", () => {
   test("should render the search results page for mixed content", async ({
     wp,
     searchResultsPage,
+    wordpressLoginPage,
     runId,
   }) => {
     const keyword = `Procurement-${runId}`;
     const seed = createSearchSeed(keyword);
+
     await seedSearchData(wp, seed);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
 
     await searchResultsPage.goto(seed.keyword);
 
