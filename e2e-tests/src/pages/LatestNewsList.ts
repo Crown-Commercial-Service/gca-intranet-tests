@@ -1,6 +1,6 @@
 import { Page, Locator, expect } from "@playwright/test";
 import BasePage from "./BasePage";
-import { formatDateOld } from "../utils/formatters";
+import { formatDateNew } from "../utils/formatters";
 import Post from "../models/Post";
 
 export default class LatestNewsList extends BasePage {
@@ -100,7 +100,7 @@ export default class LatestNewsList extends BasePage {
   async assertLatestNewsDate(post: Post): Promise<void> {
     await expect(
       this.postByTitle(post.title).getByTestId("news-post-meta"),
-    ).toContainText(formatDateOld(post.createdAt));
+    ).toContainText(formatDateNew(post.createdAt));
   }
 
   async assertPostHasCategory(title: string, category: string): Promise<void> {
