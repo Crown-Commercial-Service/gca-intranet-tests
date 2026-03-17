@@ -1,6 +1,6 @@
 import { Page, Locator, expect } from "@playwright/test";
 import BasePage from "./BasePage";
-import { formatDateOld } from "../utils/formatters";
+import { formatDateNew } from "../utils/formatters";
 import Post from "../models/Post";
 
 export default class LatestNews extends BasePage {
@@ -71,7 +71,7 @@ export default class LatestNews extends BasePage {
   }
 
   async assertLatestNewsDate(post: Post): Promise<void> {
-    await expect(this.details).toContainText(formatDateOld(post.createdAt));
+    await expect(this.details).toContainText(formatDateNew(post.createdAt));
   }
 
   async assertFeaturedImageVisible(): Promise<void> {

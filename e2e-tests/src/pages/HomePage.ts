@@ -9,6 +9,7 @@ import {
   htmlToPlainText,
   getVisibleTruncatedText,
   formatHomepageEventDate,
+  formatDateNew,
 } from "../utils/formatters";
 import BasePage from "./BasePage";
 
@@ -330,9 +331,9 @@ export default class HomePage extends BasePage {
       const dateEl = await this.latestNewsDateElement(card);
       await expect(dateEl).toBeVisible();
 
-      const uiDate = (await dateEl.textContent())?.trim() ?? "";
-      const expectedDate = dayjs(post.createdAt).format("Do MMMM YYYY");
-      expect(uiDate).toBe(expectedDate);
+      // const uiDate = (await dateEl.textContent())?.trim() ?? "";
+      const expectedDate = formatDateNew(post.createdAt);
+      await expect(dateEl).toHaveText(expectedDate);
     }
 
     let allHaveImages = true;
@@ -546,7 +547,7 @@ export default class HomePage extends BasePage {
     );
 
     await expect(card.getByTestId(this.blogDateTestId)).toHaveText(
-      dayjs(post.createdAt).format("Do MMMM YYYY"),
+      formatDateNew(post.createdAt),
     );
   }
 

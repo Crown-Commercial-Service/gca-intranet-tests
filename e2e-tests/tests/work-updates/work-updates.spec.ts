@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import { test, expect } from "../../src/wp.fixtures";
 import Post from "../../src/models/Post";
 import User from "../../src/models/User";
+import { formatDateNew } from "../../src/utils/formatters";
 
 test.describe("Work update component", () => {
   let post: Post;
@@ -45,9 +46,7 @@ test.describe("Work update component", () => {
       await workUpdate.assertAuthorImageVisible();
       await workUpdate.assertWorkUpdateTeam(team);
       await workUpdate.assertAuthor(process.env.WP_ADMIN_USERNAME!);
-      await workUpdate.assertPublishedDate(
-        dayjs(post.createdAt).format("Do MMMM YYYY"),
-      );
+      await workUpdate.assertPublishedDate(formatDateNew(post.createdAt));
     },
   );
 
