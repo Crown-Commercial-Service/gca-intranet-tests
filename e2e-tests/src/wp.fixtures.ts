@@ -102,9 +102,9 @@ async function loginToQaWordpress(
   expect(password, "WP_API_PASSWORD is not set").toBeTruthy();
   expect(baseUrl, "PW_BASE_URL is not set").toBeTruthy();
 
-  await page.request.get(`${baseUrl}/wp-login.php`);
+  await page.request.get(`${baseUrl}/gcawebadmin`);
 
-  await page.request.post(`${baseUrl}/wp-login.php`, {
+  await page.request.post(`${baseUrl}/gcawebadmin`, {
     form: {
       log: username!,
       pwd: password!,

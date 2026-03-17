@@ -20,9 +20,9 @@ export default class LatestNewsList extends BasePage {
   readonly postLinks: Locator;
   readonly postDescriptions: Locator;
   readonly postMeta: Locator;
-  readonly postTags: Locator;
+  readonly postCategoryTags: Locator;
+  readonly postLabelTags: Locator;
 
-  // Accessibility Selectors
   readonly latestNewsListSection: string;
 
   constructor(page: Page, baseUrl?: string) {
@@ -47,7 +47,9 @@ export default class LatestNewsList extends BasePage {
     this.postLinks = this.page.getByTestId("news-post-link");
     this.postDescriptions = this.page.getByTestId("news-desc");
     this.postMeta = this.page.getByTestId("news-post-meta");
-    this.postTags = this.page.getByTestId("news-post-tags");
+    this.postCategoryTags = this.page.getByTestId("archive-news-post-category");
+    this.postLabelTags = this.page.getByTestId("archive-news-post-label");
+
     this.latestNewsListSection = "[data-testid='news-main']";
   }
 
@@ -73,14 +75,10 @@ export default class LatestNewsList extends BasePage {
     await this.column.getByRole("link", { name: title }).click();
   }
 
-  async assertLatestNewsDate(post: Post): Promise<void> {
-    await expect(this.details).toContainText(formatDateOld(post.createdAt));
-  }
-
   postByTitle(title: string): Locator {
     return this.posts
       .filter({
-        has: this.page.getByTestId("news-post-link").filter({ hasText: title }),
+        has: this.postLinks.filter({ hasText: title }),
       })
       .first();
   }
@@ -99,20 +97,27 @@ export default class LatestNewsList extends BasePage {
     await link.click();
   }
 
-  async assertPostHasTag(title: string, tag: string): Promise<void> {
-    const post = this.postByTitle(title);
-    const tags = post.getByTestId("news-post-tags");
-
+  async assertLatestNewsDate(post: Post): Promise<void> {
     await expect(
-      tags.locator(".govuk-tag").filter({ hasText: tag }).first(),
-    ).toBeVisible();
+      this.postByTitle(post.title).getByTestId("news-post-meta"),
+    ).toContainText(formatDateOld(post.createdAt));
   }
 
   async assertPostHasCategory(title: string, category: string): Promise<void> {
-    await this.assertPostHasTag(title, category);
+    await expect(
+      this.postByTitle(title)
+        .getByTestId("archive-news-post-category")
+        .filter({ hasText: category })
+        .first(),
+    ).toBeVisible();
   }
 
   async assertPostHasLabel(title: string, label: string): Promise<void> {
-    await this.assertPostHasTag(title, label);
+    await expect(
+      this.postByTitle(title)
+        .getByTestId("archive-news-post-label")
+        .filter({ hasText: label })
+        .first(),
+    ).toBeVisible();
   }
 }

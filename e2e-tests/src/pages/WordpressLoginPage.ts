@@ -16,12 +16,10 @@ export default class WordpressLoginPage {
   }
 
   async goto(): Promise<void> {
-    await this.page.goto("/wp-login.php", { waitUntil: "domcontentloaded" });
-    await this.page.waitForURL(/wp-(login\.php|admin)/i);
+    await this.page.goto("/gcawebadmin", { waitUntil: "domcontentloaded" });
+    await this.page.waitForURL(/gcawebadmin/i);
 
-    if (/wp-login\.php/i.test(this.page.url())) {
-      await this.usernameInput.waitFor();
-    }
+    await this.usernameInput.waitFor();
   }
 
   async login(username: string, password: string): Promise<void> {
