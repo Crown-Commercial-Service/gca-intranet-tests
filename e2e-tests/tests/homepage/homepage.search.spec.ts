@@ -19,6 +19,7 @@ test.describe("search", () => {
 
   test("should render the search results page for mixed content", async ({
     wp,
+    homepage,
     searchResultsPage,
     wordpressLoginPage,
     runId,
@@ -31,7 +32,8 @@ test.describe("search", () => {
     await wordpressLoginPage.goto();
     await wordpressLoginPage.loginAsAdmin();
 
-    await searchResultsPage.goto(seed.keyword);
+    await homepage.goto();
+    await homepage.search(seed.keyword);
 
     await searchResultsPage.assertHeadingContainsQuery(seed.keyword);
     await searchResultsPage.assertSearchInputVisible();

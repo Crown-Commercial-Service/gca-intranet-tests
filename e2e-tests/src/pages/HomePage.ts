@@ -71,6 +71,9 @@ export default class HomePage extends BasePage {
 
   readonly footerLinks: Locator;
 
+  readonly searchInput: Locator;
+  readonly searchButton: Locator;
+
   readonly primaryNavigation: Locator;
   readonly primaryNavigationParentLinks: Locator;
 
@@ -132,7 +135,8 @@ export default class HomePage extends BasePage {
     this.baseUrl = baseUrl;
 
     this.primaryNavigation = this.page.locator(this.primaryNavigationSelector);
-
+    this.searchInput = this.page.getByRole("searchbox");
+    this.searchButton = this.page.getByRole("button", { name: "Search" });
     this.primaryNavigationParentLinks = this.primaryNavigation.locator(
       this.primaryNavigationParentLinksSelector,
     );
@@ -201,6 +205,12 @@ export default class HomePage extends BasePage {
 
   async goto(): Promise<void> {
     await this.page.goto(this.baseUrl ?? "/", { waitUntil: "networkidle" });
+  }
+
+  async search(query: string): Promise<void> {
+    await expect(this.searchInput).toBeVisible();
+    await this.searchInput.fill(query);
+    await this.searchButton.click();
   }
 
   // ---------------------------------------------------------
@@ -737,14 +747,6 @@ export default class HomePage extends BasePage {
       }
     }
   }
-
-  // async assertEventTitleIsTruncated(event: EventModel): Promise<void> {
-  //   const card = this.eventCardByTitle(event.title);
-
-  //   const link = card.getByTestId(this.eventsLinkTestId);
-
-  //   await this.assertTextIsTruncated(link, event.title);
-  // }
 
   async assertEventTitleIsTruncated(event: EventModel): Promise<void> {
     const prefix = event.title.trim().slice(0, 25);
