@@ -1,5 +1,7 @@
 import { Page, Locator, expect } from "@playwright/test";
 import BasePage from "./BasePage";
+import { formatDateOld } from "../utils/formatters";
+import Post from "../models/Post";
 
 export default class LatestNewsList extends BasePage {
   private readonly baseUrl?: string;
@@ -69,6 +71,10 @@ export default class LatestNewsList extends BasePage {
   async openByTitle(title: string): Promise<void> {
     await expect(this.column).toBeVisible();
     await this.column.getByRole("link", { name: title }).click();
+  }
+
+  async assertLatestNewsDate(post: Post): Promise<void> {
+    await expect(this.details).toContainText(formatDateOld(post.createdAt));
   }
 
   postByTitle(title: string): Locator {

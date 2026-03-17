@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import { test, expect } from "../../src/wp.fixtures";
 import Post from "../../src/models/Post";
 import User from "../../src/models/User";
+import { formatDateOld } from "../../src/utils/formatters";
 
 test.describe("Latest news component", () => {
   let post: Post;
@@ -43,9 +44,7 @@ test.describe("Latest news component", () => {
       await latestNews.assertFeaturedImageVisible();
       await latestNews.assertCategory(post.category!);
       await latestNews.assertLabel(label);
-      await expect(latestNews.details).toContainText(
-        dayjs(post.createdAt).format("Do MMMM YYYY"),
-      );
+      await latestNews.assertLatestNewsDate(post);
     },
   );
 
@@ -77,9 +76,7 @@ test.describe("Latest news component", () => {
       await latestNewsList.assertPostVisible(post.title);
       await latestNewsList.assertPostHasCategory(post.title, post.category!);
       await latestNewsList.assertPostHasLabel(post.title, label);
-      await expect(latestNewsList.postByTitle(post.title)).toContainText(
-        dayjs(post.createdAt).format("Do MMMM YYYY"),
-      );
+      await latestNewsList.assertLatestNewsDate(post);
       await expect(latestNewsList.postByTitle(post.title)).toContainText(
         post.content,
       );

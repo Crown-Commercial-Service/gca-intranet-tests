@@ -1,5 +1,7 @@
 import { Page, Locator, expect } from "@playwright/test";
 import BasePage from "./BasePage";
+import { formatDateOld } from "../utils/formatters";
+import Post from "../models/Post";
 
 export default class LatestNews extends BasePage {
   private readonly baseUrl?: string;
@@ -68,9 +70,9 @@ export default class LatestNews extends BasePage {
       .toBe(`By ${author}`);
   }
 
-  // async assertAuthor(author: string): Promise<void> {
-  //   await expect(this.publishedByAuthor).toHaveText(`By ${author}`);
-  // }
+  async assertLatestNewsDate(post: Post): Promise<void> {
+    await expect(this.details).toContainText(formatDateOld(post.createdAt));
+  }
 
   async assertFeaturedImageVisible(): Promise<void> {
     await expect(this.featuredImage).toBeVisible();
