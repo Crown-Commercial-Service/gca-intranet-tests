@@ -18,12 +18,20 @@ function getOrdinal(dayNumber: number) {
   }
 }
 
-export function formatPostDate(date: Date): string {
-  const parsedDate = dayjs(date);
+export function formatDateNew(value: string | Date): string {
+  return dayjs(value).format("D MMMM YYYY");
+}
+
+export function formatDateOld(value: string | Date): string {
+  const parsedDate = dayjs(value);
   const dayOfMonth = parsedDate.date();
   const ordinal = getOrdinal(dayOfMonth);
 
   return `${dayOfMonth}${ordinal} ${parsedDate.format("MMMM YYYY")}`;
+}
+
+export function formatPostDate(date: Date): string {
+  return formatDateOld(date);
 }
 
 /**
@@ -100,7 +108,7 @@ export function toEditorTime(value: string): string {
 }
 
 export function formatHomepageArticleDate(value: string | Date): string {
-  return dayjs(value).format("Do MMMM YYYY");
+  return formatDateOld(value);
 }
 
 export function formatHomepageEventDate(value: string | Date): string {

@@ -1,5 +1,6 @@
 import { Page, Locator, expect } from "@playwright/test";
 import BasePage from "./BasePage";
+import { formatDateNew } from "../utils/formatters";
 
 export default class BlogListPage extends BasePage {
   private readonly baseUrl?: string;
@@ -67,9 +68,16 @@ export default class BlogListPage extends BasePage {
     await expect(post.getByTestId("blog-tax")).toContainText(label);
   }
 
-  async assertPostHasDate(title: string, date: string): Promise<void> {
+  // async assertPostHasDate(title: string, date: string): Promise<void> {
+  //   const post = this.postByTitle(title);
+  //   await expect(post.getByTestId("blog-post-date")).toContainText(date);
+  // }
+
+  async assertPostHasDate(title: string, value: string | Date): Promise<void> {
     const post = this.postByTitle(title);
-    await expect(post.getByTestId("blog-post-date")).toContainText(date);
+    const expected = formatDateNew(value);
+
+    await expect(post.getByTestId("blog-post-date")).toContainText(expected);
   }
 
   async assertPostHasContent(title: string, content: string): Promise<void> {

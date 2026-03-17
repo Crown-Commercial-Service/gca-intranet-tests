@@ -1,5 +1,6 @@
 import { Page, Locator, expect } from "@playwright/test";
 import BasePage from "./BasePage";
+import { formatDateNew } from "../utils/formatters";
 
 export default class BlogPage extends BasePage {
   private readonly baseUrl?: string;
@@ -67,7 +68,8 @@ export default class BlogPage extends BasePage {
     await expect(this.authorImage).toBeVisible();
   }
 
-  async assertPublishedDate(expected: string): Promise<void> {
+  async assertPublishedDate(value: string | Date): Promise<void> {
+    const expected = formatDateNew(value);
     await expect(this.date).toContainText(expected);
   }
 }
