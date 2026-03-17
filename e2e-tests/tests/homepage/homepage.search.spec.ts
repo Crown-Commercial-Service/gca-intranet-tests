@@ -1,6 +1,7 @@
 import { test, expect } from "../../src/wp.fixtures";
 import { createSearchSeed } from "../../src/models/SearchSeed";
 import { seedSearchData } from "../../src/helpers/SearchHelper";
+import Post from "../../src/models/Post";
 
 test.describe("search", () => {
   test.beforeEach(async ({ wp }) => {
@@ -31,159 +32,140 @@ test.describe("search", () => {
 
     await wordpressLoginPage.goto();
     await wordpressLoginPage.loginAsAdmin();
-
     await homepage.goto();
-    await homepage.search(seed.keyword);
 
+    await homepage.search(seed.keyword);
     await searchResultsPage.assertHeadingContainsQuery(seed.keyword);
     await searchResultsPage.assertSearchInputVisible();
     await searchResultsPage.assertResultsCountVisible();
     await searchResultsPage.assertResultCount(8);
   });
 
-  //   test("should display the correct result format for each content type", async ({
-  //     wp,
-  //     searchResultsPage,
-  //   }) => {
-  //     const seed = createSearchSeed("Procurement");
-  //     await seedSearchData(wp, seed);
+  test("should display the correct result format for each content type", async ({
+    wp,
+    homepage,
+    searchResultsPage,
+    wordpressLoginPage,
+    runId,
+  }) => {
+    const keyword = `Procurement-${runId}`;
+    const seed = createSearchSeed(keyword);
 
-  //     await searchResultsPage.goto(seed.keyword);
+    await seedSearchData(wp, seed);
 
-  //     const pageResult = page
-  //       .getByTestId("search-result")
-  //       .filter({
-  //         has: page.getByRole("link", { name: seed.pages[0].title }),
-  //       })
-  //       .first();
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+    await homepage.goto();
 
-  //     const newsResult = page
-  //       .getByTestId("search-result")
-  //       .filter({
-  //         has: page.getByRole("link", { name: seed.news[0].title }),
-  //       })
-  //       .first();
+    await homepage.search(seed.keyword);
 
-  //     const blogResult = page
-  //       .getByTestId("search-result")
-  //       .filter({
-  //         has: page.getByRole("link", { name: seed.blogs[0].title }),
-  //       })
-  //       .first();
+    await searchResultsPage.assertResultHasType(seed.pages[0].title, "Page");
+    await searchResultsPage.assertResultHasLink(seed.pages[0].title);
+    await searchResultsPage.assertResultHasExcerpt(seed.pages[0].title);
 
-  //     const workUpdateResult = page
-  //       .getByTestId("search-result")
-  //       .filter({
-  //         has: page.getByRole("link", { name: seed.workUpdates[0].title }),
-  //       })
-  //       .first();
+    await searchResultsPage.assertResultHasType(seed.news[0].title, "News");
+    await searchResultsPage.assertResultHasLink(seed.news[0].title);
+    await searchResultsPage.assertResultHasExcerpt(seed.news[0].title);
 
-  //     await expect(pageResult.getByTestId("search-result-type")).toBeVisible();
-  //     await expect(
-  //       pageResult.getByRole("link", { name: seed.pages[0].title }),
-  //     ).toBeVisible();
-  //     await expect(
-  //       pageResult.getByTestId("search-result-description"),
-  //     ).toBeVisible();
+    await searchResultsPage.assertResultHasType(seed.blogs[0].title, "Blog");
+    await searchResultsPage.assertResultHasLink(seed.blogs[0].title);
+    await searchResultsPage.assertResultHasExcerpt(seed.blogs[0].title);
 
-  //     await expect(newsResult.getByTestId("search-result-type")).toContainText(
-  //       "News",
-  //     );
-  //     await expect(
-  //       newsResult.getByRole("link", { name: seed.news[0].title }),
-  //     ).toBeVisible();
-  //     await expect(
-  //       newsResult.getByTestId("search-result-description"),
-  //     ).toBeVisible();
+    await searchResultsPage.assertResultHasType(
+      seed.workUpdates[0].title,
+      "Work update",
+    );
+    await searchResultsPage.assertResultHasLink(seed.workUpdates[0].title);
+    await searchResultsPage.assertResultHasExcerpt(seed.workUpdates[0].title);
+  });
 
-  //     await expect(blogResult.getByTestId("search-result-type")).toContainText(
-  //       "Blog",
-  //     );
-  //     await expect(
-  //       blogResult.getByRole("link", { name: seed.blogs[0].title }),
-  //     ).toBeVisible();
-  //     await expect(
-  //       blogResult.getByTestId("search-result-description"),
-  //     ).toBeVisible();
+  test("should show the correct total results count", async ({
+    wp,
+    homepage,
+    searchResultsPage,
+    wordpressLoginPage,
+    runId,
+  }) => {
+    const keyword = `Procurement-${runId}`;
+    const seed = createSearchSeed(keyword);
 
-  //     await expect(
-  //       workUpdateResult.getByTestId("search-result-type"),
-  //     ).toContainText("Work update");
-  //     await expect(
-  //       workUpdateResult.getByRole("link", { name: seed.workUpdates[0].title }),
-  //     ).toBeVisible();
-  //     await expect(
-  //       workUpdateResult.getByTestId("search-result-description"),
-  //     ).toBeVisible();
-  //   });
+    await seedSearchData(wp, seed);
 
-  //   test("should show the correct total results count", async ({
-  //     wp,
-  //     searchResultsPage,
-  //   }) => {
-  //     const seed = createSearchSeed("Procurement");
-  //     await seedSearchData(wp, seed);
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
 
-  //     await searchResultsPage.goto(seed.keyword);
+    await homepage.goto();
+    await homepage.search(seed.keyword);
 
-  //     await expect(page.getByTestId("search-results-count")).toContainText("8");
-  //   });
+    await searchResultsPage.assertResultsCount(8);
+  });
 
-  //   test("should paginate when more than 10 results exist", async ({
-  //     wp,
-  //     searchResultsPage,
-  //   }) => {
-  //     const keyword = "Procurement";
-  //     const pages = [
-  //       Post.aPage()
-  //         .withFixedTitle(`${keyword} Policy Hub`)
-  //         .withContent(`${keyword} policy and guidance content.`)
-  //         .withStatus("publish"),
-  //     ];
+  test("should paginate when more than 10 results exist", async ({
+    wp,
+    homepage,
+    searchResultsPage,
+    wordpressLoginPage,
+    runId,
+  }) => {
+    const keyword = `Procurement-${runId}`;
+    const seed = createSearchSeed(keyword);
 
-  //     const news = Post.manyNews(4, `${keyword} News`);
-  //     const blogs = Post.manyBlogs(4, `${keyword} Blog`);
-  //     const workUpdates = Post.manyWorkUpdates(4, `${keyword} Work Update`);
+    // Add extra results to exceed 10
+    const extraNews = Post.manyNews(4, keyword);
+    const extraBlogs = Post.manyBlogs(4, keyword);
 
-  //     await wp.posts.createPages(pages);
-  //     await wp.posts.createMany(news);
-  //     await wp.posts.createMany(blogs);
-  //     await wp.posts.createMany(workUpdates);
+    await seedSearchData(wp, seed);
+    await wp.posts.createMany(extraNews);
+    await wp.posts.createMany(extraBlogs);
 
-  //     await gotoSearchResults(page, keyword);
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
 
-  //     await expect(page.getByTestId("search-result")).toHaveCount(10);
-  //     await expect(page.locator(".pagination")).toBeVisible();
-  //   });
+    await homepage.goto();
+    await homepage.search(seed.keyword);
 
-  //   test("should not show pagination when 10 or fewer results exist", async ({
-  //     wp,
-  //     searchResultsPage,
-  //   }) => {
-  //     const seed = createSearchSeed("Procurement");
-  //     await seedSearchData(wp, seed);
+    await searchResultsPage.assertResultCount(10);
+    await searchResultsPage.assertPaginationVisible();
+  });
 
-  //     await searchResultsPage.goto(seed.keyword);
+  test("should not show pagination when 10 or fewer results exist", async ({
+    wp,
+    homepage,
+    searchResultsPage,
+    wordpressLoginPage,
+    runId,
+  }) => {
+    const keyword = `Procurement-${runId}`;
+    const seed = createSearchSeed(keyword);
 
-  //     await expect(page.getByTestId("search-result")).toHaveCount(8);
-  //     await expect(page.locator(".pagination")).not.toBeVisible();
-  //   });
+    await seedSearchData(wp, seed);
 
-  //   test("should display a no results state for an unmatched term", async ({
-  //     searchResultsPage,
-  //   }) => {
-  //     const query = "NoMatchSearchTerm123";
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
 
-  //     await gotoSearchResults(page, query);
+    await homepage.goto();
+    await homepage.search(seed.keyword);
 
-  //     await expect(
-  //       page.getByRole("heading", {
-  //         name: new RegExp(`Search results for.*${query}`, "i"),
-  //       }),
-  //     ).toBeVisible();
+    await searchResultsPage.assertResultCount(8);
+    await searchResultsPage.assertPaginationNotVisible();
+  });
 
-  //     await expect(page.getByRole("searchbox")).toBeVisible();
-  //     await expect(page.getByText(/no results/i)).toBeVisible();
-  //     await expect(page.getByTestId("search-results-count")).toContainText("0");
-  //   });
+  test("should display a no results state for an unmatched term", async ({
+    homepage,
+    searchResultsPage,
+    wordpressLoginPage,
+    runId,
+  }) => {
+    const query = `NoMatch-${runId}`;
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await homepage.goto();
+    await homepage.search(query);
+
+    await searchResultsPage.assertHeadingContainsQuery(query);
+    await searchResultsPage.assertSearchInputVisible();
+    await searchResultsPage.assertNoResultsMessageVisible();
+  });
 });
