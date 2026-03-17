@@ -106,3 +106,47 @@ export function formatHomepageArticleDate(value: string | Date): string {
 export function formatHomepageEventDate(value: string | Date): string {
   return dayjs(value, "DD-MM-YYYY").format("D MMMM YYYY");
 }
+
+export function formatEventDate(value: string): string {
+  return dayjs(value, "DD-MM-YYYY").format("D MMMM YYYY");
+}
+
+export function formatEventTime(value: string): string {
+  return dayjs(value, "HH:mm").format("h:mm a");
+}
+
+export function buildExpectedEventDateText(event: {
+  startDate: string;
+  endDate?: string;
+}): string {
+  const startDate = formatEventDate(event.startDate);
+
+  if (event.endDate) {
+    const endDate = formatEventDate(event.endDate);
+    return `Date: ${startDate} to ${endDate}`;
+  }
+
+  return `Date: ${startDate}`;
+}
+
+export function buildExpectedEventTimeText(event: {
+  startTime?: string;
+  endTime?: string;
+}): string | null {
+  const startTime = event.startTime ? formatEventTime(event.startTime) : "";
+  const endTime = event.endTime ? formatEventTime(event.endTime) : "";
+
+  if (startTime && endTime) {
+    return `Time: ${startTime} to ${endTime}`;
+  }
+
+  if (startTime) {
+    return `Time: ${startTime}`;
+  }
+
+  if (endTime) {
+    return `Time: Until ${endTime}`;
+  }
+
+  return null;
+}
