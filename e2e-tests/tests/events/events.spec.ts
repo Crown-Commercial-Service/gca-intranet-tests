@@ -32,7 +32,6 @@ test.describe("events", { tag: "@regression" }, () => {
     await eventEditorPage.update();
     await eventPage.goto(eventId);
     // await eventsListPage.pause();
-
   });
 
   test("event with start date and end date", async ({
@@ -56,7 +55,7 @@ test.describe("events", { tag: "@regression" }, () => {
     await eventEditorPage.fillEventDetails(event);
     await eventEditorPage.update();
     await eventPage.goto(eventId);
-        await eventsListPage.pause();
+    await eventsListPage.pause();
     await eventsListPage.goto();
   });
 
@@ -83,7 +82,7 @@ test.describe("events", { tag: "@regression" }, () => {
     await eventEditorPage.fillEventDetails(event);
     await eventEditorPage.update();
     await eventPage.goto(eventId);
-        await eventsListPage.pause();
+    await eventsListPage.pause();
     await eventsListPage.goto();
   });
 
@@ -108,7 +107,7 @@ test.describe("events", { tag: "@regression" }, () => {
     await eventEditorPage.fillEventDetails(event);
     await eventEditorPage.update();
     await eventPage.goto(eventId);
-        await eventsListPage.pause();
+    await eventsListPage.pause();
     await eventsListPage.goto();
   });
 
@@ -134,7 +133,7 @@ test.describe("events", { tag: "@regression" }, () => {
     await eventEditorPage.fillEventDetails(event);
     await eventEditorPage.update();
     await eventPage.goto(eventId);
-        await eventsListPage.pause();
+    await eventsListPage.pause();
     await eventsListPage.goto();
   });
 
@@ -160,7 +159,7 @@ test.describe("events", { tag: "@regression" }, () => {
     await eventEditorPage.fillEventDetails(event);
     await eventEditorPage.update();
     await eventPage.goto(eventId);
-        await eventsListPage.pause();
+    await eventsListPage.pause();
     await eventsListPage.goto();
   });
 
@@ -183,10 +182,10 @@ test.describe("events", { tag: "@regression" }, () => {
 
     await eventEditorPage.gotoEdit(eventId);
     await eventEditorPage.fillEventDetails(event);
-            await eventsListPage.pause();
+    await eventsListPage.pause();
     await eventEditorPage.update();
     await eventPage.goto(eventId);
-        await eventsListPage.pause();
+    await eventsListPage.pause();
     await eventsListPage.goto();
   });
 });

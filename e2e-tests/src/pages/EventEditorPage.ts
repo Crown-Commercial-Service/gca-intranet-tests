@@ -17,6 +17,8 @@ export default class EventEditorPage extends BasePage {
   readonly endTimeInput: Locator;
   readonly publishButton: Locator;
   readonly updateButton: Locator;
+  readonly timePickerHourSelect: Locator;
+  readonly timePickerMinuteSelect: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -52,6 +54,13 @@ export default class EventEditorPage extends BasePage {
 
     this.endTimeInput = page.locator(
       'input[name="acf[202603101020a_202603131021c]"] + input.input',
+    );
+
+    this.timePickerHourSelect = this.page.locator(
+      '.ui-timepicker-select[data-unit="hour"]',
+    );
+    this.timePickerMinuteSelect = this.page.locator(
+      '.ui-timepicker-select[data-unit="minute"]',
     );
   }
 
@@ -89,7 +98,7 @@ export default class EventEditorPage extends BasePage {
     );
     if (event.startTime) {
       await expect(this.startTimeInput).toBeVisible();
-      await this.setTimeFromTimePicker(this.startTimeInput);
+      await this.setTimeFromTimePicker(this.startTimeInput, event.startTime);
     }
     if (event.endDate) {
       await expect(this.endDateInput).toBeVisible();
@@ -100,7 +109,7 @@ export default class EventEditorPage extends BasePage {
     }
     if (event.endTime) {
       await expect(this.endTimeInput).toBeVisible();
-      await this.setTimeFromTimePicker(this.endTimeInput);
+      await this.setTimeFromTimePicker(this.endTimeInput, event.endTime);
     }
     if (event.ctaLabel) {
       await this.ctaLabelInput.fill(event.ctaLabel);
@@ -110,13 +119,23 @@ export default class EventEditorPage extends BasePage {
     }
   }
 
-  async setTimeFromTimePicker(input: Locator): Promise<void> {
+  async setTimeFromTimePicker(input: Locator, time: string): Promise<void> {
     await input.click();
 
-    const nowButton = this.page.getByRole("button", { name: "Now" });
-    await expect(nowButton).toBeVisible();
+    if (time.trim().toLowerCase() === "now") {
+      const nowButton = this.page.getByRole("button", { name: "Now" });
+      await expect(nowButton).toBeVisible();
+      await nowButton.click();
+      return;
+    }
 
-    await nowButton.click();
+    const [hour, minute] = time.split(":");
+
+    await expect(this.timePickerHourSelect).toBeVisible();
+    await this.timePickerHourSelect.selectOption(parseInt(hour).toString());
+
+    await expect(this.timePickerMinuteSelect).toBeVisible();
+    await this.timePickerMinuteSelect.selectOption(parseInt(minute).toString());
   }
 
   async selectDateFromDatePicker(input: Locator, value: string): Promise<void> {
