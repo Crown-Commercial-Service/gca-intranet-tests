@@ -166,6 +166,6 @@ test.describe("search", () => {
 
     await searchResultsPage.assertHeadingContainsQuery(query);
     await searchResultsPage.assertSearchInputVisible();
-    await searchResultsPage.assertNoResultsMessageVisible();
+    await searchResultsPage.assertNoResultsMessageVisible(query);
   });
 });

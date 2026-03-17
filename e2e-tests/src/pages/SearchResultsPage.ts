@@ -145,8 +145,10 @@ export default class SearchResultsPage extends BasePage {
     ).toBeVisible();
   }
 
-  async assertNoResultsMessageVisible(): Promise<void> {
-    await expect(this.resultsCount).toContainText("Found 0 result(s)");
+  async assertNoResultsMessageVisible(keyword: string): Promise<void> {
+    await expect(this.main).toContainText(
+      `No results found for “${keyword}”. Try a different search term.`,
+    );
   }
 
   async assertPaginationVisible(): Promise<void> {
