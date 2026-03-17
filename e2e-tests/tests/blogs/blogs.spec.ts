@@ -52,12 +52,9 @@ test.describe("Blog component", () => {
     { tag: "@regression" },
     async ({ blog, homepage, blogList }) => {
       await blog.gotoById(postId);
-
       await blog.selectBreadcrumbLink("Home");
       await homepage.expectUrlToContain("/");
-
       await blog.gotoById(postId);
-
       await blog.selectBreadcrumbLink("Blogs");
       await expect(blogList.main).toBeVisible();
     },
@@ -69,10 +66,6 @@ test.describe("Blog component", () => {
     async ({ blogList }) => {
       await blogList.gotoBlogList();
       await blogList.assertPostVisible(post.title);
-      // await blogList.assertPostHasDate(
-      //   post.title,
-      //   dayjs(post.createdAt).format("Do MMMM YYYY"),
-      // );
       await blogList.assertPostHasDate(post.title, post.createdAt);
       await blogList.assertPostHasContent(post.title, post.content);
       await blogList.assertPostHasFeaturedImage(post.title);
@@ -87,7 +80,6 @@ test.describe("Blog component", () => {
 
       await wp.posts.createMany(posts);
       await blogList.gotoBlogList();
-
       await blogList.assertPostCount(10);
       await blogList.assertPaginationVisible();
     },
@@ -102,7 +94,6 @@ test.describe("Blog component", () => {
 
     await wp.posts.createMany(posts);
     await blogList.gotoBlogList();
-
     await blogList.assertPostCount(9);
     await blogList.assertPaginationNotVisible();
   });
@@ -115,7 +106,6 @@ test.describe("Blog component", () => {
 
       await wp.posts.createMany(posts);
       await blogList.gotoBlogList();
-
       await blogList.assertPaginationVisible();
       await blogList.assertNextPaginationVisible();
       await blogList.assertPreviousPaginationNotVisible();
@@ -130,7 +120,6 @@ test.describe("Blog component", () => {
 
       await wp.posts.createMany(posts);
       await blogList.gotoBlogList();
-
       await blogList.goToLastPaginationPage();
       await blogList.assertNextPaginationNotVisible();
     },
