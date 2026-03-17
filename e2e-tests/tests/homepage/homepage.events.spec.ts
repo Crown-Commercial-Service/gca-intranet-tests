@@ -55,20 +55,20 @@ test.describe("events", () => {
 
         Event.anEvent()
           .withFixedTitle("Procurement Policy Update Session")
-          .withStartDate(dayjs().add(3, "day").format("DD-MM-YYYY"))
-          .withEndDate(dayjs().add(4, "day").format("DD-MM-YYYY"))
+          .withStartDate(dayjs().add(1, "day").format("DD-MM-YYYY"))
+          .withEndDate(dayjs().add(2, "day").format("DD-MM-YYYY"))
           .withStatus("publish"),
 
         Event.anEvent()
           .withFixedTitle("Supplier Engagement Workshop")
-          .withStartDate(dayjs().add(5, "day").format("DD-MM-YYYY"))
-          .withEndDate(dayjs().add(6, "day").format("DD-MM-YYYY"))
+          .withStartDate(dayjs().add(1, "day").format("DD-MM-YYYY"))
+          .withEndDate(dayjs().add(3, "day").format("DD-MM-YYYY"))
           .withStatus("publish"),
 
         Event.anEvent()
           .withFixedTitle("Working From Home")
-          .withStartDate(dayjs().add(7, "day").format("DD-MM-YYYY"))
-          .withEndDate(dayjs().add(8, "day").format("DD-MM-YYYY"))
+          .withStartDate(dayjs().add(1, "day").format("DD-MM-YYYY"))
+          .withEndDate(dayjs().add(4, "day").format("DD-MM-YYYY"))
           .withStatus("publish"),
       ];
 
@@ -204,24 +204,24 @@ test.describe("events", () => {
           .withFixedTitle("Procurement Policy Update Session")
           .withCategory("Change management")
           .withEventLocation("In-person")
-          .withStartDate(dayjs().add(3, "day").format("DD-MM-YYYY"))
-          .withEndDate(dayjs().add(4, "day").format("DD-MM-YYYY"))
+          .withStartDate(dayjs().add(1, "day").format("DD-MM-YYYY"))
+          .withEndDate(dayjs().add(2, "day").format("DD-MM-YYYY"))
           .withStatus("publish"),
 
         Event.anEvent()
           .withFixedTitle("Supplier Engagement Workshop")
           .withCategory("Digital and data")
           .withEventLocation("Online")
-          .withStartDate(dayjs().add(5, "day").format("DD-MM-YYYY"))
-          .withEndDate(dayjs().add(6, "day").format("DD-MM-YYYY"))
+          .withStartDate(dayjs().add(1, "day").format("DD-MM-YYYY"))
+          .withEndDate(dayjs().add(3, "day").format("DD-MM-YYYY"))
           .withStatus("publish"),
 
         Event.anEvent()
           .withFixedTitle("Information Security Awareness Session")
           .withCategory("Information security")
           .withEventLocation("In-person")
-          .withStartDate(dayjs().add(7, "day").format("DD-MM-YYYY"))
-          .withEndDate(dayjs().add(8, "day").format("DD-MM-YYYY"))
+          .withStartDate(dayjs().add(1, "day").format("DD-MM-YYYY"))
+          .withEndDate(dayjs().add(4, "day").format("DD-MM-YYYY"))
           .withStatus("publish"),
       ];
 
