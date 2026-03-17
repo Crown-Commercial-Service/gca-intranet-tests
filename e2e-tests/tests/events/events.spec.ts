@@ -1,8 +1,16 @@
 import { test, expect } from "../../src/wp.fixtures";
 import Event from "../../src/models/Events";
 
-test.describe("event builders", { tag: "@regression" }, () => {
-  test.skip("event with only start date", async ({
+test.describe("events", { tag: "@regression" }, () => {
+  test.beforeEach(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("events");
+  });
+
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("events");
+  });
+
+  test("event with only start date", async ({
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -23,10 +31,11 @@ test.describe("event builders", { tag: "@regression" }, () => {
     await eventEditorPage.fillEventDetails(event);
     await eventEditorPage.update();
     await eventPage.goto(eventId);
-    await eventsListPage.goto();
+    // await eventsListPage.pause();
+
   });
 
-  test.skip("event with start date and end date", async ({
+  test("event with start date and end date", async ({
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -47,10 +56,11 @@ test.describe("event builders", { tag: "@regression" }, () => {
     await eventEditorPage.fillEventDetails(event);
     await eventEditorPage.update();
     await eventPage.goto(eventId);
+        await eventsListPage.pause();
     await eventsListPage.goto();
   });
 
-  test.skip("event with start and end date and start and end time", async ({
+  test("event with start and end date and start and end time", async ({
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -73,10 +83,11 @@ test.describe("event builders", { tag: "@regression" }, () => {
     await eventEditorPage.fillEventDetails(event);
     await eventEditorPage.update();
     await eventPage.goto(eventId);
+        await eventsListPage.pause();
     await eventsListPage.goto();
   });
 
-  test.skip("event with start date and start time only", async ({
+  test("event with start date and start time only", async ({
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -97,10 +108,11 @@ test.describe("event builders", { tag: "@regression" }, () => {
     await eventEditorPage.fillEventDetails(event);
     await eventEditorPage.update();
     await eventPage.goto(eventId);
+        await eventsListPage.pause();
     await eventsListPage.goto();
   });
 
-  test.skip("event with start and end date and only start time", async ({
+  test("event with start and end date and only start time", async ({
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -122,10 +134,11 @@ test.describe("event builders", { tag: "@regression" }, () => {
     await eventEditorPage.fillEventDetails(event);
     await eventEditorPage.update();
     await eventPage.goto(eventId);
+        await eventsListPage.pause();
     await eventsListPage.goto();
   });
 
-  test.skip("event with start and end date and only end time", async ({
+  test("event with start and end date and only end time", async ({
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -147,10 +160,11 @@ test.describe("event builders", { tag: "@regression" }, () => {
     await eventEditorPage.fillEventDetails(event);
     await eventEditorPage.update();
     await eventPage.goto(eventId);
+        await eventsListPage.pause();
     await eventsListPage.goto();
   });
 
-  test.skip("event with start date and end time", async ({
+  test("event with start date and end time", async ({
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -169,8 +183,10 @@ test.describe("event builders", { tag: "@regression" }, () => {
 
     await eventEditorPage.gotoEdit(eventId);
     await eventEditorPage.fillEventDetails(event);
+            await eventsListPage.pause();
     await eventEditorPage.update();
     await eventPage.goto(eventId);
+        await eventsListPage.pause();
     await eventsListPage.goto();
   });
 });

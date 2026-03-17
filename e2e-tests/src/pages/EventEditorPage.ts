@@ -87,23 +87,24 @@ export default class EventEditorPage extends BasePage {
       this.startDateInput,
       toEditorDate(event.startDate),
     );
-
-    await expect(this.startTimeInput).toBeVisible();
-    await this.setTimeFromTimePicker(this.startTimeInput);
-
-    await expect(this.endDateInput).toBeVisible();
-    await this.selectDateFromDatePicker(
-      this.endDateInput,
-      toEditorDate(event.endDate),
-    );
-
-    await expect(this.endTimeInput).toBeVisible();
-    await this.setTimeFromTimePicker(this.endTimeInput);
-
+    if (event.startTime) {
+      await expect(this.startTimeInput).toBeVisible();
+      await this.setTimeFromTimePicker(this.startTimeInput);
+    }
+    if (event.endDate) {
+      await expect(this.endDateInput).toBeVisible();
+      await this.selectDateFromDatePicker(
+        this.endDateInput,
+        toEditorDate(event.endDate),
+      );
+    }
+    if (event.endTime) {
+      await expect(this.endTimeInput).toBeVisible();
+      await this.setTimeFromTimePicker(this.endTimeInput);
+    }
     if (event.ctaLabel) {
       await this.ctaLabelInput.fill(event.ctaLabel);
     }
-
     if (event.ctaDestination) {
       await this.ctaDestinationInput.fill(event.ctaDestination);
     }

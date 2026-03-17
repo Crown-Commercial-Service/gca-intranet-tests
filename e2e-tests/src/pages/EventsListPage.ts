@@ -1,14 +1,14 @@
 import { Page, Locator, expect } from "@playwright/test";
+import BasePage from "./BasePage";
 
-export default class EventsListPage {
-  readonly page: Page;
+export default class EventsListPage extends BasePage{
   readonly baseUrl?: string;
 
   readonly eventsRows: Locator;
   readonly eventsLinks: Locator;
 
   constructor(page: Page, baseUrl?: string) {
-    this.page = page;
+    super(page);
     this.baseUrl = baseUrl;
 
     this.eventsRows = page.locator('[data-testid="events-row"]');

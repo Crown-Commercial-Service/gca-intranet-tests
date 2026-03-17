@@ -10,7 +10,7 @@ export type EventProps = {
   content: string;
   status: EventStatus;
   startDate: string;
-  endDate: string;
+  endDate?: string;
   startTime?: string;
   endTime?: string;
   category?: string;
@@ -24,7 +24,7 @@ export default class Event {
   readonly content: string;
   readonly status: EventStatus;
   readonly startDate: string;
-  readonly endDate: string;
+  readonly endDate?: string;
   readonly ctaLabel?: string;
   readonly ctaDestination?: string;
   readonly category?: string;
@@ -88,9 +88,9 @@ class EventBuilder {
     content: chance.paragraph({ sentences: 3 }),
     status: "draft",
     startDate: dayjs().add(1, "day").format("DD-MM-YYYY"),
-    endDate: dayjs().add(3, "day").format("DD-MM-YYYY"),
-    startTime: "09:00",
-    endTime: "17:00",
+    endDate: undefined,
+    startTime: undefined,
+    endTime: undefined,
     category: "Leave, absence and flexible working",
     eventLocation: "In-person",
   };
