@@ -1,7 +1,7 @@
 import { test } from "../../src/wp.fixtures";
 import Event from "../../src/models/Events";
 
-test.describe("events", { tag: "@regression" }, () => {
+test.describe("Event Component", { tag: "@regression" }, () => {
   test.beforeEach(async ({ wp }) => {
     await wp.posts.clearByTypeAndAuthor("events");
   });
@@ -186,5 +186,69 @@ test.describe("events", { tag: "@regression" }, () => {
 
     await eventPage.gotoById(eventId);
     await eventPage.assertDateAndTime(event);
+  });
+});
+
+test.describe("Event Component", { tag: "@regression" }, () => {
+  test.beforeEach(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("events");
+  });
+
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("events");
+  });
+
+  test("can create a Two column template", async ({
+    wp,
+    wordpressLoginPage,
+    eventEditorPage,
+    eventPage,
+    runId,
+  }) => {
+    const event = Event.anEvent()
+      .withFixedTitle(`Event[1] - ${runId}`)
+      .withRealisticBodyContent("compact")
+      .withStartDate("20-03-2026")
+      .withEndDate("22-03-2026")
+      .withStatus("publish");
+
+    const eventId = await wp.events.create(event);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await eventEditorPage.gotoEdit(eventId);
+    await eventEditorPage.fillEventDetails(event);
+    await eventEditorPage.update();
+
+    await eventPage.gotoById(eventId);
+    await eventPage.assertTwoColumnTemplateIsApplied();
+  });
+
+  test("can create a One column template", async ({
+    wp,
+    wordpressLoginPage,
+    eventEditorPage,
+    eventPage,
+    runId,
+  }) => {
+    const event = Event.anEvent()
+      .withFixedTitle(`Event[2] - ${runId}`)
+      .withRealisticBodyContent("compact")
+      .withStartDate("20-03-2026")
+      .withEndDate("22-03-2026")
+      .withStatus("publish");
+
+    const eventId = await wp.events.create(event);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await eventEditorPage.gotoEdit(eventId);
+    await eventEditorPage.fillEventDetails(event);
+    await eventEditorPage.update();
+
+    await eventPage.gotoById(eventId);
+    await eventPage.assertOneColumnTemplateIsApplied();
   });
 });

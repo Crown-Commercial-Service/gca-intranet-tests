@@ -160,7 +160,7 @@ test.describe("Latest news component", () => {
   );
 });
 
-test.describe("Latest news component", () => {
+test.describe("Latest news component", { tag: "@regression" }, () => {
   test.beforeEach(async ({ wp }) => {
     await wp.posts.clearByTypeAndAuthor("news");
   });
@@ -168,31 +168,60 @@ test.describe("Latest news component", () => {
   test.afterAll(async ({ wp }) => {
     await wp.posts.clearByTypeAndAuthor("news");
   });
-  test(
-    "can create a Two column template",
-    { tag: "@regression" },
-    async ({ wp, wordpressLoginPage, latestNews, runId }) => {
-      const templatePage = Post.aPost()
-        .withType("news")
-        .withFixedTitle(`Two Column Template ${runId}`)
-        .withRealisticBodyContent("long")
-        .withFeaturedImage("featured.jpg")
-        .withStatus("publish");
+  test("can create a Two column template", async ({
+    wp,
+    wordpressLoginPage,
+    latestNews,
+    runId,
+  }) => {
+    const templatePage = Post.aPost()
+      .withType("news")
+      .withFixedTitle(`Two Column Template ${runId}`)
+      .withRealisticBodyContent("long")
+      .withFeaturedImage("featured.jpg")
+      .withStatus("publish");
 
-      const pageId = await wp.posts.create(templatePage);
+    const pageId = await wp.posts.create(templatePage);
 
-      await wordpressLoginPage.goto();
-      await wordpressLoginPage.loginAsAdmin();
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
 
-      await latestNews.gotoEdit(pageId);
-      await latestNews.fillSlug(`two-column-template-${runId}`);
-      await latestNews.selectTwoColumnTemplate();
-      await latestNews.selectCategory("Digital and data");
-      await latestNews.selectLabel("CCS live");
-      await latestNews.fillExcerpt(templatePage);
-      await latestNews.update();
-      await latestNews.gotoById(pageId);
-      await latestNews.assertTwoColumnTemplateIsApplied();
-    },
-  );
+    await latestNews.gotoEdit(pageId);
+    await latestNews.fillSlug(`two-column-template-${runId}`);
+    await latestNews.selectTwoColumnTemplate();
+    await latestNews.selectCategory("Digital and data");
+    await latestNews.selectLabel("CCS live");
+    await latestNews.fillExcerpt(templatePage);
+    await latestNews.update();
+    await latestNews.gotoById(pageId);
+    await latestNews.assertTwoColumnTemplateIsApplied();
+  });
+
+  test("can create a One column template", async ({
+    wp,
+    wordpressLoginPage,
+    latestNews,
+    runId,
+  }) => {
+    const templatePage = Post.aPost()
+      .withType("news")
+      .withFixedTitle(`One Column Template ${runId}`)
+      .withRealisticBodyContent("long")
+      .withFeaturedImage("featured.jpg")
+      .withStatus("publish");
+
+    const pageId = await wp.posts.create(templatePage);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await latestNews.gotoEdit(pageId);
+    await latestNews.fillSlug(`one-column-template-${runId}`);
+    await latestNews.selectCategory("Digital and data");
+    await latestNews.selectLabel("CCS live");
+    await latestNews.fillExcerpt(templatePage);
+    await latestNews.update();
+    await latestNews.gotoById(pageId);
+    await latestNews.assertOneColumnTemplateIsApplied();
+  });
 });

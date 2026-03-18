@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import { test, expect } from "../../src/wp.fixtures";
 import Post from "../../src/models/Post";
 import User from "../../src/models/User";
@@ -142,4 +141,66 @@ test.describe("Blog component", () => {
       await blog.assertAuthor(newUser.username);
     },
   );
+});
+
+test.describe("Blog component", { tag: "@regression" }, () => {
+  test.beforeEach(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("blogs");
+  });
+
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("blogs");
+  });
+
+  test("can create a Two column template", async ({
+    wp,
+    wordpressLoginPage,
+    blog,
+    runId,
+  }) => {
+    const templatePage = Post.aPost()
+      .withType("blogs")
+      .withFixedTitle(`Two Column Template ${runId}`)
+      .withRealisticBodyContent("long")
+      .withFeaturedImage("featured.jpg")
+      .withStatus("publish");
+
+    const pageId = await wp.posts.create(templatePage);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await blog.gotoEdit(pageId);
+    await blog.selectLabel("CCS live");
+    await blog.addAuthorImage("author-image.jpg");
+    await blog.update();
+    await blog.gotoById(pageId);
+    await blog.assertTwoColumnTemplateIsApplied();
+  });
+
+  test("can create a One column template", async ({
+    wp,
+    wordpressLoginPage,
+    blog,
+    runId,
+  }) => {
+    const templatePage = Post.aPost()
+      .withType("blogs")
+      .withFixedTitle(`One Column Template ${runId}`)
+      .withRealisticBodyContent("long")
+      .withFeaturedImage("featured.jpg")
+      .withStatus("publish");
+
+    const pageId = await wp.posts.create(templatePage);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await blog.gotoEdit(pageId);
+    await blog.selectLabel("CCS live");
+    await blog.addAuthorImage("author-image.jpg");
+    await blog.update();
+    await blog.gotoById(pageId);
+    await blog.assertOneColumnTemplateIsApplied();
+  });
 });

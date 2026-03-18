@@ -300,6 +300,14 @@ export default abstract class BasePage {
     await this.pageTemplateSelect.selectOption("template-layout-2col.php");
   }
 
+  async assertOneColumnTemplateIsApplied(): Promise<void> {
+    await expect(
+      this.page.locator("main.gca-single.gca-single--1col"),
+    ).toBeVisible();
+    await expect(this.page.locator(".gca-content")).toBeVisible();
+    await expect(this.page.getByTestId("content-body")).toBeVisible();
+  }
+
   async assertTwoColumnTemplateIsApplied(): Promise<void> {
     await expect(this.page.getByTestId("layout-2col")).toBeVisible();
     await expect(this.page.getByTestId("col-main")).toBeVisible();

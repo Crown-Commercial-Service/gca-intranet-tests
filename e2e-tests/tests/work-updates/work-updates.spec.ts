@@ -161,3 +161,64 @@ test.describe("Work update component", () => {
     },
   );
 });
+
+test.describe("Latest news component", { tag: "@regression" }, () => {
+  test.beforeEach(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("work_updates");
+  });
+
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("work_updates");
+  });
+  test("can create a Two column template", async ({
+    wp,
+    wordpressLoginPage,
+    workUpdate,
+    runId,
+  }) => {
+    const templatePage = Post.aPost()
+      .withType("work_updates")
+      .withFixedTitle(`Two Column Template ${runId}`)
+      .withRealisticBodyContent("long")
+      .withStatus("publish");
+
+    const postId = await wp.posts.create(templatePage);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await workUpdate.gotoEdit(postId);
+    await workUpdate.selectLabel("CCS live");
+    await workUpdate.selectTeam("Finance");
+    await workUpdate.addAuthorImage("author-image.jpg");
+    await workUpdate.update();
+    await workUpdate.gotoById(postId);
+    await workUpdate.assertTwoColumnTemplateIsApplied();
+  });
+
+  test("can create a One column template", async ({
+    wp,
+    wordpressLoginPage,
+    workUpdate,
+    runId,
+  }) => {
+    const templatePage = Post.aPost()
+      .withType("work_updates")
+      .withFixedTitle(`One Column Template ${runId}`)
+      .withRealisticBodyContent("long")
+      .withStatus("publish");
+
+    const postId = await wp.posts.create(templatePage);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await workUpdate.gotoEdit(postId);
+    await workUpdate.selectLabel("CCS live");
+    await workUpdate.selectTeam("Finance");
+    await workUpdate.addAuthorImage("author-image.jpg");
+    await workUpdate.update();
+    await workUpdate.gotoById(postId);
+    await workUpdate.assertOneColumnTemplateIsApplied();
+  });
+});

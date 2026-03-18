@@ -1,5 +1,6 @@
 import Chance from "chance";
 import dayjs from "dayjs";
+import { buildRealisticBodyContent } from "../utils/contentFactory";
 
 const chance = new Chance();
 
@@ -157,6 +158,11 @@ class EventBuilder {
 
   withEventLocation(location: string): this {
     this.props.eventLocation = location;
+    return this;
+  }
+
+  withRealisticBodyContent(type: "compact" | "short" | "long" = "short"): this {
+    this.props.content = buildRealisticBodyContent(type);
     return this;
   }
 
