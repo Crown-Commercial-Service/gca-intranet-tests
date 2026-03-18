@@ -167,12 +167,11 @@ test.describe("Latest news component", () => {
     async ({ wp, wordpressLoginPage, latestNews, page, runId }) => {
       const slug = `two-column-template-${runId}`;
       const title = `Two Column Template ${runId}`;
-      const description = `Description for ${title}`;
       const excerpt = `Excerpt for ${title}`;
 
       const templatePage = Post.aPage()
         .withFixedTitle(title)
-        .withContent(description)
+        .withRealisticBodyContent("long")
         .withFeaturedImage("featured.jpg")
         .withStatus("publish");
 
@@ -182,24 +181,23 @@ test.describe("Latest news component", () => {
       await wordpressLoginPage.loginAsAdmin();
 
       await latestNews.gotoEdit(pageId);
+      await latestNews.fillSlug(slug);
       await latestNews.selectTwoColumnTemplate();
-      await latestNews.pause();
-      // await latestNews.selectAudience("Line managers");
-      // await latestNews.selectCategory("Digital and data");
-      // await latestNews.selectContentType("Staff network");
-      // await latestNews.selectTeam("Able Network");
-      // await latestNews.update();
+      await latestNews.fillExcerpt(templatePage);
+      await latestNews.selectAudience("Line managers");
+      await latestNews.selectCategory("Digital and data");
+      await latestNews.selectContentType("Staff network");
+      await latestNews.selectTeam("Able Network");
+      await latestNews.update();
 
-      // await page.goto(`/${slug}/`, { waitUntil: "networkidle" });
+      await page.goto(`/${slug}/`, { waitUntil: "networkidle" });
 
-      // await expect(page.getByRole("heading", { name: title })).toBeVisible();
-      // await expect(page.locator("body")).toContainText(description);
-      // await expect(page.locator("body")).toContainText(excerpt);
-      // await expect(page.locator("body")).toContainText("Line managers");
-      // await expect(page.locator("body")).toContainText("Digital and data");
-      // await expect(page.locator("body")).toContainText("Staff network");
-      // await expect(page.locator("body")).toContainText("Able Network");
-      // await expect(page.locator("img")).toBeVisible();
+      await expect(page.getByRole("heading", { name: title })).toBeVisible();
+      await expect(page.locator("body")).toContainText("Line managers");
+      await expect(page.locator("body")).toContainText("Digital and data");
+      await expect(page.locator("body")).toContainText("Staff network");
+      await expect(page.locator("body")).toContainText("Able Network");
+      await expect(page.locator("img")).toBeVisible();
     },
   );
 });
