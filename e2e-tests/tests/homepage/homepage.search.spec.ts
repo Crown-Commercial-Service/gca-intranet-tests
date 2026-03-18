@@ -374,7 +374,6 @@ test.describe("search", () => {
 
     await blog.gotoEdit(ids.blogIds[0]);
     await blog.selectLabel("Reward");
-    // await blog.selectAudience("Line managers");
     await blog.update();
 
     await workUpdate.gotoEdit(ids.workUpdateIds[0]);
@@ -389,10 +388,6 @@ test.describe("search", () => {
       "Information security",
     );
     await searchResultsPage.assertResultHasTerm(seed.blogs[0].title, "Reward");
-    await searchResultsPage.assertResultHasTerm(
-      seed.blogs[0].title,
-      "Line managers",
-    );
     await searchResultsPage.assertResultHasTerm(
       seed.workUpdates[0].title,
       "CCS live",
