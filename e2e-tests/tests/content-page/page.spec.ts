@@ -1,7 +1,7 @@
 import { test } from "../../src/wp.fixtures";
 import Post from "../../src/models/Post";
 
-test.describe("Two column component on content page", () => {
+test.describe("Content page component", () => {
   test.beforeEach(async ({ wp }) => {
     await wp.posts.clearByTypeAndAuthor("page");
   });

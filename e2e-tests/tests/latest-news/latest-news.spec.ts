@@ -158,14 +158,22 @@ test.describe("Latest news component", () => {
       await latestNews.assertAuthor(newUser.username);
     },
   );
+});
 
+test.describe("Latest news component", () => {
+  test.beforeEach(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("news");
+  });
+
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("news");
+  });
   test(
-    "can create a 2 column template",
+    "can create a Two column template",
     { tag: "@regression" },
     async ({ wp, wordpressLoginPage, latestNews, runId }) => {
-      await wp.posts.clearByTypeAndAuthor("news");
-
       const templatePage = Post.aPost()
+        .withType("news")
         .withFixedTitle(`Two Column Template ${runId}`)
         .withRealisticBodyContent("long")
         .withFeaturedImage("featured.jpg")
@@ -180,7 +188,7 @@ test.describe("Latest news component", () => {
       await latestNews.fillSlug(`two-column-template-${runId}`);
       await latestNews.selectTwoColumnTemplate();
       await latestNews.selectCategory("Digital and data");
-      await latestNews.selectLabel(label);
+      await latestNews.selectLabel("CCS live");
       await latestNews.fillExcerpt(templatePage);
       await latestNews.update();
       await latestNews.gotoById(pageId);
