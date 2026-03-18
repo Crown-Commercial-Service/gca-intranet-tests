@@ -409,4 +409,31 @@ test.describe("search", () => {
     await searchResultsPage.assertResultHasLink(seed.pages[0].title);
     await searchResultsPage.assertResultHasExcerpt(seed.pages[0].title);
   });
+
+  test("should display page category as content type in search results", async ({
+    wp,
+    homepage,
+    searchResultsPage,
+    wordpressLoginPage,
+    runId,
+  }) => {
+    const keyword = `PageCategory-${runId}`;
+
+    const page = Post.aPage()
+      .withFixedTitle(`${keyword} Policy Hub`)
+      .withContent(`${keyword} guidance and support`)
+      .withStatus("publish");
+
+    await wp.posts.create(page);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await homepage.goto();
+    await homepage.search(keyword);
+
+    await searchResultsPage.assertResultHasType(page.title, "Page");
+    await searchResultsPage.assertResultHasLink(page.title);
+    await searchResultsPage.assertResultHasExcerpt(page.title);
+  });
 });
