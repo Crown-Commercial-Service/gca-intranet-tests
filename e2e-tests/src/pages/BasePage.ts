@@ -69,8 +69,7 @@ export default abstract class BasePage {
     this.publishMessage = page.locator("#message.updated, #message.notice");
     this.categoriesBox = page.locator("#categorychecklist");
     this.labelsBox = page.locator("#radio-labeldiv #labelchecklist");
-    this.audienceBox = page.locator("#radio-audiencediv #labelchecklist");
-    this.audienceBox = page.locator("#radio-audiencediv #labelchecklist");
+    this.audienceBox = page.locator("#radio-audiencediv #audience-all");
     this.contentTypeBox = page.locator(
       "#radio-content_typediv #content_type-all",
     );
@@ -198,10 +197,9 @@ export default abstract class BasePage {
   }
 
   async selectAudience(audienceName: string): Promise<void> {
-    const audienceOption = this.audienceBox
-      .locator("label.selectit")
-      .filter({ hasText: audienceName })
-      .first();
+    const audienceOption = this.audienceBox.getByLabel(audienceName, {
+      exact: true,
+    });
 
     await expect(audienceOption).toBeVisible();
     await audienceOption.click();
