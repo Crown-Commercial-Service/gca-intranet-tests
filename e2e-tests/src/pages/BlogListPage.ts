@@ -68,11 +68,6 @@ export default class BlogListPage extends BasePage {
     await expect(post.getByTestId("blog-tax")).toContainText(label);
   }
 
-  // async assertPostHasDate(title: string, date: string): Promise<void> {
-  //   const post = this.postByTitle(title);
-  //   await expect(post.getByTestId("blog-post-date")).toContainText(date);
-  // }
-
   async assertPostHasDate(title: string, value: string | Date): Promise<void> {
     const post = this.postByTitle(title);
     const expected = formatDateNew(value);
