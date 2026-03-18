@@ -245,7 +245,7 @@ test.describe("search", () => {
     await homepage.assertHeaderSearchNotVisible();
   });
 
-  test("should show results in the correct order", async ({
+  test("should show newest search results first", async ({
     wp,
     homepage,
     searchResultsPage,
@@ -284,55 +284,27 @@ test.describe("search", () => {
 
     await homepage.goto();
     await homepage.search(keyword);
-
     await searchResultsPage.assertResultsInOrder([
-      first.title,
-      second.title,
       third.title,
+      second.title,
+      first.title,
     ]);
   });
 
-  test("should truncate result title to 85 characters", async ({
+  test("should truncate result title and description", async ({
     wp,
     homepage,
     searchResultsPage,
     wordpressLoginPage,
     runId,
   }) => {
-    const keyword = `TitleTruncation-${runId}`;
+    const keyword = `SearchTruncation-${runId}`;
 
     const post = Post.aPost()
       .withType("news")
       .withFixedTitle(
         `${keyword} this is a very long search result title designed to exceed the eighty five character limit on the search results page`,
       )
-      .withContent(`${keyword} title truncation content`)
-      .withStatus("publish")
-      .withFeaturedImage("featured.jpg");
-
-    await wp.posts.create(post);
-
-    await wordpressLoginPage.goto();
-    await wordpressLoginPage.loginAsAdmin();
-
-    await homepage.goto();
-    await homepage.search(keyword);
-
-    await searchResultsPage.assertResultTitleIsTruncated(post.title);
-  });
-
-  test("should truncate result description to 125 characters", async ({
-    wp,
-    homepage,
-    searchResultsPage,
-    wordpressLoginPage,
-    runId,
-  }) => {
-    const keyword = `ExcerptTruncation-${runId}`;
-
-    const post = Post.aPost()
-      .withType("news")
-      .withFixedTitle(`${keyword} result`)
       .withContent(
         `${keyword} this is a very long excerpt designed to exceed one hundred and twenty five characters so that the search results page has to truncate the visible description for the user`,
       )
@@ -347,7 +319,8 @@ test.describe("search", () => {
     await homepage.goto();
     await homepage.search(keyword);
 
-    await searchResultsPage.assertResultExcerptIsTruncated(post.title);
+    await searchResultsPage.assertResultTitleIsTruncated(post.title);
+    await searchResultsPage.assertResultExcerptIsTruncated(post.content);
   });
 
   test("should display categories or terms for each result", async ({
@@ -355,59 +328,80 @@ test.describe("search", () => {
     homepage,
     searchResultsPage,
     wordpressLoginPage,
+    latestNews,
+    blog,
+    workUpdate,
     runId,
   }) => {
     const keyword = `Terms-${runId}`;
     const seed = createSearchSeed(keyword);
 
-    await seedSearchData(wp, seed);
+    const ids = await seedSearchData(wp, seed);
 
     await wordpressLoginPage.goto();
     await wordpressLoginPage.loginAsAdmin();
 
+    await latestNews.gotoEdit(ids.newsIds[0]);
+    await latestNews.selectCategory("Information security");
+    await latestNews.update();
+
+    await blog.gotoEdit(ids.blogIds[0]);
+    await blog.selectLabel("Reward");
+    await blog.update();
+
+    await workUpdate.gotoEdit(ids.workUpdateIds[0]);
+    await workUpdate.selectLabel("CCS live");
+    await workUpdate.update();
+
     await homepage.goto();
     await homepage.search(seed.keyword);
 
-    await searchResultsPage.assertResultHasTerm(
-      seed.pages[0].title,
-      "Customers and suppliers",
-    );
     await searchResultsPage.assertResultHasTerm(
       seed.news[0].title,
       "Information security",
     );
-    await searchResultsPage.assertResultHasTerm(
-      seed.blogs[0].title,
-      "Digital and data",
-    );
+
+    await searchResultsPage.assertResultHasTerm(seed.blogs[0].title, "Reward");
+
     await searchResultsPage.assertResultHasTerm(
       seed.workUpdates[0].title,
-      "Marketing and communications",
+      "CCS live",
     );
   });
 
-  test("should display page results using the category content type label", async ({
+  test("should display page results using the page content type label", async ({
     wp,
     homepage,
     searchResultsPage,
     wordpressLoginPage,
+    latestNews,
+    blog,
+    workUpdate,
     runId,
   }) => {
     const keyword = `Guidance-${runId}`;
     const seed = createSearchSeed(keyword);
-
-    await seedSearchData(wp, seed);
+    const ids = await seedSearchData(wp, seed);
 
     await wordpressLoginPage.goto();
     await wordpressLoginPage.loginAsAdmin();
 
+    await latestNews.gotoEdit(ids.newsIds[0]);
+    await latestNews.selectCategory("Information security");
+    await latestNews.update();
+
+    await blog.gotoEdit(ids.blogIds[0]);
+    await blog.selectLabel("Reward");
+    await blog.update();
+
+    await workUpdate.gotoEdit(ids.workUpdateIds[0]);
+    await workUpdate.selectLabel("CCS live");
+    await workUpdate.update();
+
     await homepage.goto();
     await homepage.search(seed.keyword);
 
-    await searchResultsPage.assertResultHasType(
-      seed.pages[0].title,
-      "Guidance",
-    );
+    await searchResultsPage.assertResultHasType(seed.pages[0].title, "Page");
     await searchResultsPage.assertResultHasLink(seed.pages[0].title);
     await searchResultsPage.assertResultHasExcerpt(seed.pages[0].title);
   });

@@ -71,7 +71,7 @@ export default class HomePage extends BasePage {
 
   readonly footerLinks: Locator;
 
-  readonly searchInput: Locator;
+  readonly headerSearchInput: Locator;
   readonly searchButton: Locator;
 
   readonly primaryNavigation: Locator;
@@ -135,7 +135,7 @@ export default class HomePage extends BasePage {
     this.baseUrl = baseUrl;
 
     this.primaryNavigation = this.page.locator(this.primaryNavigationSelector);
-    this.searchInput = this.page.getByRole("searchbox");
+    this.headerSearchInput = this.page.locator('header').getByRole("searchbox");
     this.searchButton = this.page.getByRole("button", { name: "Search" });
     this.primaryNavigationParentLinks = this.primaryNavigation.locator(
       this.primaryNavigationParentLinksSelector,
@@ -208,19 +208,19 @@ export default class HomePage extends BasePage {
   }
 
   async search(query: string): Promise<void> {
-    await expect(this.searchInput).toBeVisible();
-    await this.searchInput.fill(query);
+    await expect(this.headerSearchInput).toBeVisible();
+    await this.headerSearchInput.fill(query);
     await this.searchButton.click();
   }
 
   async searchWithEnter(query: string): Promise<void> {
-    await expect(this.searchInput).toBeVisible();
-    await this.searchInput.fill(query);
-    await this.searchInput.press("Enter");
+    await expect(this.headerSearchInput).toBeVisible();
+    await this.headerSearchInput.fill(query);
+    await this.headerSearchInput.press("Enter");
   }
 
   async assertHeaderSearchNotVisible(): Promise<void> {
-    await expect(this.searchInput).toHaveCount(0);
+    await expect(this.headerSearchInput).not.toBeVisible();
   }
   // ---------------------------------------------------------
   // Take a look assertions

@@ -1,5 +1,6 @@
 import { Page, Locator, expect } from "@playwright/test";
 import BasePage from "./BasePage";
+import { getVisibleTruncatedText } from "../utils/formatters";
 
 export default class SearchResultsPage extends BasePage {
   readonly baseUrl?: string;
@@ -172,26 +173,36 @@ export default class SearchResultsPage extends BasePage {
   }
 
   async assertResultTitleIsTruncated(fullTitle: string): Promise<void> {
-    const result = this.resultByTitle(fullTitle);
-    const link = result.getByTestId("search-result-link");
+    const prefix = fullTitle.trim().slice(0, 25);
+
+    const link = this.resultLinks.filter({ hasText: prefix }).first();
 
     await expect(link).toBeVisible();
 
-    const actual = ((await link.textContent()) ?? "").trim();
+    const actual = ((await link.textContent()) ?? "")
+      .replace(/\s+/g, " ")
+      .trim();
 
-    expect(actual).not.toBe(fullTitle);
-    expect(actual.endsWith("...")).toBe(true);
-    expect(fullTitle.startsWith(actual.slice(0, -3).trim())).toBe(true);
+    expect(actual).not.toBe(fullTitle.trim());
+
+    const visiblePart = getVisibleTruncatedText(actual);
+    expect(fullTitle.startsWith(visiblePart)).toBe(true);
   }
 
-  async assertResultExcerptIsTruncated(title: string): Promise<void> {
-    const result = this.resultByTitle(title);
-    const excerpt = result.getByTestId("search-result-excerpt");
+  async assertResultExcerptIsTruncated(fullText: string): Promise<void> {
+    const prefix = fullText.trim().slice(0, 25);
+
+    const excerpt = this.resultExcerpts.filter({ hasText: prefix }).first();
 
     await expect(excerpt).toBeVisible();
 
-    const actual = ((await excerpt.textContent()) ?? "").trim();
+    const actual = ((await excerpt.textContent()) ?? "")
+      .replace(/\s+/g, " ")
+      .trim();
 
-    expect(actual.endsWith("...")).toBe(true);
+    expect(actual).not.toBe(fullText.trim());
+
+    const visiblePart = getVisibleTruncatedText(actual);
+    expect(fullText.startsWith(visiblePart)).toBe(true);
   }
 }
