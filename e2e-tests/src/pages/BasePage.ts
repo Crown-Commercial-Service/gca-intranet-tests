@@ -291,6 +291,11 @@ export default abstract class BasePage {
     await this.pageTemplateSelect.selectOption("template-layout-2col.php");
   }
 
+  async assertTwoColumnTemplateIsApplied(): Promise<void> {
+    await expect(this.page.getByTestId("layout-2col")).toBeVisible();
+    await expect(this.page.getByTestId("col-main")).toBeVisible();
+  }
+
   lastPaginationPageNumber(): Locator {
     return this.paginationPageNumbers
       .filter({ hasNot: this.visuallyHiddenText })

@@ -167,7 +167,7 @@ test.describe("Latest news component", () => {
     async ({ wp, wordpressLoginPage, latestNews, page, runId }) => {
       const slug = `two-column-template-${runId}`;
       const title = `Two Column Template ${runId}`;
-      const excerpt = `Excerpt for ${title}`;
+      // const excerpt = `Excerpt for ${title}`;
 
       const templatePage = Post.aPage()
         .withFixedTitle(title)
@@ -189,15 +189,9 @@ test.describe("Latest news component", () => {
       await latestNews.selectContentType("Staff network");
       await latestNews.selectTeam("Able Network");
       await latestNews.update();
-
-      await page.goto(`/${slug}/`, { waitUntil: "networkidle" });
-
-      await expect(page.getByRole("heading", { name: title })).toBeVisible();
-      await expect(page.locator("body")).toContainText("Line managers");
-      await expect(page.locator("body")).toContainText("Digital and data");
-      await expect(page.locator("body")).toContainText("Staff network");
-      await expect(page.locator("body")).toContainText("Able Network");
-      await expect(page.locator("img")).toBeVisible();
+      await latestNews.gotoById(pageId);
+      await latestNews.assertTitle(post.title);
+      await latestNews.assertTwoColumnTemplateIsApplied();
     },
   );
 });
