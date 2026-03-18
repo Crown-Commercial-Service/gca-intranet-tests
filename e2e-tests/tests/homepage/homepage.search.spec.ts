@@ -350,7 +350,7 @@ test.describe("search", () => {
     await searchResultsPage.assertResultExcerptIsTruncated(post.content);
   });
 
-  test("should display categories, terms and audience for each result", async ({
+  test("should display search result terms for news, blogs and work updates", async ({
     wp,
     homepage,
     searchResultsPage,
@@ -399,6 +399,79 @@ test.describe("search", () => {
     );
   });
 
+  test("should not display an audience tag when no audience is selected", async ({
+    wp,
+    homepage,
+    searchResultsPage,
+    wordpressLoginPage,
+    blog,
+    runId,
+  }) => {
+    const keyword = `AudienceNone-${runId}`;
+
+    const post = Post.aPost()
+      .withType("blogs")
+      .withFixedTitle(`${keyword} result`)
+      .withContent(`${keyword} content`)
+      .withStatus("publish")
+      .withFeaturedImage("featured.jpg");
+
+    const postId = await wp.posts.create(post);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await blog.gotoEdit(postId);
+    await blog.update();
+
+    await homepage.goto();
+    await homepage.search(keyword);
+
+    await searchResultsPage.assertResultHasLink(post.title);
+    await searchResultsPage.assertResultHasExcerpt(post.title);
+    await searchResultsPage.assertResultDoesNotHaveTerm(
+      post.title,
+      "Line managers",
+    );
+  });
+
+  test("should not display an audience tag when audience is All colleagues", async ({
+    wp,
+    homepage,
+    searchResultsPage,
+    wordpressLoginPage,
+    blog,
+    runId,
+  }) => {
+    const keyword = `AudienceAll-${runId}`;
+
+    const post = Post.aPost()
+      .withType("blogs")
+      .withFixedTitle(`${keyword} result`)
+      .withContent(`${keyword} content`)
+      .withStatus("publish")
+      .withFeaturedImage("featured.jpg");
+
+    const postId = await wp.posts.create(post);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await blog.gotoEdit(postId);
+    await blog.selectAudience("All colleagues");
+    await blog.update();
+
+    await homepage.goto();
+    await homepage.search(keyword);
+
+    await searchResultsPage.assertResultHasLink(post.title);
+    await searchResultsPage.assertResultHasExcerpt(post.title);
+    await searchResultsPage.assertResultDoesNotHaveTerm(
+      post.title,
+      "All colleagues",
+    );
+  });
+
   test("should display page results using the page content type label", async ({
     wp,
     homepage,
@@ -438,15 +511,44 @@ test.describe("search", () => {
     await searchResultsPage.assertResultHasExcerpt(seed.pages[0].title);
   });
 
-  test("should display page category as content type in search results", async ({
+  test("should display selected content type for a page in search results", async ({
     wp,
     homepage,
     searchResultsPage,
     wordpressLoginPage,
     runId,
   }) => {
-    // Additional coverage: verifies a single searchable page renders correctly in results
-    // Data setup: create one unique page and search for only that page title keyword
+    const keyword = `PageCategory-${runId}`;
+
+    const page = Post.aPage()
+      .withFixedTitle(`${keyword} Policy Hub`)
+      .withContent(`${keyword} guidance and support`)
+      .withStatus("publish");
+
+    const pageId = await wp.posts.create(page);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await searchResultsPage.gotoEdit(pageId);
+    await searchResultsPage.selectContentType("Staff network");
+    await searchResultsPage.update();
+
+    await homepage.goto();
+    await homepage.search(keyword);
+
+    await searchResultsPage.assertResultHasType(page.title, "Staff network");
+    await searchResultsPage.assertResultHasLink(page.title);
+    await searchResultsPage.assertResultHasExcerpt(page.title);
+  });
+
+  test("should display Page as the content type when no content type is selected", async ({
+    wp,
+    homepage,
+    searchResultsPage,
+    wordpressLoginPage,
+    runId,
+  }) => {
     const keyword = `PageCategory-${runId}`;
 
     const page = Post.aPage()

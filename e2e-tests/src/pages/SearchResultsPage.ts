@@ -139,6 +139,18 @@ export default class SearchResultsPage extends BasePage {
     await expect(result.getByTestId("search-result-excerpt")).toBeVisible();
   }
 
+  async assertResultDoesNotHaveTerm(
+    title: string,
+    term: string,
+  ): Promise<void> {
+    const result = this.resultByTitle(title);
+    const terms = result.getByTestId("search-result-terms");
+
+    await expect(
+      terms.locator(".tag_label").filter({ hasText: term }),
+    ).toHaveCount(0);
+  }
+
   async assertResultHasTerm(title: string, term: string): Promise<void> {
     const result = this.resultByTitle(title);
     await expect(

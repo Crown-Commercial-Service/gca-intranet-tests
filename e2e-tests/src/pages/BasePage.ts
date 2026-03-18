@@ -25,6 +25,7 @@ export default abstract class BasePage {
   readonly publishMessage: Locator;
   readonly categoriesBox: Locator;
   readonly labelsBox: Locator;
+  readonly contentTypeBox: Locator;
   readonly audienceBox: Locator;
   readonly teamBox: Locator;
   readonly authorImageBox: Locator;
@@ -69,6 +70,8 @@ export default abstract class BasePage {
     this.categoriesBox = page.locator("#categorychecklist");
     this.labelsBox = page.locator("#radio-labeldiv #labelchecklist");
     this.audienceBox = page.locator("#radio-audiencediv #labelchecklist");
+    this.audienceBox = page.locator("#radio-audiencediv #labelchecklist");
+    this.contentTypeBox = page.locator("#radio-content_typediv #labelchecklist");
     this.teamBox = page.locator(
       "#radio-responsible_teamdiv #responsible_teamchecklist",
     );
@@ -200,6 +203,16 @@ export default abstract class BasePage {
 
     await expect(audienceOption).toBeVisible();
     await audienceOption.click();
+  }
+
+  async selectContentType(contentTypeName: string): Promise<void> {
+    const contentTypeOption = this.contentTypeBox
+      .locator("label.selectit")
+      .filter({ hasText: contentTypeName })
+      .first();
+
+    await expect(contentTypeOption).toBeVisible();
+    await contentTypeOption.click();
   }
 
   async selectTeam(teamName: string): Promise<void> {
