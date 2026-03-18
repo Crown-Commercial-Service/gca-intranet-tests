@@ -1,4 +1,5 @@
 import { Page, Locator, expect } from "@playwright/test";
+import { formatDateNew } from "../utils/formatters";
 import BasePage from "./BasePage";
 
 export default class WorkUpdateList extends BasePage {
@@ -31,6 +32,14 @@ export default class WorkUpdateList extends BasePage {
     this.postLabels = this.page.getByTestId("work-update-tax");
     this.postTeams = this.page.getByTestId("work-update-team");
     this.workUpdateListSection = "[data-testid='work-update-main']";
+  }
+
+  private postLabelTag(post: Locator): Locator {
+    return post.locator(".tag_label.green");
+  }
+
+  private postTeamTag(post: Locator): Locator {
+    return post.locator(".tag_label.grey");
   }
 
   async goto(): Promise<void> {
@@ -69,19 +78,20 @@ export default class WorkUpdateList extends BasePage {
 
   async assertPostHasLabel(title: string, label: string): Promise<void> {
     const post = this.postByTitle(title);
-    await expect(post.getByTestId("work-update-tax")).toContainText(label);
+    await expect(this.postLabelTag(post)).toContainText(label);
   }
 
   async assertPostHasTeam(title: string, team: string): Promise<void> {
     const post = this.postByTitle(title);
-    await expect(post.getByTestId("work-update-team")).toContainText(team);
+    await expect(this.postTeamTag(post)).toContainText(team);
   }
 
-  async assertPostHasDate(title: string, date: string): Promise<void> {
+  async assertPostHasDate(title: string, value: string | Date): Promise<void> {
     const post = this.postByTitle(title);
-    await expect(post.getByTestId("work-update-post-date")).toContainText(date);
+    await expect(post.getByTestId("work-update-post-date")).toContainText(
+      formatDateNew(value),
+    );
   }
-
   async assertPostHasContent(title: string, content: string): Promise<void> {
     const post = this.postByTitle(title);
     await expect(post.getByTestId("work-update-decs")).toContainText(content);

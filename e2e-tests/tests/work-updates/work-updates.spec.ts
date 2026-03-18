@@ -78,12 +78,9 @@ test.describe("Work update component", () => {
 
       await workUpdateList.gotoWorkUpdateList();
       await workUpdateList.assertPostVisible(post.title);
-      await workUpdateList.assertPostHasLabel(post.title, label); // BUG REPORETD. Label tag not visible
-      await workUpdateList.assertPostHasTeam(post.title, team); // BUG REPORETD. team tab not visible
-      await workUpdateList.assertPostHasDate(
-        post.title,
-        dayjs(post.createdAt).format("Do MMMM YYYY"),
-      );
+      await workUpdateList.assertPostHasLabel(post.title, label);
+      await workUpdateList.assertPostHasTeam(post.title, team);
+      await workUpdateList.assertPostHasDate(post.title, post.createdAt);
       await workUpdateList.assertPostHasContent(post.title, post.content);
       await workUpdateList.assertPostHasAuthorImage(post.title);
     },
