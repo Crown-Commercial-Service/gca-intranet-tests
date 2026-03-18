@@ -2,6 +2,7 @@ import { test, expect } from "../../src/wp.fixtures";
 import { createSearchSeed } from "../../src/models/SearchSeed";
 import { seedSearchData } from "../../src/helpers/SearchHelper";
 import Post from "../../src/models/Post";
+import dayjs from "dayjs";
 
 test.describe("search", () => {
   test.beforeEach(async ({ wp }) => {
@@ -73,7 +74,7 @@ test.describe("search", () => {
 
     await searchResultsPage.assertResultHasType(
       seed.workUpdates[0].title,
-      "Work update",
+      "Work Update",
     );
     await searchResultsPage.assertResultHasLink(seed.workUpdates[0].title);
     await searchResultsPage.assertResultHasExcerpt(seed.workUpdates[0].title);
@@ -253,12 +254,13 @@ test.describe("search", () => {
     runId,
   }) => {
     const keyword = `Ordering-${runId}`;
-
+    const now = dayjs();
     const first = Post.aPost()
       .withType("news")
       .withFixedTitle(`${keyword} First result`)
       .withContent(`${keyword} first result content`)
       .withStatus("publish")
+      .withCreatedAt(now.subtract(3, "minute").toDate())
       .withFeaturedImage("featured.jpg");
 
     const second = Post.aPost()
@@ -266,6 +268,7 @@ test.describe("search", () => {
       .withFixedTitle(`${keyword} Second result`)
       .withContent(`${keyword} second result content`)
       .withStatus("publish")
+      .withCreatedAt(now.subtract(2, "minute").toDate())
       .withFeaturedImage("featured.jpg");
 
     const third = Post.aPost()
@@ -273,6 +276,7 @@ test.describe("search", () => {
       .withFixedTitle(`${keyword} Third result`)
       .withContent(`${keyword} third result content`)
       .withStatus("publish")
+      .withCreatedAt(now.subtract(1, "minute").toDate())
       .withFeaturedImage("featured.jpg");
 
     await wp.posts.create(first);
