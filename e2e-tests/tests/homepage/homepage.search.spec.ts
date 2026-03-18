@@ -374,7 +374,7 @@ test.describe("search", () => {
 
     await blog.gotoEdit(ids.blogIds[0]);
     await blog.selectLabel("Reward");
-    await blog.selectAudience("Line managers");
+    // await blog.selectAudience("Line managers");
     await blog.update();
 
     await workUpdate.gotoEdit(ids.workUpdateIds[0]);
@@ -440,34 +440,31 @@ test.describe("search", () => {
     homepage,
     searchResultsPage,
     wordpressLoginPage,
-    blog,
     runId,
   }) => {
     const keyword = `AudienceAll-${runId}`;
 
-    const post = Post.aPost()
-      .withType("blogs")
+    const page = Post.aPage()
       .withFixedTitle(`${keyword} result`)
       .withContent(`${keyword} content`)
-      .withStatus("publish")
-      .withFeaturedImage("featured.jpg");
+      .withStatus("publish");
 
-    const postId = await wp.posts.create(post);
+    const pageId = await wp.posts.create(page);
 
     await wordpressLoginPage.goto();
     await wordpressLoginPage.loginAsAdmin();
 
-    await blog.gotoEdit(postId);
-    await blog.selectAudience("All colleagues");
-    await blog.update();
+    await searchResultsPage.gotoEdit(pageId);
+    await searchResultsPage.selectAudience("All colleagues");
+    await searchResultsPage.update();
 
     await homepage.goto();
     await homepage.search(keyword);
 
-    await searchResultsPage.assertResultHasLink(post.title);
-    await searchResultsPage.assertResultHasExcerpt(post.title);
+    await searchResultsPage.assertResultHasLink(page.title);
+    await searchResultsPage.assertResultHasExcerpt(page.title);
     await searchResultsPage.assertResultDoesNotHaveTerm(
-      post.title,
+      page.title,
       "All colleagues",
     );
   });

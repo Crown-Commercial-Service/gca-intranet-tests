@@ -71,7 +71,9 @@ export default abstract class BasePage {
     this.labelsBox = page.locator("#radio-labeldiv #labelchecklist");
     this.audienceBox = page.locator("#radio-audiencediv #labelchecklist");
     this.audienceBox = page.locator("#radio-audiencediv #labelchecklist");
-    this.contentTypeBox = page.locator("#radio-content_typediv #labelchecklist");
+    this.contentTypeBox = page.locator(
+      "#radio-content_typediv #content_type-all",
+    );
     this.teamBox = page.locator(
       "#radio-responsible_teamdiv #responsible_teamchecklist",
     );
@@ -206,13 +208,12 @@ export default abstract class BasePage {
   }
 
   async selectContentType(contentTypeName: string): Promise<void> {
-    const contentTypeOption = this.contentTypeBox
-      .locator("label.selectit")
-      .filter({ hasText: contentTypeName })
-      .first();
+    const contentTypeOption = this.contentTypeBox.getByLabel(contentTypeName, {
+      exact: true,
+    });
 
     await expect(contentTypeOption).toBeVisible();
-    await contentTypeOption.click();
+    await contentTypeOption.check();
   }
 
   async selectTeam(teamName: string): Promise<void> {
