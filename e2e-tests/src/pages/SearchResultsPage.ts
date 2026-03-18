@@ -114,6 +114,12 @@ export default class SearchResultsPage extends BasePage {
     await expect(this.resultCards).toHaveCount(expected);
   }
 
+  async assertFirstResultTitle(title: string): Promise<void> {
+    await expect(
+      this.resultCards.first().getByTestId("search-result-link"),
+    ).toContainText(title);
+  }
+
   async assertResultVisible(title: string): Promise<void> {
     await expect(this.resultByTitle(title)).toBeVisible();
   }
