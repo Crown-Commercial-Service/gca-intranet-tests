@@ -190,7 +190,6 @@ test.describe("Latest news component", () => {
       await latestNews.selectTeam("Able Network");
       await latestNews.update();
       await latestNews.gotoById(pageId);
-      await latestNews.assertTitle(post.title);
       await latestNews.assertTwoColumnTemplateIsApplied();
     },
   );

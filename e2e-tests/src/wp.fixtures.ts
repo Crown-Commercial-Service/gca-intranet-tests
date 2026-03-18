@@ -23,6 +23,7 @@ import logger from "../src/utils/logger";
 import EventEditorPage from "../src/pages/EventEditorPage";
 import EventsListPage from "../src/pages/EventsListPage";
 import EventPage from "../src/pages/EventPage";
+import ContentPage from "../src/pages/ContentPage";
 import SearchResultsPage from "../src/pages/SearchResultsPage";
 
 type WpHelpers = {
@@ -53,6 +54,7 @@ type Fixtures = {
   eventsListPage: EventsListPage;
   eventPage: EventPage;
   searchResultsPage: SearchResultsPage;
+  contentPage: ContentPage;
 
   runId: string;
 };
@@ -232,6 +234,14 @@ export const test = base.extend<Fixtures>({
     const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
 
     await use(new BlogPage(page, baseUrl));
+  },
+
+  contentPage: async ({ page }, use, testInfo) => {
+    const qaMode = isQaMode();
+    const parallel = qaMode ? false : await isParallelEnabled();
+    const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
+
+    await use(new ContentPage(page, baseUrl));
   },
 
   blogList: async ({ page }, use, testInfo) => {
