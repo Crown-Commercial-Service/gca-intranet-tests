@@ -39,6 +39,9 @@ export default abstract class BasePage {
   readonly mediaFileInput: Locator;
   readonly excerptBox: Locator;
   readonly excerptInput: Locator;
+  readonly slugInput: Locator;
+  readonly pageAttributesBox: Locator;
+  readonly pageTemplateSelect: Locator;
 
   // News detail/list locators
   readonly details: Locator;
@@ -96,6 +99,9 @@ export default abstract class BasePage {
     this.mediaFileInput = this.mediaModal.locator('input[type="file"]');
     this.excerptBox = this.page.locator("#postexcerpt");
     this.excerptInput = this.page.locator("#excerpt");
+    this.slugInput = this.page.locator("#post_name");
+    this.pageAttributesBox = this.page.locator("#pageparentdiv");
+    this.pageTemplateSelect = this.page.locator("#page_template");
   }
 
   async checkAccessibility(): Promise<void> {
@@ -271,6 +277,18 @@ export default abstract class BasePage {
     await expect(items.nth(0)).toContainText("Home");
     await expect(items.nth(1)).toContainText(sectionTitle);
     await expect(items.nth(2)).toContainText(post.title);
+  }
+
+  async fillSlug(slug: string): Promise<void> {
+    await this.slugInput.scrollIntoViewIfNeeded();
+    await expect(this.slugInput).toBeVisible();
+    await this.slugInput.fill(slug);
+  }
+
+  async selectTwoColumnTemplate(): Promise<void> {
+    await this.pageAttributesBox.scrollIntoViewIfNeeded();
+    await expect(this.pageTemplateSelect).toBeVisible();
+    await this.pageTemplateSelect.selectOption("template-layout-2col.php");
   }
 
   lastPaginationPageNumber(): Locator {

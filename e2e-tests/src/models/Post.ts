@@ -11,9 +11,6 @@ export type HomepageContent = {
 
 export type PostStatus = "draft" | "publish" | "private" | "pending";
 
-/**
- * Supports core types + custom post types (e.g. "work-update").
- */
 export type PostType = "post" | "page" | (string & {});
 
 export type PostProps = {
@@ -28,6 +25,7 @@ export type PostProps = {
   template?: string;
   label?: string;
   excerpt?: string;
+  slug?: string;
 };
 
 export default class Post {
@@ -42,6 +40,7 @@ export default class Post {
   readonly template?: string;
   readonly label?: string;
   readonly excerpt?: string;
+  readonly slug?: string;
 
   constructor(props: PostProps) {
     this.title = props.title;
@@ -55,6 +54,7 @@ export default class Post {
     this.template = props.template;
     this.label = props.label;
     this.excerpt = props.excerpt;
+    this.slug = props.slug;
   }
 
   static aPost(): PostBuilder {
@@ -200,38 +200,54 @@ class PostBuilder {
     category: undefined,
     template: undefined,
     excerpt: this.randomParagraphWithin(140),
+    slug: this.randomSlug(),
   };
 
   private applyRunId(value: string): string {
-    const cleanValue = String(value ?? "")
+    return String(value ?? "")
       .replace(/\s+/g, " ")
       .trim();
+  }
 
-    return cleanValue;
+  private toSlug(value: string): string {
+    return value
+      .toLowerCase()
+      .trim()
+      .replace(/['’]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  private syncSlugFromTitle(): void {
+    this.props.slug = this.toSlug(this.props.title);
+  }
+
+  private randomSlug(): string {
+    return this.toSlug(chance.sentence({ words: 4 }).replace(/\.$/, ""));
   }
 
   withRunId(runId: string): this {
     this.runId = runId;
     this.props.title = this.applyRunId(this.props.title);
+    this.syncSlugFromTitle();
     return this;
   }
 
-  withExcerpt(excerpt: string): this {
-    this.props.excerpt = excerpt;
-    return this;
-  }
   withTitle(title: string): this {
     this.props.title = this.applyRunId(title);
+    this.syncSlugFromTitle();
     return this;
   }
 
   withFixedTitle(title: string): this {
     this.props.title = this.applyRunId(title);
+    this.syncSlugFromTitle();
     return this;
   }
 
   withTitleOver100Chars(): this {
     this.props.title = this.applyRunId(this.randomTitleExact(120));
+    this.syncSlugFromTitle();
     return this;
   }
 
@@ -282,16 +298,19 @@ class PostBuilder {
 
   withTitleMaxChars(max: number): this {
     this.props.title = this.applyRunId(this.randomTitleWithin(max));
+    this.syncSlugFromTitle();
     return this;
   }
 
   withTitleExactChars(exact: number): this {
     this.props.title = this.applyRunId(this.randomTitleExact(exact));
+    this.syncSlugFromTitle();
     return this;
   }
 
   withTitleOverLimit(limit: number, overBy: number = 1): this {
     this.props.title = this.applyRunId(this.randomTitleExact(limit + overBy));
+    this.syncSlugFromTitle();
     return this;
   }
 
@@ -346,9 +365,18 @@ class PostBuilder {
     return this.props.category;
   }
 
+  get slug() {
+    return this.props.slug;
+  }
+
   build(): Post {
     const props: PostProps = { ...this.props };
     props.title = this.applyRunId(props.title);
+
+    if (!props.slug) {
+      props.slug = this.toSlug(props.title);
+    }
+
     return new Post(props);
   }
 
