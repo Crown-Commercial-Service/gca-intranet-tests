@@ -1,18 +1,21 @@
-import dayjs from "dayjs";
-import { test, expect } from "../../src/wp.fixtures";
+import { test } from "../../src/wp.fixtures";
 import Post from "../../src/models/Post";
-import User from "../../src/models/User";
-import { formatDateOld } from "../../src/utils/formatters";
 
-test.describe("Latest news component", () => {
+test.describe("Two column component on content page", () => {
+  test.beforeEach(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("page");
+  });
+
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("page");
+  });
+
   test(
     "can create a 2 column template",
     { tag: "@regression" },
-    async ({ wp, wordpressLoginPage, contentPage, runId, latestNews }) => {
-      const slug = `two-column-template-${runId}`;
-      const title = `Two Column Template ${runId}`;
+    async ({ wp, wordpressLoginPage, contentPage, runId }) => {
       const templatePage = Post.aPage()
-        .withFixedTitle(title)
+        .withFixedTitle(`Two Column Template ${runId}`)
         .withRealisticBodyContent("long")
         .withFeaturedImage("featured.jpg")
         .withStatus("publish");
@@ -23,7 +26,7 @@ test.describe("Latest news component", () => {
       await wordpressLoginPage.loginAsAdmin();
 
       await contentPage.gotoEdit(pageId);
-      await contentPage.fillSlug(slug);
+      await contentPage.fillSlug(`two-column-template-${runId}`);
       await contentPage.selectTwoColumnTemplate();
       await contentPage.fillExcerpt(templatePage);
       await contentPage.selectAudience("Line managers");
@@ -31,7 +34,7 @@ test.describe("Latest news component", () => {
       await contentPage.selectContentType("Staff network");
       await contentPage.selectTeam("Able Network");
       await contentPage.update();
-      await latestNews.gotoById(pageId);
+      await contentPage.gotoById(pageId);
       await contentPage.assertTwoColumnTemplateIsApplied();
     },
   );

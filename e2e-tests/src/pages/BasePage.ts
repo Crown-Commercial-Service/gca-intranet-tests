@@ -8,6 +8,7 @@ import type Post from "../models/Post";
 
 export default abstract class BasePage {
   protected readonly page: Page;
+  protected readonly baseUrl?: string;
 
   readonly breadcrumbs: Locator;
   readonly pagination: Locator;
@@ -48,9 +49,9 @@ export default abstract class BasePage {
   readonly categoryTag: Locator;
   readonly taxonomyTag: Locator;
 
-  protected constructor(page: Page) {
+  protected constructor(page: Page, baseUrl?: string) {
     this.page = page;
-
+    this.baseUrl = baseUrl;
     this.breadcrumbs = this.page.locator(".govuk-breadcrumbs");
     this.pagination = this.page.locator(".pagination");
     this.paginationPageNumbers = this.pagination.locator(
@@ -122,6 +123,14 @@ export default abstract class BasePage {
 
   async goto(path: string): Promise<void> {
     await this.page.goto(path, { waitUntil: "domcontentloaded" });
+  }
+
+  async gotoById(postId: number): Promise<void> {
+    const url = this.baseUrl
+      ? `${this.baseUrl.replace(/\/+$/, "")}/?p=${postId}`
+      : `/?p=${postId}`;
+
+    await this.page.goto(url, { waitUntil: "networkidle" });
   }
 
   async gotoEdit(postId: number): Promise<void> {

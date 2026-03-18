@@ -1,8 +1,6 @@
-import dayjs from "dayjs";
 import { test, expect } from "../../src/wp.fixtures";
 import Post from "../../src/models/Post";
 import User from "../../src/models/User";
-import { formatDateOld } from "../../src/utils/formatters";
 
 test.describe("Latest news component", () => {
   let post: Post;
@@ -164,13 +162,11 @@ test.describe("Latest news component", () => {
   test(
     "can create a 2 column template",
     { tag: "@regression" },
-    async ({ wp, wordpressLoginPage, latestNews, page, runId }) => {
-      const slug = `two-column-template-${runId}`;
-      const title = `Two Column Template ${runId}`;
-      // const excerpt = `Excerpt for ${title}`;
+    async ({ wp, wordpressLoginPage, latestNews, runId }) => {
+      await wp.posts.clearByTypeAndAuthor("news");
 
-      const templatePage = Post.aPage()
-        .withFixedTitle(title)
+      const templatePage = Post.aPost()
+        .withFixedTitle(`Two Column Template ${runId}`)
         .withRealisticBodyContent("long")
         .withFeaturedImage("featured.jpg")
         .withStatus("publish");
@@ -181,13 +177,11 @@ test.describe("Latest news component", () => {
       await wordpressLoginPage.loginAsAdmin();
 
       await latestNews.gotoEdit(pageId);
-      await latestNews.fillSlug(slug);
+      await latestNews.fillSlug(`two-column-template-${runId}`);
       await latestNews.selectTwoColumnTemplate();
-      await latestNews.fillExcerpt(templatePage);
-      await latestNews.selectAudience("Line managers");
       await latestNews.selectCategory("Digital and data");
-      await latestNews.selectContentType("Staff network");
-      await latestNews.selectTeam("Able Network");
+      await latestNews.selectLabel(label);
+      await latestNews.fillExcerpt(templatePage);
       await latestNews.update();
       await latestNews.gotoById(pageId);
       await latestNews.assertTwoColumnTemplateIsApplied();
