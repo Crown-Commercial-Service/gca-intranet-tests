@@ -22,4 +22,4 @@ test-results/
 storybook-static
 allure-report/
 allure-results/
-allure-report.zip
+allure-report-*.zip
