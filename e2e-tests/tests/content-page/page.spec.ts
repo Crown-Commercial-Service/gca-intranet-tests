@@ -39,4 +39,27 @@ test.describe("Content page component", { tag: "@regression" }, () => {
     await contentPage.gotoById(pageId);
     await contentPage.assertTwoColumnTemplateIsApplied();
   });
+
+  test("can add multiple page contents to a page", async ({
+    wp,
+    wordpressLoginPage,
+    contentPage,
+    runId,
+  }) => {
+    const templatePage = Post.aPage()
+      .withFixedTitle(`Two Column Template ${runId}`)
+      .withParagraphMaxChars(180)
+      .withFeaturedImage("featured.jpg")
+      .withStatus("publish");
+
+    const pageId = await wp.posts.create(templatePage);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await contentPage.addTextComponent('oishfodofjo');
+
+    await contentPage.update();
+
+  });
 });
