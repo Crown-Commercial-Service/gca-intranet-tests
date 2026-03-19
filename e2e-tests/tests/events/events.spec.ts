@@ -216,11 +216,10 @@ test.describe("Event Component", { tag: "@regression" }, () => {
 
     await wordpressLoginPage.goto();
     await wordpressLoginPage.loginAsAdmin();
-
     await eventEditorPage.gotoEdit(eventId);
+    await eventEditorPage.selectColumnTemplate("Layout – 2 column");
     await eventEditorPage.fillEventDetails(event);
     await eventEditorPage.update();
-
     await eventPage.gotoById(eventId);
     await eventPage.assertTwoColumnTemplateIsApplied();
   });
@@ -243,11 +242,10 @@ test.describe("Event Component", { tag: "@regression" }, () => {
 
     await wordpressLoginPage.goto();
     await wordpressLoginPage.loginAsAdmin();
-
     await eventEditorPage.gotoEdit(eventId);
+    await eventEditorPage.selectColumnTemplate("Layout – 1 column");
     await eventEditorPage.fillEventDetails(event);
     await eventEditorPage.update();
-
     await eventPage.gotoById(eventId);
     await eventPage.assertOneColumnTemplateIsApplied();
   });

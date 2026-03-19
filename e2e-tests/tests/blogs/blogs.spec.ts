@@ -171,6 +171,7 @@ test.describe("Blog component", { tag: "@regression" }, () => {
     await wordpressLoginPage.loginAsAdmin();
 
     await blog.gotoEdit(pageId);
+    await blog.selectColumnTemplate("Layout – 2 column");
     await blog.selectLabel("CCS live");
     await blog.addAuthorImage("author-image.jpg");
     await blog.update();
@@ -197,6 +198,7 @@ test.describe("Blog component", { tag: "@regression" }, () => {
     await wordpressLoginPage.loginAsAdmin();
 
     await blog.gotoEdit(pageId);
+    await blog.selectColumnTemplate("Layout – 1 column");
     await blog.selectLabel("CCS live");
     await blog.addAuthorImage("author-image.jpg");
     await blog.update();

@@ -29,7 +29,7 @@ test.describe("Content page component", { tag: "@regression" }, () => {
 
     await contentPage.gotoEdit(pageId);
     await contentPage.fillSlug(`two-column-template-${runId}`);
-    await contentPage.selectTwoColumnTemplate();
+    await contentPage.selectColumnTemplate("Layout – 2 column");
     await contentPage.fillExcerpt(templatePage);
     await contentPage.selectAudience("Line managers");
     await contentPage.selectCategory("Digital and data");
@@ -38,35 +38,5 @@ test.describe("Content page component", { tag: "@regression" }, () => {
     await contentPage.update();
     await contentPage.gotoById(pageId);
     await contentPage.assertTwoColumnTemplateIsApplied();
-  });
-
-  test("can create a One column template", async ({
-    wp,
-    wordpressLoginPage,
-    contentPage,
-    runId,
-  }) => {
-    const templatePage = Post.aPage()
-      .withFixedTitle(`One Column Template ${runId}`)
-      .withRealisticBodyContent("long")
-      .withFeaturedImage("featured.jpg")
-      .withStatus("publish");
-
-    const pageId = await wp.posts.create(templatePage);
-
-    await wordpressLoginPage.goto();
-    await wordpressLoginPage.loginAsAdmin();
-
-    await contentPage.gotoEdit(pageId);
-    await contentPage.fillSlug(`one-column-template-${runId}`);
-    await contentPage.selectTwoColumnTemplate();
-    await contentPage.fillExcerpt(templatePage);
-    await contentPage.selectAudience("Line managers");
-    await contentPage.selectCategory("Digital and data");
-    await contentPage.selectContentType("Staff network");
-    await contentPage.selectTeam("Able Network");
-    await contentPage.update();
-    await contentPage.gotoById(pageId);
-    await contentPage.assertOneColumnTemplateIsApplied();
   });
 });

@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import { test, expect } from "../../src/wp.fixtures";
 import Post from "../../src/models/Post";
 import User from "../../src/models/User";
@@ -162,7 +161,7 @@ test.describe("Work update component", () => {
   );
 });
 
-test.describe("Latest news component", { tag: "@regression" }, () => {
+test.describe("Work update component", { tag: "@regression" }, () => {
   test.beforeEach(async ({ wp }) => {
     await wp.posts.clearByTypeAndAuthor("work_updates");
   });
@@ -191,6 +190,7 @@ test.describe("Latest news component", { tag: "@regression" }, () => {
     await workUpdate.selectLabel("CCS live");
     await workUpdate.selectTeam("Finance");
     await workUpdate.addAuthorImage("author-image.jpg");
+    await workUpdate.selectColumnTemplate("Layout – 2 column");
     await workUpdate.update();
     await workUpdate.gotoById(postId);
     await workUpdate.assertTwoColumnTemplateIsApplied();
@@ -217,6 +217,7 @@ test.describe("Latest news component", { tag: "@regression" }, () => {
     await workUpdate.selectLabel("CCS live");
     await workUpdate.selectTeam("Finance");
     await workUpdate.addAuthorImage("author-image.jpg");
+    await workUpdate.selectColumnTemplate("Layout – 1 column");
     await workUpdate.update();
     await workUpdate.gotoById(postId);
     await workUpdate.assertOneColumnTemplateIsApplied();

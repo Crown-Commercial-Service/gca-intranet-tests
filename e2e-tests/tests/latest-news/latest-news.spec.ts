@@ -188,7 +188,7 @@ test.describe("Latest news component", { tag: "@regression" }, () => {
 
     await latestNews.gotoEdit(pageId);
     await latestNews.fillSlug(`two-column-template-${runId}`);
-    await latestNews.selectTwoColumnTemplate();
+    await latestNews.selectColumnTemplate("Layout – 2 column");
     await latestNews.selectCategory("Digital and data");
     await latestNews.selectLabel("CCS live");
     await latestNews.fillExcerpt(templatePage);
@@ -217,6 +217,7 @@ test.describe("Latest news component", { tag: "@regression" }, () => {
 
     await latestNews.gotoEdit(pageId);
     await latestNews.fillSlug(`one-column-template-${runId}`);
+    await latestNews.selectColumnTemplate("Layout – 1 column");
     await latestNews.selectCategory("Digital and data");
     await latestNews.selectLabel("CCS live");
     await latestNews.fillExcerpt(templatePage);

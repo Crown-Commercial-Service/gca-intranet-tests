@@ -294,10 +294,10 @@ export default abstract class BasePage {
     await this.slugInput.fill(slug);
   }
 
-  async selectTwoColumnTemplate(): Promise<void> {
+  async selectColumnTemplate(template: string): Promise<void> {
     await this.pageAttributesBox.scrollIntoViewIfNeeded();
     await expect(this.pageTemplateSelect).toBeVisible();
-    await this.pageTemplateSelect.selectOption("template-layout-2col.php");
+    await this.pageTemplateSelect.selectOption(template);
   }
 
   async assertOneColumnTemplateIsApplied(): Promise<void> {
