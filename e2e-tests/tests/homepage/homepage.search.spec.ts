@@ -4,7 +4,7 @@ import { seedSearchData } from "../../src/helpers/SearchHelper";
 import Post from "../../src/models/Post";
 import dayjs from "dayjs";
 
-test.describe("search", () => {
+test.describe("search", { tag: "@regression" }, () => {
   test.beforeEach(async ({ wp }) => {
     await wp.posts.clearByTypeAndAuthor("page");
     await wp.posts.clearByTypeAndAuthor("news");
