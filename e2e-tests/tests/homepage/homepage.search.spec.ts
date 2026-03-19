@@ -312,8 +312,6 @@ test.describe("search", { tag: "@regression" }, () => {
     await searchResultsPage.assertResultVisible(second.title);
     await searchResultsPage.assertResultVisible(third.title);
   });
-
-  // test("should show newest results first in search results", async ({
   //   wp,
   //   homepage,
   //   searchResultsPage,
