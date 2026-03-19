@@ -18,7 +18,7 @@ test.describe("Content page component", { tag: "@regression" }, () => {
   }) => {
     const templatePage = Post.aPage()
       .withFixedTitle(`Two Column Template ${runId}`)
-      .withRealisticBodyContent("long")
+      .withParagraphMaxChars(180)
       .withFeaturedImage("featured.jpg")
       .withStatus("publish");
 

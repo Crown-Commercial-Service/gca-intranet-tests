@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 
 test.describe("events", () => {
   test.beforeEach(async ({ wp }) => {
-    await wp.posts.clearByTypeAndAuthor("events");
+    await wp.posts.clearByType("events");
   });
 
   test.afterAll(async ({ wp }) => {
@@ -224,7 +224,6 @@ test.describe("events", () => {
           .withEndDate(dayjs().add(4, "day").format("DD-MM-YYYY"))
           .withStatus("publish"),
       ];
-
       await wordpressLoginPage.goto();
       await wordpressLoginPage.loginAsAdmin();
 
@@ -261,7 +260,6 @@ test.describe("events", () => {
           .getByTestId("events-link")
           .filter({ hasText: events[0].title }),
       ).toHaveCount(0);
-
       await homepage.hasEvents([events[1], events[2], events[3]]);
     },
   );

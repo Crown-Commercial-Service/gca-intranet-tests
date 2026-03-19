@@ -161,7 +161,7 @@ test.describe("Blog component", { tag: "@regression" }, () => {
     const templatePage = Post.aPost()
       .withType("blogs")
       .withFixedTitle(`Two Column Template ${runId}`)
-      .withRealisticBodyContent("long")
+      .withParagraphMaxChars(180)
       .withFeaturedImage("featured.jpg")
       .withStatus("publish");
 
@@ -171,9 +171,9 @@ test.describe("Blog component", { tag: "@regression" }, () => {
     await wordpressLoginPage.loginAsAdmin();
 
     await blog.gotoEdit(pageId);
-    await blog.selectColumnTemplate("Layout – 2 column");
     await blog.selectLabel("CCS live");
     await blog.addAuthorImage("author-image.jpg");
+    await blog.selectColumnTemplate("Layout – 2 column");
     await blog.update();
     await blog.gotoById(pageId);
     await blog.assertTwoColumnTemplateIsApplied();
@@ -188,7 +188,7 @@ test.describe("Blog component", { tag: "@regression" }, () => {
     const templatePage = Post.aPost()
       .withType("blogs")
       .withFixedTitle(`One Column Template ${runId}`)
-      .withRealisticBodyContent("long")
+      .withParagraphMaxChars(180)
       .withFeaturedImage("featured.jpg")
       .withStatus("publish");
 
@@ -198,8 +198,8 @@ test.describe("Blog component", { tag: "@regression" }, () => {
     await wordpressLoginPage.loginAsAdmin();
 
     await blog.gotoEdit(pageId);
-    await blog.selectColumnTemplate("Layout – 1 column");
     await blog.selectLabel("CCS live");
+    await blog.selectColumnTemplate("Layout – 1 column");
     await blog.addAuthorImage("author-image.jpg");
     await blog.update();
     await blog.gotoById(pageId);

@@ -207,7 +207,7 @@ test.describe("Event Component", { tag: "@regression" }, () => {
   }) => {
     const event = Event.anEvent()
       .withFixedTitle(`Event[1] - ${runId}`)
-      .withRealisticBodyContent("compact")
+      .withParagraphMaxChars(180)
       .withStartDate("20-03-2026")
       .withEndDate("22-03-2026")
       .withStatus("publish");
@@ -233,7 +233,7 @@ test.describe("Event Component", { tag: "@regression" }, () => {
   }) => {
     const event = Event.anEvent()
       .withFixedTitle(`Event[2] - ${runId}`)
-      .withRealisticBodyContent("compact")
+      .withParagraphMaxChars(180)
       .withStartDate("20-03-2026")
       .withEndDate("22-03-2026")
       .withStatus("publish");

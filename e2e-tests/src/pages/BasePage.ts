@@ -187,6 +187,7 @@ export default abstract class BasePage {
   }
 
   async update(): Promise<void> {
+    await this.page.waitForTimeout(2000);
     await this.publishButton.click();
     await this.waitForSaveToComplete();
   }

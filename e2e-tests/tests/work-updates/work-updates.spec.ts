@@ -10,7 +10,7 @@ test.describe("Work update component", () => {
   let team = "Finance";
 
   test.beforeEach(async ({ wp, wordpressLoginPage }) => {
-    await wp.posts.clearByTypeAndAuthor("work_updates");
+    await wp.posts.clearByType("work_updates");
 
     post = Post.aPost()
       .withType("work_updates")
@@ -25,7 +25,7 @@ test.describe("Work update component", () => {
   });
 
   test.afterAll(async ({ wp }) => {
-    await wp.posts.clearByTypeAndAuthor("work_updates");
+    await wp.posts.clearByType("work_updates");
   });
 
   test(
@@ -178,7 +178,7 @@ test.describe("Work update component", { tag: "@regression" }, () => {
     const templatePage = Post.aPost()
       .withType("work_updates")
       .withFixedTitle(`Two Column Template ${runId}`)
-      .withRealisticBodyContent("long")
+      .withParagraphMaxChars(180)
       .withStatus("publish");
 
     const postId = await wp.posts.create(templatePage);
@@ -205,7 +205,7 @@ test.describe("Work update component", { tag: "@regression" }, () => {
     const templatePage = Post.aPost()
       .withType("work_updates")
       .withFixedTitle(`One Column Template ${runId}`)
-      .withRealisticBodyContent("long")
+      .withParagraphMaxChars(180)
       .withStatus("publish");
 
     const postId = await wp.posts.create(templatePage);

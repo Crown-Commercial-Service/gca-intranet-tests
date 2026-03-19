@@ -101,6 +101,11 @@ class EventBuilder {
     return this;
   }
 
+  withParagraphMaxChars(max: number): this {
+    this.props.content = this.randomParagraphWithin(max);
+    return this;
+  }
+
   withContent(content: string): this {
     this.props.content = content;
     return this;
@@ -212,5 +217,15 @@ class EventBuilder {
 
   build(): Event {
     return new Event({ ...this.props });
+  }
+
+  private randomParagraphWithin(max: number): string {
+    if (max <= 0) return "";
+
+    const paragraph = chance.paragraph({ sentences: 3 }).trim();
+
+    return paragraph.length <= max
+      ? paragraph
+      : paragraph.slice(0, max).trimEnd();
   }
 }

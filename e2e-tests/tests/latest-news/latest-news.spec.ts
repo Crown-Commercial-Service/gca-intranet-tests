@@ -177,7 +177,7 @@ test.describe("Latest news component", { tag: "@regression" }, () => {
     const templatePage = Post.aPost()
       .withType("news")
       .withFixedTitle(`Two Column Template ${runId}`)
-      .withRealisticBodyContent("long")
+      .withParagraphMaxChars(180)
       .withFeaturedImage("featured.jpg")
       .withStatus("publish");
 
@@ -188,10 +188,10 @@ test.describe("Latest news component", { tag: "@regression" }, () => {
 
     await latestNews.gotoEdit(pageId);
     await latestNews.fillSlug(`two-column-template-${runId}`);
-    await latestNews.selectColumnTemplate("Layout – 2 column");
     await latestNews.selectCategory("Digital and data");
     await latestNews.selectLabel("CCS live");
     await latestNews.fillExcerpt(templatePage);
+    await latestNews.selectColumnTemplate("Layout – 2 column");
     await latestNews.update();
     await latestNews.gotoById(pageId);
     await latestNews.assertTwoColumnTemplateIsApplied();
@@ -206,7 +206,7 @@ test.describe("Latest news component", { tag: "@regression" }, () => {
     const templatePage = Post.aPost()
       .withType("news")
       .withFixedTitle(`One Column Template ${runId}`)
-      .withRealisticBodyContent("long")
+      .withParagraphMaxChars(180)
       .withFeaturedImage("featured.jpg")
       .withStatus("publish");
 
@@ -217,10 +217,10 @@ test.describe("Latest news component", { tag: "@regression" }, () => {
 
     await latestNews.gotoEdit(pageId);
     await latestNews.fillSlug(`one-column-template-${runId}`);
-    await latestNews.selectColumnTemplate("Layout – 1 column");
     await latestNews.selectCategory("Digital and data");
     await latestNews.selectLabel("CCS live");
     await latestNews.fillExcerpt(templatePage);
+    await latestNews.selectColumnTemplate("Layout – 1 column");
     await latestNews.update();
     await latestNews.gotoById(pageId);
     await latestNews.assertOneColumnTemplateIsApplied();
