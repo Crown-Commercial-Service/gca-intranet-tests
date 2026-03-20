@@ -6,7 +6,7 @@ type IntroMediaPosition = "image_right" | "image_left";
 export default class ContentPage extends BasePage {
   readonly pageComponentsBox: Locator;
   readonly addComponentButton: Locator;
-  readonly textComponentOption: Locator;
+  readonly addComponentlistBox: Locator;
   readonly introComponentOption: Locator;
   readonly pageComponentValues: Locator;
   readonly textComponents: Locator;
@@ -23,8 +23,8 @@ export default class ContentPage extends BasePage {
       name: "Add component",
     });
 
-    this.textComponentOption = this.page.locator(
-      '.tmpl-popup a[data-layout="text_text"]',
+    this.addComponentlistBox = this.page.locator(
+      '.acf-tooltip',
     );
 
     this.introComponentOption = this.page.locator(
@@ -49,8 +49,9 @@ export default class ContentPage extends BasePage {
     await expect(this.addComponentButton).toBeVisible();
     await this.addComponentButton.click();
 
-    await expect(this.textComponentOption).toBeVisible();
-    await this.textComponentOption.click();
+    await expect(this.addComponentlistBox).toBeVisible();
+    await this.addComponentlistBox.getByText('Text').click();
+    await this.page.pause()
 
     const textComponent = this.textComponents.last();
     const contentInput = textComponent.getByLabel("Content");
