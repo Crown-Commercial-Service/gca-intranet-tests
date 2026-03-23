@@ -1,7 +1,7 @@
 import { test } from "../../src/wp.fixtures";
 import Post from "../../src/models/Post";
 
-test.describe("Content page component", { tag: "@regression" }, () => {
+test.describe("Content page component", () => {
   test.beforeEach(async ({ wp }) => {
     await wp.posts.clearByTypeAndAuthor("page");
   });
@@ -10,7 +10,7 @@ test.describe("Content page component", { tag: "@regression" }, () => {
     await wp.posts.clearByTypeAndAuthor("page");
   });
 
-  test("can create a 2 column template", async ({
+  test("can create a 2 column template", { tag: "@regression" }, async ({
     wp,
     wordpressLoginPage,
     contentPage,
@@ -57,6 +57,9 @@ test.describe("Content page component", { tag: "@regression" }, () => {
     await wordpressLoginPage.goto();
     await wordpressLoginPage.loginAsAdmin();
 
+        await contentPage.gotoEdit(pageId);
+
+    // await contentPage.pause()
     await contentPage.addTextComponent('oishfodofjo');
 
     await contentPage.update();

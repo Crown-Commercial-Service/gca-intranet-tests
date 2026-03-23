@@ -15,13 +15,13 @@ test.describe("Accessibility - Homepage components", () => {
     await wp.posts.clearByTypeAndAuthor("news");
   });
 
-  test.afterAll(async ({ wp }) => {
-    await wp.posts.clearByTypeAndAuthor("page");
-    await wp.posts.clearByTypeAndAuthor("events");
-    await wp.posts.clearByTypeAndAuthor("blogs");
-    await wp.posts.clearByTypeAndAuthor("work_updates");
-    await wp.posts.clearByTypeAndAuthor("news");
-  });
+  // test.afterAll(async ({ wp }) => {
+  //   await wp.posts.clearByTypeAndAuthor("page");
+  //   await wp.posts.clearByTypeAndAuthor("events");
+  //   await wp.posts.clearByTypeAndAuthor("blogs");
+  //   await wp.posts.clearByTypeAndAuthor("work_updates");
+  //   await wp.posts.clearByTypeAndAuthor("news");
+  // });
 
   test("Components on the homepage should have no serious or critical violations", async ({
     homepage,
@@ -41,7 +41,7 @@ test.describe("Accessibility - Homepage components", () => {
     await wp.posts.create(contentType.blog);
 
     // Create header and footer pages
-    await wp.posts.createPages([...MenuPages.all(), ...FooterPages.all()]);
+    // await wp.posts.createPages([...MenuPages.all(), ...FooterPages.all()]);
 
     // Log in to WordPress admin
     await wordpressLoginPage.goto();
