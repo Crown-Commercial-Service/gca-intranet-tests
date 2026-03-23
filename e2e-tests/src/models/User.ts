@@ -9,6 +9,7 @@ export type UserRole =
   | "contributor"
   | "subscriber"
   | "publisher_hr"
+  | "publisher"
   | "publisher_admin"
   | "publisher_intranet_it"
   | "contributor_intranet";
