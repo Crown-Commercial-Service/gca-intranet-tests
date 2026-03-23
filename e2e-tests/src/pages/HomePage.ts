@@ -21,7 +21,7 @@ type CharLimits = {
 };
 
 export default class HomePage extends BasePage {
-  private readonly baseUrl?: string;
+  readonly baseUrl?: string;
 
   readonly primaryNavigationSelector = "#primaryNav";
 

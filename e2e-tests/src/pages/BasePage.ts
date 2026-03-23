@@ -17,6 +17,7 @@ export default abstract class BasePage {
 
   // WordPress locators
   readonly posts: Locator;
+  readonly adminBar: Locator;
   readonly titleInput: Locator;
   readonly contentInput: Locator;
   readonly authorSection: Locator;
@@ -51,6 +52,7 @@ export default abstract class BasePage {
 
   protected constructor(page: Page, baseUrl?: string) {
     this.page = page;
+    this.adminBar = this.page.locator("#wpadminbar");
     this.baseUrl = baseUrl;
     this.breadcrumbs = this.page.locator(".govuk-breadcrumbs");
     this.pagination = this.page.locator(".pagination");
@@ -107,6 +109,14 @@ export default abstract class BasePage {
 
   async checkAccessibility(): Promise<void> {
     await expectNoSeriousA11yViolations(this.page);
+  }
+
+  async assertAdminBarNotVisible(): Promise<void> {
+    await expect(this.adminBar).toHaveCount(0);
+  }
+
+  async gotoPath(path: string): Promise<void> {
+    await this.page.goto(path, { waitUntil: "networkidle" });
   }
 
   async checkAccessibilityFor(selectors: string[]): Promise<void> {
