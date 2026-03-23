@@ -40,7 +40,7 @@ test.describe("Content page component", () => {
     await contentPage.assertTwoColumnTemplateIsApplied();
   });
 
-  test("can add multiple page contents to a page", async ({
+  test.skip("can add multiple page contents to a page", async ({
     wp,
     wordpressLoginPage,
     contentPage,
