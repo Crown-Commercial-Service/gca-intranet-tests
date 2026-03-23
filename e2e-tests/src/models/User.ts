@@ -7,7 +7,11 @@ export type UserRole =
   | "editor"
   | "author"
   | "contributor"
-  | "subscriber";
+  | "subscriber"
+  | "publisher_hr"
+  | "publisher_admin"
+  | "publisher_intranet_it"
+  | "contributor_intranet";
 
 export type UserProps = {
   username: string;
