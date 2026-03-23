@@ -8,25 +8,42 @@ async function run() {
 
   let failed = 0;
 
-  for (const url of urls) {
-    try {
-      const res = await api.get(url, {
-        timeout: 15000,
-      });
+  await Promise.all(
+    urls.map(async (url) => {
+      try {
+        const res = await api.get(url, {
+          timeout: 15000,
+        });
 
-      const status = res.status();
+        const status = res.status();
+        const finalUrl = res.url();
 
-      if (status !== 200) {
-        console.log(`FAIL  ${status}  ${url}`);
+        const isBadRedirect =
+          finalUrl.includes("/login") ||
+          finalUrl.includes("/signin") ||
+          finalUrl.includes("/auth") ||
+          finalUrl === "https://qa.intranet.gca.gov.uk/";
+
+        const isExternalRedirect = !finalUrl.includes("qa.intranet.gca.gov.uk");
+
+        if (status !== 200) {
+          console.log(`FAIL  ${status}  ${url}`);
+          failed++;
+        } else if (isBadRedirect) {
+          console.log(`BAD REDIRECT  ${url} -> ${finalUrl}`);
+          failed++;
+        } else if (isExternalRedirect) {
+          console.log(`EXTERNAL REDIRECT  ${url} -> ${finalUrl}`);
+          failed++;
+        } else {
+          console.log(`PASS  ${status}  ${url}`);
+        }
+      } catch {
+        console.log(`ERROR ${url}`);
         failed++;
-      } else {
-        console.log(`PASS  ${status}  ${url}`);
       }
-    } catch (err) {
-      console.log(`ERROR ${url}`);
-      failed++;
-    }
-  }
+    }),
+  );
 
   console.log("\nDone");
   console.log(`Total: ${urls.length}`);
