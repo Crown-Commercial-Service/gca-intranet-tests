@@ -123,6 +123,14 @@ export default abstract class BasePage {
     await expectNoSeriousA11yViolationsForSelectors(this.page, selectors);
   }
 
+  async expectScreenshot(name: string): Promise<void> {
+    await expect(this.page).toHaveScreenshot(name, {
+      fullPage: true,
+      animations: "disabled",
+      caret: "hide",
+    });
+  }
+
   async wait(ms: number): Promise<void> {
     await this.page.waitForTimeout(ms);
   }

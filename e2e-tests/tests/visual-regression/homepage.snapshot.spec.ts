@@ -56,8 +56,6 @@ test.describe("Accessibility - Homepage components", () => {
 
     // Open homepage and submenu for accessibility scan
     await homepage.goto();
-
-    // Run avisual regression
-    // need this part
+    await homepage.expectScreenshot("homepage.png");
   });
 });
