@@ -27,7 +27,8 @@
     "report:allure": "npx allure generate ./allure-results --clean && npx allure open",
     "deploy:allure": "TIMESTAMP=$(date +%Y-%m-%d-%H-%M) && DOMAIN=gca-allure-report-$TIMESTAMP.surge.sh && ZIP=allure-report-$TIMESTAMP.zip && rm -rf allure-report && npx allure generate ./allure-results --clean && zip -r $ZIP allure-report && npx surge ./allure-report $DOMAIN",
     "report:a11y": "open -a \"Google Chrome\" test-results/axe/a11y-sections.html",
-    "links:collect:qa": "npx dotenv -e .env.qa -- tsx scripts/getQaUrls.ts"
+    "links:collect:qa": "npx dotenv -e .env.qa -- tsx scripts/getQaUrls.ts",
+    "check:urls.qa": "npx tsx scripts/check-urls.ts"
   },
   "keywords": [
     "playwright",
