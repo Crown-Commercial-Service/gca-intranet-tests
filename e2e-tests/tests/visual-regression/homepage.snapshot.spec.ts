@@ -16,14 +16,13 @@ test.describe("Accessibility - Homepage components", () => {
   test("Components on the homepage should have no serious or critical violations", async ({
     homepage,
     wp,
-    runId,
     wordpressLoginPage,
     customizerPage,
     eventEditorPage,
   }) => {
-    const contentType = Post.homepageSet(runId);
-    const customizations = HomepageCustomizationSet.homepageSet(runId);
-    const events = Event.homepageEvents();
+    const contentType = Post.homepageSetStable();
+    const customizations = HomepageCustomizationSet.homepageSetStable();
+    const events = Event.homepageEventsStable();
 
     // Create homepage content
     await wp.posts.createMany(contentType.news);

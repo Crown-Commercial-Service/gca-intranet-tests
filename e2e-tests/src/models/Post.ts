@@ -111,6 +111,71 @@ export default class Post {
     );
   }
 
+  static homepageSetStable(): HomepageContent {
+    const news = [
+      Post.aPost()
+        .withType("news")
+        .withFixedTitle("E2E News Post 1")
+        .withContent("Stable news content 1")
+        .withStatus("publish")
+        .withFeaturedImage("img-1.jpg")
+        .build(),
+
+      Post.aPost()
+        .withType("news")
+        .withFixedTitle("E2E News Post 2")
+        .withContent("Stable news content 2")
+        .withStatus("publish")
+        .withFeaturedImage("img-2.jpg")
+        .build(),
+
+      Post.aPost()
+        .withType("news")
+        .withFixedTitle("E2E News Post 3")
+        .withContent("Stable news content 3")
+        .withStatus("publish")
+        .withFeaturedImage("img-3.jpg")
+        .build(),
+
+      Post.aPost()
+        .withType("news")
+        .withFixedTitle("E2E News Post 4")
+        .withContent("Stable news content 4")
+        .withStatus("publish")
+        .withFeaturedImage("img-4.jpg")
+        .build(),
+    ];
+
+    const workUpdates: [Post, Post] = [
+      Post.aPost()
+        .withType("work_updates")
+        .withFixedTitle("E2E Work Update 1")
+        .withContent("Stable work update content 1")
+        .withStatus("publish")
+        .build(),
+
+      Post.aPost()
+        .withType("work_updates")
+        .withFixedTitle("E2E Work Update 2")
+        .withContent("Stable work update content 2")
+        .withStatus("publish")
+        .build(),
+    ];
+
+    const blog = Post.aPost()
+      .withType("blogs")
+      .withFixedTitle("E2E Blog Post")
+      .withContent("Stable blog content")
+      .withStatus("publish")
+      .build();
+
+    return {
+      news,
+      workUpdates,
+      blog,
+    };
+  }
+
   static homepageSet(runId?: string): HomepageContent {
     const applyRunId = (builder: PostBuilder) => {
       if (runId) {

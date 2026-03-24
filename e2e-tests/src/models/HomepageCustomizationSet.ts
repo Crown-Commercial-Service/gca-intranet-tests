@@ -32,4 +32,24 @@ export default class HomepageCustomizationSet {
       quickLinks,
     });
   }
+
+  static homepageSetStable(): HomepageCustomizationSet {
+    const takeALook = TakeALook.aTakeALook()
+      .withTitle("Take a look")
+      .withDescription("Find out more about featured updates and support.")
+      .withLinkText("Learn more")
+      .withLinkUrl("https://example.com/stable");
+
+    const quickLinks = QuickLinks.quickLinks()
+      .withTitle("Quick links")
+      .withDescription("Useful links for quick access")
+      .withLink1("Link 1", "https://example.com/link1")
+      .withLink2("Link 2", "https://example.com/link2")
+      .withLink3("Link 3", "https://example.com/link3");
+
+    return new HomepageCustomizationSet({
+      takeALook,
+      quickLinks,
+    });
+  }
 }
