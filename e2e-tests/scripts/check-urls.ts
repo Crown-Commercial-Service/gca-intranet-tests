@@ -1,59 +1,86 @@
 import { request } from "@playwright/test";
+import logger from "../../e2e-tests/src/utils/logger";
 import { urls } from "../../e2e-tests/tests/data/urls";
 
-async function run() {
+async function run(): Promise<void> {
+  // Create HTTP client for checking URLs
   const api = await request.newContext({
     ignoreHTTPSErrors: true,
   });
 
-  let failed = 0;
+  let failedCount = 0;
 
-  await Promise.all(
-    urls.map(async (url) => {
-      try {
-        const res = await api.get(url, {
-          timeout: 15000,
-        });
+  try {
+    // Run checks in parallel for speed
+    await Promise.all(
+      urls.map(async (url) => {
+        try {
+          const response = await api.get(url, { timeout: 15000 });
 
-        const status = res.status();
-        const finalUrl = res.url();
+          const status = response.status();
+          const finalUrl = response.url();
 
-        const isBadRedirect =
-          finalUrl.includes("/login") ||
-          finalUrl.includes("/signin") ||
-          finalUrl.includes("/auth") ||
-          finalUrl === "https://qa.intranet.gca.gov.uk/";
+          // Detect unwanted redirects (auth pages or homepage fallback)
+          const isBadRedirect =
+            finalUrl.includes("/login") ||
+            finalUrl.includes("/signin") ||
+            finalUrl.includes("/auth") ||
+            finalUrl === "https://qa.intranet.gca.gov.uk/";
 
-        const isExternalRedirect = !finalUrl.includes("qa.intranet.gca.gov.uk");
+          // Detect redirects outside expected domain
+          const isExternalRedirect = !finalUrl.includes(
+            "qa.intranet.gca.gov.uk",
+          );
 
-        if (status !== 200) {
-          console.log(`FAIL  ${status}  ${url}`);
-          failed++;
-        } else if (isBadRedirect) {
-          console.log(`BAD REDIRECT  ${url} -> ${finalUrl}`);
-          failed++;
-        } else if (isExternalRedirect) {
-          console.log(`EXTERNAL REDIRECT  ${url} -> ${finalUrl}`);
-          failed++;
-        } else {
-          console.log(`PASS  ${status}  ${url}`);
+          if (status !== 200) {
+            logger.error(`FAIL ${status} ${url}`);
+            failedCount++;
+            return;
+          }
+
+          if (isBadRedirect) {
+            logger.error(`BAD REDIRECT ${url} -> ${finalUrl}`);
+            failedCount++;
+            return;
+          }
+
+          if (isExternalRedirect) {
+            logger.error(`EXTERNAL REDIRECT ${url} -> ${finalUrl}`);
+            failedCount++;
+            return;
+          }
+
+          logger.info(`PASS ${url}`);
+        } catch (error) {
+          logger.error(`ERROR ${url}`);
+
+          if (error instanceof Error) {
+            logger.error(error.message);
+          }
+
+          failedCount++;
         }
-      } catch {
-        console.log(`ERROR ${url}`);
-        failed++;
-      }
-    }),
-  );
+      }),
+    );
 
-  console.log("\nDone");
-  console.log(`Total: ${urls.length}`);
-  console.log(`Failed: ${failed}`);
+    logger.info("Done");
+    logger.info(`Total checked: ${urls.length}`);
+    logger.info(`Failed: ${failedCount}`);
 
-  await api.dispose();
-
-  if (failed > 0) {
-    process.exit(1);
+    if (failedCount > 0) {
+      throw new Error(`${failedCount} URL check(s) failed`);
+    }
+  } finally {
+    await api.dispose();
   }
 }
 
-run();
+run().catch((error) => {
+  if (error instanceof Error) {
+    logger.error(error.message);
+  } else {
+    logger.error("URL check failed");
+  }
+
+  throw error;
+});

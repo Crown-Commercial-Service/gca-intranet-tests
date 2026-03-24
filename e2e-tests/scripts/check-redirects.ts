@@ -1,63 +1,78 @@
 import { request } from "@playwright/test";
+import logger from "../../e2e-tests/src/utils/logger";
 import { urlRedirects } from "../../e2e-tests/tests/data/url_redirect";
 
 function normalizeUrl(url: string): string {
   return url.replace(/\/+$/, "") || "/";
 }
 
-async function run() {
+async function run(): Promise<void> {
+  // Create a lightweight HTTP client for the redirect checks.
   const api = await request.newContext({
     ignoreHTTPSErrors: true,
   });
 
-  let failed = 0;
+  let failedCount = 0;
 
-  for (const { before, after } of urlRedirects) {
-    try {
-      const response = await api.get(before, {
-        timeout: 15000,
-      });
+  try {
+    // Check each redirect pair:
+    // - "before" should resolve successfully
+    // - final URL should match "after"
+    for (const { before, after } of urlRedirects) {
+      try {
+        const response = await api.get(before, { timeout: 15000 });
+        const status = response.status();
+        const actualUrl = response.url();
+        const expectedUrl = new URL(after, before).toString();
 
-      const status = response.status();
-      const finalUrl = response.url();
+        // A valid redirect chain should end in a 200 response.
+        if (status !== 200) {
+          logger.error(`FAIL ${status} ${before}`);
+          logger.error(`Expected: ${expectedUrl}`);
+          logger.error(`Actual:   ${actualUrl}`);
+          failedCount++;
+          continue;
+        }
 
-      const expectedUrl = new URL(after, before).toString();
+        // Compare normalised URLs so trailing slashes do not cause false failures.
+        if (normalizeUrl(actualUrl) !== normalizeUrl(expectedUrl)) {
+          logger.error(`FAIL REDIRECT MISMATCH ${before}`);
+          logger.error(`Expected: ${expectedUrl}`);
+          logger.error(`Actual:   ${actualUrl}`);
+          failedCount++;
+          continue;
+        }
 
-      if (status !== 200) {
-        console.log(`FAIL  ${status}  ${before}`);
-        console.log(`      expected: ${expectedUrl}`);
-        console.log(`      actual:   ${finalUrl}`);
-        failed++;
-        continue;
+        logger.info(`PASS ${before} -> ${actualUrl}`);
+      } catch (error) {
+        logger.error(`ERROR ${before}`);
+
+        if (error instanceof Error) {
+          logger.error(error.message);
+        }
+
+        failedCount++;
       }
-
-      if (normalizeUrl(finalUrl) !== normalizeUrl(expectedUrl)) {
-        console.log(`FAIL  REDIRECT MISMATCH  ${before}`);
-        console.log(`      expected: ${expectedUrl}`);
-        console.log(`      actual:   ${finalUrl}`);
-        failed++;
-        continue;
-      }
-
-      console.log(`PASS  ${before} -> ${finalUrl}`);
-    } catch (error) {
-      console.log(`ERROR ${before}`);
-      if (error instanceof Error) {
-        console.log(`      ${error.message}`);
-      }
-      failed++;
     }
-  }
 
-  console.log("\nDone");
-  console.log(`Total: ${urlRedirects.length}`);
-  console.log(`Failed: ${failed}`);
+    logger.info("Done");
+    logger.info(`Total checked: ${urlRedirects.length}`);
+    logger.info(`Failed: ${failedCount}`);
 
-  await api.dispose();
-
-  if (failed > 0) {
-    process.exit(1);
+    if (failedCount > 0) {
+      throw new Error(`${failedCount} redirect check(s) failed`);
+    }
+  } finally {
+    await api.dispose();
   }
 }
 
-run();
+run().catch((error) => {
+  if (error instanceof Error) {
+    logger.error(error.message);
+  } else {
+    logger.error("Redirect check failed");
+  }
+
+  throw error;
+});
