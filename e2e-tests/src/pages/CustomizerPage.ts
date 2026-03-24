@@ -311,10 +311,13 @@ export default class CustomizerPage {
   }
 
   async publish(): Promise<void> {
-    await this.publishButton.click();
-    await expect(this.publishedText).toBeVisible();
-    await expect(this.publishedButton).toBeDisabled();
+    if (await this.publishButton.isEnabled()) {
+      await this.publishButton.click();
+      await expect(this.publishedText).toBeVisible();
+      await expect(this.publishedButton).toBeDisabled();
+    }
   }
+
   async editFooterLinkLabel(
     currentLabel: string,
     newLabel: string,

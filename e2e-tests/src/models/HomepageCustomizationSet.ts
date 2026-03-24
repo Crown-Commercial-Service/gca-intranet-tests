@@ -42,10 +42,10 @@ export default class HomepageCustomizationSet {
 
     const quickLinks = QuickLinks.quickLinks()
       .withTitle("Quick links")
-      .withDescription("Useful links for quick access")
-      .withLink1("Link 1", "https://example.com/link1")
-      .withLink2("Link 2", "https://example.com/link2")
-      .withLink3("Link 3", "https://example.com/link3");
+      .withDescription("Access commonly used tools and resources")
+      .withLink1("Apply for leave", "https://intranet.gca.gov.uk/leave")
+      .withLink2("HR policies", "https://intranet.gca.gov.uk/hr-policies")
+      .withLink3("IT support", "https://intranet.gca.gov.uk/it-support");
 
     return new HomepageCustomizationSet({
       takeALook,
