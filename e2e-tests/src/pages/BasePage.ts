@@ -131,6 +131,19 @@ export default abstract class BasePage {
     });
   }
 
+  async waitForImagesToLoad(): Promise<void> {
+    await this.page.waitForLoadState("networkidle");
+
+    const images = this.page.locator("img");
+    const count = await images.count();
+
+    for (let i = 0; i < count; i++) {
+      await images.nth(i).waitFor({ state: "visible" });
+    }
+
+    await this.page.waitForTimeout(2000);
+  }
+
   async wait(ms: number): Promise<void> {
     await this.page.waitForTimeout(ms);
   }

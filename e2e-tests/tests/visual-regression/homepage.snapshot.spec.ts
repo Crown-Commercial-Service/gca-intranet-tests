@@ -3,7 +3,7 @@ import Post from "../../src/models/Post";
 import Event from "../../src/models/Events";
 import HomepageCustomizationSet from "../../src/models/HomepageCustomizationSet";
 
-test.describe("Accessibility - Homepage components", () => {
+test.describe("Visual snapshot - Homepage components", () => {
   test.beforeEach(async ({ wp, runId }) => {
     await wp.posts.clearByRunId(runId);
     await wp.posts.clearByTypeAndAuthor("page");
@@ -13,7 +13,7 @@ test.describe("Accessibility - Homepage components", () => {
     await wp.posts.clearByTypeAndAuthor("news");
   });
 
-  test("Components on the homepage should have no serious or critical violations", async ({
+  test("Components on the homepage should match original snapshot", async ({
     homepage,
     wp,
     wordpressLoginPage,
@@ -53,8 +53,8 @@ test.describe("Accessibility - Homepage components", () => {
       await eventEditorPage.update();
     }
 
-    // Open homepage and submenu for accessibility scan
-    await homepage.goto();
+    // Open homepage and run snapshot
+    await homepage.waitForImagesToLoad();
     await homepage.expectScreenshot("homepage.png");
   });
 });

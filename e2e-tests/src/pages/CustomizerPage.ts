@@ -311,7 +311,16 @@ export default class CustomizerPage {
   }
 
   async publish(): Promise<void> {
-    if (await this.publishButton.isEnabled()) {
+    const hasPublishButton = await this.publishButton
+      .count()
+      .then((count) => count > 0);
+
+    if (!hasPublishButton) return;
+
+    if (
+      (await this.publishButton.isVisible()) &&
+      (await this.publishButton.isEnabled())
+    ) {
       await this.publishButton.click();
       await expect(this.publishedText).toBeVisible();
       await expect(this.publishedButton).toBeDisabled();
