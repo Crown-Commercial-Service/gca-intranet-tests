@@ -131,14 +131,9 @@ export default abstract class BasePage {
     });
   }
 
-  async waitForImagesToLoad(): Promise<void> {
+  async waitForNewsImages(): Promise<void> {
     await this.page.waitForLoadState("networkidle");
-
-    await this.page.waitForFunction(() => {
-      const images = Array.from(document.images);
-      return images.every((img) => img.complete);
-    });
-
+    await this.page.locator('[data-testid="news-post"] img').first().waitFor();
     await this.page.waitForTimeout(2000);
   }
 
