@@ -93,7 +93,7 @@ export default class WpEvents {
       "202603101020a_202603101020b",
     );
 
-    await this.setMeta(postId, "end_datetime", event.endDate);
+    await this.setMeta(postId, "end_datetime", event.endDate!);
     await this.setMeta(postId, "_end_datetime", "202603101020a_202603101020c");
 
     await this.setMeta(postId, "secondary_cta_label", event.ctaLabel ?? "");

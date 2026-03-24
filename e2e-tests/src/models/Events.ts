@@ -51,40 +51,6 @@ export default class Event {
     return new EventBuilder();
   }
 
-  static homepageEventsStable(): Event[] {
-    return [
-      Event.anEvent()
-        .withFixedTitle("Accessibility Support Session")
-        .withContent("Stable event content 1")
-        .withCategory("Accessibility")
-        .withEventLocation("Online")
-        .withStartDate("10-01-2026")
-        .withEndDate("11-01-2026")
-        .withStatus("publish")
-        .build(),
-
-      Event.anEvent()
-        .withFixedTitle("Digital Strategy Workshop")
-        .withContent("Stable event content 2")
-        .withCategory("Digital and data")
-        .withEventLocation("In-person")
-        .withStartDate("12-01-2026")
-        .withEndDate("13-01-2026")
-        .withStatus("publish")
-        .build(),
-
-      Event.anEvent()
-        .withFixedTitle("HR Policy Briefing")
-        .withContent("Stable event content 3")
-        .withCategory("HR")
-        .withEventLocation("Online")
-        .withStartDate("14-01-2026")
-        .withEndDate("15-01-2026")
-        .withStatus("publish")
-        .build(),
-    ];
-  }
-
   static homepageEvents(): Event[] {
     return [
       Event.anEvent()
@@ -111,6 +77,40 @@ export default class Event {
         .withEventLocation("Online")
         .withStartDate(dayjs().add(5, "day").format("DD-MM-YYYY"))
         .withEndDate(dayjs().add(6, "day").format("DD-MM-YYYY"))
+        .withStatus("publish")
+        .build(),
+    ];
+  }
+
+  static homepageEventsStable(): Event[] {
+    return [
+      Event.anEvent()
+        .withFixedTitle("Accessibility Support Session")
+        .withContent("Stable event content 1")
+        .withCategory("Accessibility")
+        .withEventLocation("Online")
+        .withStartDate("10-06-2026")
+        .withEndDate("11-06-2026")
+        .withStatus("publish")
+        .build(),
+
+      Event.anEvent()
+        .withFixedTitle("Digital Strategy Workshop")
+        .withContent("Stable event content 2")
+        .withCategory("Digital and data")
+        .withEventLocation("In-person")
+        .withStartDate("12-06-2026")
+        .withEndDate("13-06-2026")
+        .withStatus("publish")
+        .build(),
+
+      Event.anEvent()
+        .withFixedTitle("HR Policy Briefing")
+        .withContent("Stable event content 3")
+        .withCategory("HR")
+        .withEventLocation("Online")
+        .withStartDate("14-06-2026")
+        .withEndDate("15-06-2026")
         .withStatus("publish")
         .build(),
     ];
