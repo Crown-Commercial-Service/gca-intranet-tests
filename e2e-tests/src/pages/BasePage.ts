@@ -134,12 +134,10 @@ export default abstract class BasePage {
   async waitForImagesToLoad(): Promise<void> {
     await this.page.waitForLoadState("networkidle");
 
-    const images = this.page.locator("img");
-    const count = await images.count();
-
-    for (let i = 0; i < count; i++) {
-      await images.nth(i).waitFor({ state: "visible" });
-    }
+    await this.page.waitForFunction(() => {
+      const images = Array.from(document.images);
+      return images.every((img) => img.complete);
+    });
 
     await this.page.waitForTimeout(2000);
   }
