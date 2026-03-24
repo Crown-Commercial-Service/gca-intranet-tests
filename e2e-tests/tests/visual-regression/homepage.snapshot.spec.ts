@@ -54,7 +54,8 @@ test.describe("Visual snapshot - Homepage components", () => {
     }
 
     // Open homepage and run snapshot
-    await homepage.waitForNewsImages();
+    await homepage.wait(5000);
+    await homepage.goto();
     await homepage.expectScreenshot("homepage.png");
   });
 });

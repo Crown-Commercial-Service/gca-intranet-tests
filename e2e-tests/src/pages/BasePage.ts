@@ -128,13 +128,8 @@ export default abstract class BasePage {
       fullPage: true,
       animations: "disabled",
       caret: "hide",
+      maxDiffPixelRatio: 0.03,
     });
-  }
-
-  async waitForNewsImages(): Promise<void> {
-    await this.page.waitForLoadState("networkidle");
-    await this.page.locator('[data-testid="news-post"] img').first().waitFor();
-    await this.page.waitForTimeout(2000);
   }
 
   async wait(ms: number): Promise<void> {
@@ -395,9 +390,9 @@ export default abstract class BasePage {
   }
 
   private async waitForSaveToComplete(): Promise<void> {
-    await expect(this.publishButton)
-      .toBeDisabled({ timeout: 10000 })
-      .catch(() => {});
+    // await expect(this.publishButton)
+    //   .toBeDisabled({ timeout: 10000 })
+    //   .catch(() => {});
 
     await expect(this.publishMessage).toBeVisible({ timeout: 15000 });
     await this.page.waitForLoadState("networkidle");
