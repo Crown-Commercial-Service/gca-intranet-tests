@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import { test } from "../../src/wp.fixtures";
 import Post from "../../src/models/Post";
 

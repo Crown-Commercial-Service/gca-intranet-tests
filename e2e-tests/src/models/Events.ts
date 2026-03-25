@@ -59,6 +59,8 @@ export default class Event {
         .withEventLocation("Online")
         .withStartDate(dayjs().add(1, "day").format("DD-MM-YYYY"))
         .withEndDate(dayjs().add(2, "day").format("DD-MM-YYYY"))
+        .withCtaLabel("Book Now")
+        .withCtaDestination("https://www.example.com/booknow")
         .withStatus("publish")
         .build(),
 
@@ -68,6 +70,8 @@ export default class Event {
         .withEventLocation("In-person")
         .withStartDate(dayjs().add(3, "day").format("DD-MM-YYYY"))
         .withEndDate(dayjs().add(4, "day").format("DD-MM-YYYY"))
+        .withCtaLabel("Book Now")
+        .withCtaDestination("https://www.example.com/booknow")
         .withStatus("publish")
         .build(),
 
@@ -76,6 +80,8 @@ export default class Event {
         .withCategory("HR")
         .withEventLocation("Online")
         .withStartDate(dayjs().add(5, "day").format("DD-MM-YYYY"))
+        .withCtaLabel("Book Now")
+        .withCtaDestination("https://www.example.com/booknow")
         .withEndDate(dayjs().add(6, "day").format("DD-MM-YYYY"))
         .withStatus("publish")
         .build(),

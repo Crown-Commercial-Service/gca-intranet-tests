@@ -16,6 +16,7 @@
     "test:docker:a11y:headed": "npm run clean:allure && npx dotenv -e $WP_DOCKER_CWD/.env.e2e.docker -- playwright test -c playwright.a11y.config.ts --headed",
     "test:docker:a11y:ui": "npm run clean:allure && npx dotenv -e $WP_DOCKER_CWD/.env.e2e.docker -- playwright test -c playwright.a11y.config.ts --ui",
     "test:a11y:qa": "npm run clean:allure && npx dotenv -e .env.qa -- playwright test -c playwright.a11y.config.ts --workers=1",
+    "test:homepage:a11y:qa": "npm run clean:allure && npx dotenv -e .env.qa -- playwright test -c playwright.a11y.config.ts tests/a11y/homepage.accessibility.spec.ts --workers=1 --headed",
     "test:a11y:dev": "npm run clean:allure && npx dotenv -e .env.dev -- playwright test -c playwright.a11y.config.ts --workers=1",
     "test:a11y:ui": "npm run clean:allure && npx dotenv -e .env -- playwright test -c playwright.a11y.config.ts --ui --workers=1",
     "test:a11y:headed": "npm run clean:allure && npx dotenv -e .env -- playwright test -c playwright.a11y.config.ts --headed --workers=1",

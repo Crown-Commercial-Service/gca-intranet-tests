@@ -35,8 +35,10 @@ export default class EventEditorPage extends BasePage {
       'input[name="acf[202603101020a_202603101020c]"] + input.input',
     );
 
-    this.ctaLabelInput = page.locator("#acf-202603101020a_202603101020d");
-    this.ctaDestinationInput = page.locator("#acf-202603101020a_202603101020e");
+    this.ctaLabelInput = page.getByRole("textbox", { name: "CTA Label" });
+    this.ctaDestinationInput = page.getByRole("textbox", {
+      name: "CTA Destination",
+    });
 
     this.publishButton = page.locator("#publish");
     this.updateButton = page.locator("#publish");
