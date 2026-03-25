@@ -524,7 +524,7 @@ test.describe("search", { tag: "@regression" }, () => {
     wordpressLoginPage,
     runId,
   }) => {
-    // AC: news content should not appear in search results
+    // AC: content type of "news" should not appear in search results
     // Data setup: create a unique news item and search for it
 
     const keyword = `ExcludeNews-${runId}`;
@@ -537,14 +537,10 @@ test.describe("search", { tag: "@regression" }, () => {
       .withFeaturedImage("featured.jpg");
 
     await wp.posts.create(newsPost);
-
     await wordpressLoginPage.goto();
     await wordpressLoginPage.loginAsAdmin();
-
     await homepage.goto();
     await homepage.search(keyword);
-
-    // Assert news item is NOT visible in results
     await searchResultsPage.assertResultNotVisible(newsPost.title);
   });
 });
