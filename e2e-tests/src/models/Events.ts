@@ -132,6 +132,8 @@ export default class Event {
         .withParagraphMaxChars(120)
         .withStartInDays(index + 1)
         .withEndInDays(index + 2)
+        .withStartTime("09:00")
+        .withEndTime("17:00")
         .withCategory("Accessibility")
         .withEventLocation("Online")
         .withStatus("publish")

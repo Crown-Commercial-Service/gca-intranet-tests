@@ -2,8 +2,6 @@ import { Page, Locator, expect } from "@playwright/test";
 import BasePage from "./BasePage";
 
 export default class EventsListPage extends BasePage{
-  // readonly baseUrl?: string;
-
   readonly eventsRows: Locator;
   readonly eventsLinks: Locator;
 
@@ -12,15 +10,13 @@ export default class EventsListPage extends BasePage{
   
   constructor(page: Page, baseUrl?: string) {
     super(page);
-    // this.baseUrl = baseUrl;
-
     this.eventsRows = page.locator('[data-testid="events-row"]');
     this.eventsLinks = page.getByTestId("events-link");
-    this.eventsListSection = "[data-testid='work-update-main']";
+    this.eventsListSection = "[data-testid='archive-event-main']";
   }
 
   async goto(): Promise<void> {
-    await this.page.goto(`${this.baseUrl ?? ""}/events`, {
+    await this.page.goto("/event", {
       waitUntil: "domcontentloaded",
     });
   }

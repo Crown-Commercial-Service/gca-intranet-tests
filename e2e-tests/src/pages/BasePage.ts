@@ -391,7 +391,9 @@ export default abstract class BasePage {
     await expect(this.addAuthorImageButton).toBeVisible();
     await this.addAuthorImageButton.click();
 
-    await this.openMediaLibrary();
+    await expect(this.mediaModal).toBeVisible();
+    await expect(this.uploadFilesTab).toBeVisible();
+    await this.uploadFilesTab.click();
 
     await expect(this.mediaFileInput).toBeAttached();
     await this.mediaFileInput.setInputFiles(`assets/images/${fileName}`);

@@ -7,9 +7,20 @@ test.describe("Accessibility - Events component", () => {
   const category = "Accessibility";
   const eventLocation = "Online";
 
-  test.beforeEach(async ({ wp, wordpressLoginPage, eventEditorPage }) => {
+  test.beforeEach(async ({ wp }) => {
     await wp.posts.clearByTypeAndAuthor("events");
+  });
 
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("events");
+  });
+
+  test("event page should have no serious or critical accessibility violations", async ({
+    wp,
+    eventPage,
+    wordpressLoginPage,
+    eventEditorPage,
+  }) => {
     event = Event.anEvent()
       .withFixedTitle("Accessibility Support Session")
       .withContent("Support session for colleagues on accessibility topics.")
@@ -27,21 +38,11 @@ test.describe("Accessibility - Events component", () => {
 
     await wordpressLoginPage.goto();
     await wordpressLoginPage.loginAsAdmin();
-
     await eventEditorPage.gotoEdit(eventId);
     await eventEditorPage.fillEventDetails(event);
     await eventEditorPage.selectCategory(category);
     await eventEditorPage.selectEventLocation(eventLocation);
     await eventEditorPage.update();
-  });
-
-  test.afterAll(async ({ wp }) => {
-    await wp.posts.clearByTypeAndAuthor("events");
-  });
-
-  test("event page should have no serious or critical accessibility violations", async ({
-    eventPage,
-  }) => {
     await eventPage.gotoById(eventId);
     await eventPage.checkAccessibilityFor([eventPage.eventSection]);
   });
@@ -66,6 +67,7 @@ test.describe("Accessibility - Events component", () => {
     await eventEditorPage.selectCategory(events[0].category!);
     await eventEditorPage.selectEventLocation(events[0].eventLocation!);
     await eventEditorPage.update();
+
     await eventsListPage.goto();
     await eventsListPage.waitForPageToLoad();
     await eventsListPage.checkAccessibilityFor([
