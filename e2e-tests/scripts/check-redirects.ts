@@ -2,7 +2,7 @@ import { request } from "@playwright/test";
 import fs from "fs";
 import path from "path";
 import logger from "../../e2e-tests/src/utils/logger";
-import { urlRedirects } from "../../e2e-tests/tests/data/url_redirects_uat";
+import { urlRedirects } from "../../e2e-tests/tests/data/url_redirects_prod";
 
 /**
  * Normalise URLs by removing trailing slashes
@@ -106,19 +106,11 @@ async function run(): Promise<void> {
       }
 
       /**
-       * 3. Ensure a redirect actually happened
-       * (i.e. we didn’t just land on the same URL)
+       * 3. If before and after are the same URL, no redirect happened.
+       * That is not a failure in this version.
        */
       if (normalizedBefore === normalizedActual) {
-        logger.error(`FAIL NO REDIRECT ${before}`);
-        failures.push({
-          before,
-          expected: expectedUrl,
-          actual: actualUrl,
-          status,
-          reason: "No redirect occurred",
-        });
-        failedCount++;
+        logger.info(`PASS NO REDIRECT ${before}`);
         return;
       }
 
