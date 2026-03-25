@@ -1,6 +1,8 @@
 import { request } from "@playwright/test";
+import fs from "fs";
+import path from "path";
 import logger from "../../e2e-tests/src/utils/logger";
-import { urlRedirects } from "../../e2e-tests/tests/data/url_redirect";
+import { urlRedirects } from "../tests/data/url_redirects_uat";
 
 /**
  * Normalise URLs by removing trailing slashes
@@ -10,23 +12,42 @@ function normalizeUrl(url: string): string {
   return url.replace(/\/+$/, "") || "/";
 }
 
+/**
+ * Shape of a failed redirect record (for CSV export)
+ */
+type Failure = {
+  before: string;
+  expected: string;
+  actual: string;
+  status: number | string;
+  reason: string;
+};
+
 async function run(): Promise<void> {
-  // Create a lightweight HTTP client (no browser needed)
+  const startTime = Date.now(); // ⏱ Track total execution time
+
+  /**
+   * Create a lightweight HTTP client (no browser needed)
+   */
   const api = await request.newContext({
     ignoreHTTPSErrors: true,
   });
 
   let failedCount = 0;
+  const failures: Failure[] = [];
 
   try {
     /**
      * Loop through each redirect pair:
      * - `before` = URL that should redirect
-     * - `after`  = expected final destination
+     * - `after`  = expected destination
      */
     for (const { before, after } of urlRedirects) {
       try {
-        // Make request (Playwright will follow redirects automatically)
+        /**
+         * Make request
+         * Playwright automatically follows redirects
+         */
         const response = await api.get(before, {
           timeout: 15000,
         });
@@ -35,7 +56,7 @@ async function run(): Promise<void> {
         const actualUrl = response.url(); // final resolved URL
         const expectedUrl = new URL(after, before).toString();
 
-        // Normalise all URLs to avoid false failures (trailing slashes etc.)
+        // Normalise URLs to avoid false failures (e.g. trailing slash differences)
         const normalizedBefore = normalizeUrl(before);
         const normalizedActual = normalizeUrl(actualUrl);
         const normalizedExpected = normalizeUrl(expectedUrl);
@@ -45,8 +66,13 @@ async function run(): Promise<void> {
          */
         if (status !== 200) {
           logger.error(`FAIL ${status} ${before}`);
-          logger.error(`Expected: ${expectedUrl}`);
-          logger.error(`Actual:   ${actualUrl}`);
+          failures.push({
+            before,
+            expected: expectedUrl,
+            actual: actualUrl,
+            status,
+            reason: "Non-200 response",
+          });
           failedCount++;
           continue;
         }
@@ -56,8 +82,13 @@ async function run(): Promise<void> {
          */
         if (normalizedActual !== normalizedExpected) {
           logger.error(`FAIL REDIRECT MISMATCH ${before}`);
-          logger.error(`Expected: ${expectedUrl}`);
-          logger.error(`Actual:   ${actualUrl}`);
+          failures.push({
+            before,
+            expected: expectedUrl,
+            actual: actualUrl,
+            status,
+            reason: "Redirect mismatch",
+          });
           failedCount++;
           continue;
         }
@@ -68,40 +99,87 @@ async function run(): Promise<void> {
          */
         if (normalizedBefore === normalizedActual) {
           logger.error(`FAIL NO REDIRECT ${before}`);
-          logger.error(`Expected redirect to: ${expectedUrl}`);
-          logger.error(`Actual final URL:     ${actualUrl}`);
+          failures.push({
+            before,
+            expected: expectedUrl,
+            actual: actualUrl,
+            status,
+            reason: "No redirect occurred",
+          });
           failedCount++;
           continue;
         }
 
-        // All checks passed
+        /**
+         * All checks passed
+         */
         logger.info(`PASS ${before} -> ${actualUrl}`);
       } catch (error) {
         logger.error(`ERROR ${before}`);
 
-        if (error instanceof Error) {
-          logger.error(error.message);
-        }
+        failures.push({
+          before,
+          expected: after,
+          actual: "",
+          status: "ERROR",
+          reason: error instanceof Error ? error.message : "Unknown error",
+        });
 
         failedCount++;
       }
     }
 
-    // Summary
+    /**
+     * Export failures to CSV for easy analysis (Excel, sharing, etc.)
+     */
+    if (failures.length > 0) {
+      const filePath = path.resolve(process.cwd(), "redirect_failures.csv");
+
+      const header = "before,expected,actual,status,reason\n";
+
+      const rows = failures
+        .map(
+          (f) =>
+            `"${f.before}","${f.expected}","${f.actual}","${f.status}","${f.reason}"`,
+        )
+        .join("\n");
+
+      fs.writeFileSync(filePath, header + rows);
+
+      logger.info(`CSV report created: ${filePath}`);
+    }
+
+    /**
+     * Calculate total execution time
+     */
+    const durationMs = Date.now() - startTime;
+    const durationSec = (durationMs / 1000).toFixed(2);
+
+    /**
+     * Summary output
+     */
     logger.info("Done");
     logger.info(`Total checked: ${urlRedirects.length}`);
     logger.info(`Failed: ${failedCount}`);
+    logger.info(`Duration: ${durationSec}s`);
 
-    // Fail CI if any redirects failed
+    /**
+     * Fail CI if any redirects failed
+     */
     if (failedCount > 0) {
       throw new Error(`${failedCount} redirect check(s) failed`);
     }
   } finally {
+    /**
+     * Always clean up the API context
+     */
     await api.dispose();
   }
 }
 
-// Ensure process exits correctly for CI pipelines
+/**
+ * Ensure process exits correctly for CI pipelines
+ */
 run().catch((error) => {
   if (error instanceof Error) {
     logger.error(error.message);
