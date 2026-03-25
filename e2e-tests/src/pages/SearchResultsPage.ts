@@ -223,4 +223,8 @@ export default class SearchResultsPage extends BasePage {
     const visiblePart = getVisibleTruncatedText(actual);
     expect(fullText.startsWith(visiblePart)).toBe(true);
   }
+
+  async assertResultNotVisible(title: string): Promise<void> {
+    await expect(this.resultByTitle(title)).toHaveCount(0);
+  }
 }

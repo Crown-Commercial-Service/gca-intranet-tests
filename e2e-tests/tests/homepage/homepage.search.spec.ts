@@ -41,7 +41,7 @@ test.describe("search", { tag: "@regression" }, () => {
     await searchResultsPage.assertHeadingContainsQuery(seed.keyword);
     await searchResultsPage.assertSearchInputVisible();
     await searchResultsPage.assertResultsCountVisible();
-    await searchResultsPage.assertResultCount(8);
+    await searchResultsPage.assertResultCount(6);
   });
 
   test("should show content type, title link and description for each supported result type", async ({
@@ -144,7 +144,7 @@ test.describe("search", { tag: "@regression" }, () => {
     runId,
   }) => {
     // AC: pagination should not be shown when 10 or fewer results are returned.
-    // Data setup: creates only the standard 8 matching records.
+    // Data setup: creates only the standard 6 matching records.
     const keyword = `Procurement-${runId}`;
     const seed = createSearchSeed(keyword);
 
@@ -156,7 +156,7 @@ test.describe("search", { tag: "@regression" }, () => {
     await homepage.goto();
     await homepage.search(seed.keyword);
 
-    await searchResultsPage.assertResultCount(8);
+    await searchResultsPage.assertResultCount(6);
     await searchResultsPage.assertPaginationNotVisible();
   });
 
@@ -189,7 +189,7 @@ test.describe("search", { tag: "@regression" }, () => {
     runId,
   }) => {
     // AC: the user must be able to search from the header using the Enter key.
-    // Data setup: creates 8 matching records for one unique keyword.
+    // Data setup: creates 6 matching records for one unique keyword.
     const keyword = `Procurement-${runId}`;
     const seed = createSearchSeed(keyword);
 
@@ -204,7 +204,7 @@ test.describe("search", { tag: "@regression" }, () => {
     await searchResultsPage.assertHeadingContainsQuery(seed.keyword);
     await searchResultsPage.assertSearchInputVisible();
     await searchResultsPage.assertResultsCountVisible();
-    await searchResultsPage.assertResultCount(8);
+    await searchResultsPage.assertResultCount(6);
   });
 
   test("should allow the user to search again from the search results page", async ({
@@ -578,5 +578,36 @@ test.describe("search", { tag: "@regression" }, () => {
     await searchResultsPage.assertResultHasType(page.title, "Staff network");
     await searchResultsPage.assertResultHasLink(page.title);
     await searchResultsPage.assertResultHasExcerpt(page.title);
+  });
+
+  test("should not display news content in search results", async ({
+    wp,
+    homepage,
+    searchResultsPage,
+    wordpressLoginPage,
+    runId,
+  }) => {
+    // AC: news content should not appear in search results
+    // Data setup: create a unique news item and search for it
+
+    const keyword = `ExcludeNews-${runId}`;
+
+    const newsPost = Post.aPost()
+      .withType("news")
+      .withFixedTitle(`${keyword} News item`)
+      .withContent(`${keyword} content`)
+      .withStatus("publish")
+      .withFeaturedImage("featured.jpg");
+
+    await wp.posts.create(newsPost);
+
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+
+    await homepage.goto();
+    await homepage.search(keyword);
+
+    // Assert news item is NOT visible in results
+    await searchResultsPage.assertResultNotVisible(newsPost.title);
   });
 });
