@@ -121,6 +121,20 @@ export default class Event {
         .build(),
     ];
   }
+
+  static manyEvents(count: number, titlePrefix: string = "E2E Event"): Event[] {
+    return Array.from({ length: count }, (_, index) =>
+      Event.anEvent()
+        .withFixedTitle(`${titlePrefix} ${index + 1}`)
+        .withParagraphMaxChars(120)
+        .withStartInDays(index + 1)
+        .withEndInDays(index + 2)
+        .withCategory("Accessibility")
+        .withEventLocation("Online")
+        .withStatus("publish")
+        .build(),
+    );
+  }
 }
 
 class EventBuilder {

@@ -373,20 +373,38 @@ export default abstract class BasePage {
     await expect(this.pagination).not.toBeVisible();
   }
 
+  async addMedia(fileName: string): Promise<void> {
+    await this.page.waitForLoadState("networkidle");
+    await this.openMediaLibrary();
+    await expect(this.mediaFileInput).toBeAttached();
+    await this.mediaFileInput.setInputFiles(`assets/images/${fileName}`);
+    await expect(this.selectMediaButton).toBeEnabled({ timeout: 15000 });
+    await this.selectMediaButton.click();
+  }
+
   async addAuthorImage(fileName: string): Promise<void> {
     await this.authorImageBox.scrollIntoViewIfNeeded();
     await expect(this.addAuthorImageButton).toBeVisible();
     await this.addAuthorImageButton.click();
 
-    await expect(this.mediaModal).toBeVisible();
-    await expect(this.uploadFilesTab).toBeVisible();
-    await this.uploadFilesTab.click();
+    await this.openMediaLibrary();
 
     await expect(this.mediaFileInput).toBeAttached();
     await this.mediaFileInput.setInputFiles(`assets/images/${fileName}`);
 
     await expect(this.selectMediaButton).toBeEnabled({ timeout: 15000 });
     await this.selectMediaButton.click();
+  }
+
+  async openMediaLibrary(): Promise<void> {
+    const insertMediaButton = this.page.locator("#insert-media-button");
+
+    await expect(insertMediaButton).toBeVisible();
+    await insertMediaButton.click();
+
+    await expect(this.mediaModal).toBeVisible();
+    await expect(this.uploadFilesTab).toBeVisible();
+    await this.uploadFilesTab.click();
   }
 
   private async waitForSaveToComplete(): Promise<void> {
