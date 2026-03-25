@@ -4,6 +4,7 @@ import { seedSearchData } from "../../src/helpers/SearchHelper";
 import Post from "../../src/models/Post";
 import dayjs from "dayjs";
 
+// News items should NOT appear in search results (filtered by the application).
 test.describe("search", { tag: "@regression" }, () => {
   test.beforeEach(async ({ wp }) => {
     await wp.posts.clearByTypeAndAuthor("page");
@@ -19,7 +20,7 @@ test.describe("search", { tag: "@regression" }, () => {
     await wp.posts.clearByTypeAndAuthor("work_updates");
   });
 
-  test("should open the search results page and show mixed content results", async ({
+  test("should open the search results page and show supported content results", async ({
     wp,
     homepage,
     searchResultsPage,
@@ -27,7 +28,7 @@ test.describe("search", { tag: "@regression" }, () => {
     runId,
   }) => {
     // AC: searching from the header should open the search results page and show the searched term, results count and results page search box.
-    // Data setup: creates 8 matching results across pages, news, blogs and work updates using a unique runId keyword.
+    // Data setup: creates 6 matching results across pages, blogs and work updates using a unique runId keyword.
     const keyword = `Procurement-${runId}`;
     const seed = createSearchSeed(keyword);
 
@@ -51,8 +52,8 @@ test.describe("search", { tag: "@regression" }, () => {
     wordpressLoginPage,
     runId,
   }) => {
-    // AC: results should be structured with content type, linked title and description for pages, news, blogs and work updates.
-    // Data setup: creates one searchable page, news item, blog and work update under the same unique keyword.
+    // AC: results should be structured with content type, linked title and description for pages, blogs and work updates.
+    // Data setup: creates one searchable page, blog and work update under the same unique keyword.
     const keyword = `Procurement-${runId}`;
     const seed = createSearchSeed(keyword);
 
@@ -67,10 +68,6 @@ test.describe("search", { tag: "@regression" }, () => {
     await searchResultsPage.assertResultHasType(seed.pages[0].title, "Page");
     await searchResultsPage.assertResultHasLink(seed.pages[0].title);
     await searchResultsPage.assertResultHasExcerpt(seed.pages[0].title);
-
-    await searchResultsPage.assertResultHasType(seed.news[0].title, "News");
-    await searchResultsPage.assertResultHasLink(seed.news[0].title);
-    await searchResultsPage.assertResultHasExcerpt(seed.news[0].title);
 
     await searchResultsPage.assertResultHasType(seed.blogs[0].title, "Blog");
     await searchResultsPage.assertResultHasLink(seed.blogs[0].title);
@@ -92,7 +89,7 @@ test.describe("search", { tag: "@regression" }, () => {
     runId,
   }) => {
     // AC: the results page should show the total number of results returned for the searched term.
-    // Data setup: creates 8 matching records for one unique keyword.
+    // Data setup: creates 6 matching records for one unique keyword.
     const keyword = `Procurement-${runId}`;
     const seed = createSearchSeed(keyword);
 
@@ -104,7 +101,7 @@ test.describe("search", { tag: "@regression" }, () => {
     await homepage.goto();
     await homepage.search(seed.keyword);
 
-    await searchResultsPage.assertResultsCount(8);
+    await searchResultsPage.assertResultsCount(6);
   });
 
   test("should show pagination when search results exceed 10 items", async ({
@@ -115,15 +112,14 @@ test.describe("search", { tag: "@regression" }, () => {
     runId,
   }) => {
     // AC: pagination should be shown when more than 10 results exist and only 10 results should appear on the first page.
-    // Data setup: creates the standard 8 matching records plus 8 extra matching news/blog records.
+    // Data setup: creates the standard 6 matching records (pages, blogs, work updates) plus 8 extra matching blog records.
+
     const keyword = `Procurement-${runId}`;
     const seed = createSearchSeed(keyword);
 
-    const extraNews = Post.manyNews(4, keyword);
-    const extraBlogs = Post.manyBlogs(4, keyword);
+    const extraBlogs = Post.manyBlogs(8, keyword);
 
     await seedSearchData(wp, seed);
-    await wp.posts.createMany(extraNews);
     await wp.posts.createMany(extraBlogs);
 
     await wordpressLoginPage.goto();
@@ -215,7 +211,7 @@ test.describe("search", { tag: "@regression" }, () => {
     runId,
   }) => {
     // AC: the search results page search box should allow the user to perform another search.
-    // Data setup: creates two separate 8-result datasets under two different unique keywords.
+    // Data setup: creates two separate 6-result datasets under two different unique keywords.
     const firstKeyword = `Procurement-${runId}`;
     const secondKeyword = `Governance-${runId}`;
 
@@ -247,7 +243,7 @@ test.describe("search", { tag: "@regression" }, () => {
     runId,
   }) => {
     // AC: once the user is on the results page, the search box should be shown there instead of in the header.
-    // Data setup: creates 8 matching records for one unique keyword.
+    // Data setup: creates 6 matching records for one unique keyword.
     const keyword = `Procurement-${runId}`;
     const seed = createSearchSeed(keyword);
 
@@ -274,7 +270,7 @@ test.describe("search", { tag: "@regression" }, () => {
     const now = dayjs();
 
     const first = Post.aPost()
-      .withType("news")
+      .withType("blogs")
       .withFixedTitle(`${keyword} First result`)
       .withContent(`${keyword} first result content`)
       .withStatus("publish")
@@ -282,7 +278,7 @@ test.describe("search", { tag: "@regression" }, () => {
       .withFeaturedImage("featured.jpg");
 
     const second = Post.aPost()
-      .withType("news")
+      .withType("blogs")
       .withFixedTitle(`${keyword} Second result`)
       .withContent(`${keyword} second result content`)
       .withStatus("publish")
@@ -290,7 +286,7 @@ test.describe("search", { tag: "@regression" }, () => {
       .withFeaturedImage("featured.jpg");
 
     const third = Post.aPost()
-      .withType("news")
+      .withType("blogs")
       .withFixedTitle(`${keyword} Third result`)
       .withContent(`${keyword} third result content`)
       .withStatus("publish")
@@ -312,57 +308,6 @@ test.describe("search", { tag: "@regression" }, () => {
     await searchResultsPage.assertResultVisible(second.title);
     await searchResultsPage.assertResultVisible(third.title);
   });
-  //   wp,
-  //   homepage,
-  //   searchResultsPage,
-  //   wordpressLoginPage,
-  //   runId,
-  // }) => {
-  //   // Additional coverage: verifies result ordering so the newest matching content appears first.
-  //   // Data setup: creates 3 news posts with explicit createdAt values one minute apart.
-  //   const keyword = `Ordering-${runId}`;
-  //   const now = dayjs();
-
-  //   const first = Post.aPost()
-  //     .withType("news")
-  //     .withFixedTitle(`${keyword} First result`)
-  //     .withContent(`${keyword} first result content`)
-  //     .withStatus("publish")
-  //     .withCreatedAt(now.subtract(6, "minute").toDate())
-  //     .withFeaturedImage("featured.jpg");
-
-  //   const second = Post.aPost()
-  //     .withType("news")
-  //     .withFixedTitle(`${keyword} Second result`)
-  //     .withContent(`${keyword} second result content`)
-  //     .withStatus("publish")
-  //     .withCreatedAt(now.subtract(3, "minute").toDate())
-  //     .withFeaturedImage("featured.jpg");
-
-  //   const third = Post.aPost()
-  //     .withType("news")
-  //     .withFixedTitle(`${keyword} Third result`)
-  //     .withContent(`${keyword} third result content`)
-  //     .withStatus("publish")
-  //     .withCreatedAt(now.subtract(1, "minute").toDate())
-  //     .withFeaturedImage("featured.jpg");
-
-  //   await wp.posts.create(first);
-  //   await wp.posts.create(second);
-  //   await wp.posts.create(third);
-
-  //   await wordpressLoginPage.goto();
-  //   await wordpressLoginPage.loginAsAdmin();
-
-  //   await homepage.goto();
-  //   await homepage.search(keyword);
-
-  //   await searchResultsPage.assertResultsInOrder([
-  //     third.title,
-  //     second.title,
-  //     first.title,
-  //   ]);
-  // });
 
   test("should truncate long result titles and descriptions", async ({
     wp,
@@ -372,11 +317,11 @@ test.describe("search", { tag: "@regression" }, () => {
     runId,
   }) => {
     // AC: long titles and long descriptions should be truncated on the search results page.
-    // Data setup: creates one news post with an intentionally long title and long content.
+    // Data setup: creates one blog post with an intentionally long title and long content.
     const keyword = `SearchTruncation-${runId}`;
 
     const post = Post.aPost()
-      .withType("news")
+      .withType("blogs")
       .withFixedTitle(
         `${keyword} this is a very long search result title designed to exceed the eighty five character limit on the search results page`,
       )
@@ -398,18 +343,18 @@ test.describe("search", { tag: "@regression" }, () => {
     await searchResultsPage.assertResultExcerptIsTruncated(post.content);
   });
 
-  test("should display terms for news, blogs and work updates in search results", async ({
+  test("should display terms for blogs and work updates in search results", async ({
     wp,
     homepage,
     searchResultsPage,
     wordpressLoginPage,
-    latestNews,
     blog,
     workUpdate,
     runId,
   }) => {
-    // AC: categories and labels should appear as tags in search results where supported.
-    // Data setup: seeds mixed content, then updates news, blog and work update through the WP UI to apply visible terms.
+    // AC: categories and labels should appear as tags in search results where supported (excluding news).
+    // Data setup: seeds mixed content, then updates blog and work update through the WP UI to apply visible terms.
+
     const keyword = `Terms-${runId}`;
     const seed = createSearchSeed(keyword);
 
@@ -417,10 +362,6 @@ test.describe("search", { tag: "@regression" }, () => {
 
     await wordpressLoginPage.goto();
     await wordpressLoginPage.loginAsAdmin();
-
-    await latestNews.gotoEdit(ids.newsIds[0]);
-    await latestNews.selectCategory("Information security");
-    await latestNews.update();
 
     await blog.gotoEdit(ids.blogIds[0]);
     await blog.selectLabel("Reward");
@@ -433,10 +374,6 @@ test.describe("search", { tag: "@regression" }, () => {
     await homepage.goto();
     await homepage.search(seed.keyword);
 
-    await searchResultsPage.assertResultHasTerm(
-      seed.news[0].title,
-      "Information security",
-    );
     await searchResultsPage.assertResultHasTerm(seed.blogs[0].title, "Reward");
     await searchResultsPage.assertResultHasTerm(
       seed.workUpdates[0].title,
