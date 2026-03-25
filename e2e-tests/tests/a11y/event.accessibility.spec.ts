@@ -17,6 +17,9 @@ test.describe("Accessibility - Events component", () => {
       .withEndDate("11-06-2026")
       .withCategory(category)
       .withEventLocation(eventLocation)
+      .withCtaLabel("Book Now")
+      .withCtaDestination("www.example.com/booknow")
+      .withMediaImage("img-2.jpg")
       .withStatus("publish")
       .build();
 
@@ -60,7 +63,6 @@ test.describe("Accessibility - Events component", () => {
     for (let index = 0; index < events.length; index++) {
       await eventEditorPage.gotoEdit(eventIds[index]);
       await eventEditorPage.fillEventDetails(events[index]);
-      await eventEditorPage.addMedia("img-2.jpg");
       await eventEditorPage.selectCategory(events[index].category!);
       await eventEditorPage.selectEventLocation(events[index].eventLocation!);
       await eventEditorPage.update();

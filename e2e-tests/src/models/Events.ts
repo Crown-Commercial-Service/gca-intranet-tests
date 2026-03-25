@@ -18,6 +18,7 @@ export type EventProps = {
   eventLocation?: string;
   ctaLabel?: string;
   ctaDestination?: string;
+  mediaImagePath?: string;
 };
 
 export default class Event {
@@ -32,6 +33,7 @@ export default class Event {
   readonly eventLocation?: string;
   readonly startTime?: string;
   readonly endTime?: string;
+  readonly mediaImagePath?: string;
 
   constructor(props: EventProps) {
     this.title = props.title;
@@ -45,6 +47,7 @@ export default class Event {
     this.eventLocation = props.eventLocation;
     this.startTime = props.startTime;
     this.endTime = props.endTime;
+    this.mediaImagePath = props.mediaImagePath;
   }
 
   static anEvent(): EventBuilder {
@@ -162,6 +165,11 @@ class EventBuilder {
 
   withContent(content: string): this {
     this.props.content = content;
+    return this;
+  }
+
+  withMediaImage(fileName: string): this {
+    this.props.mediaImagePath = `assets/images/${fileName}`;
     return this;
   }
 
