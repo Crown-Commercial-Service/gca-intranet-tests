@@ -2,7 +2,7 @@ import { request } from "@playwright/test";
 import fs from "fs";
 import path from "path";
 import logger from "../../e2e-tests/src/utils/logger";
-import { urlRedirects } from "../tests/data/url_redirects_uat";
+import { urlRedirects } from "../../e2e-tests/tests/data/url_redirects_uat";
 
 /**
  * Normalise URLs by removing trailing slashes
@@ -23,8 +23,19 @@ type Failure = {
   reason: string;
 };
 
+type RedirectPair = {
+  before: string;
+  after: string;
+};
+
+/**
+ * How many redirect checks to run at once.
+ * 5 or 10 is usually a good balance.
+ */
+const CONCURRENCY = 10;
+
 async function run(): Promise<void> {
-  const startTime = Date.now(); // ⏱ Track total execution time
+  const startTime = Date.now();
 
   /**
    * Create a lightweight HTTP client (no browser needed)
@@ -36,101 +47,123 @@ async function run(): Promise<void> {
   let failedCount = 0;
   const failures: Failure[] = [];
 
-  try {
-    /**
-     * Loop through each redirect pair:
-     * - `before` = URL that should redirect
-     * - `after`  = expected destination
-     */
-    for (const { before, after } of urlRedirects) {
-      try {
-        /**
-         * Make request
-         * Playwright automatically follows redirects
-         */
-        const response = await api.get(before, {
-          timeout: 15000,
-        });
+  /**
+   * Shared index for worker pool
+   */
+  let currentIndex = 0;
 
-        const status = response.status(); // final HTTP status
-        const actualUrl = response.url(); // final resolved URL
-        const expectedUrl = new URL(after, before).toString();
+  /**
+   * Run a single redirect check
+   */
+  async function checkRedirect({ before, after }: RedirectPair): Promise<void> {
+    try {
+      /**
+       * Make request
+       * Playwright automatically follows redirects
+       */
+      const response = await api.get(before, {
+        timeout: 15000,
+      });
 
-        // Normalise URLs to avoid false failures (e.g. trailing slash differences)
-        const normalizedBefore = normalizeUrl(before);
-        const normalizedActual = normalizeUrl(actualUrl);
-        const normalizedExpected = normalizeUrl(expectedUrl);
+      const status = response.status();
+      const actualUrl = response.url();
+      const expectedUrl = new URL(after, before).toString();
 
-        /**
-         * 1. Final response must be 200
-         */
-        if (status !== 200) {
-          logger.error(`FAIL ${status} ${before}`);
-          failures.push({
-            before,
-            expected: expectedUrl,
-            actual: actualUrl,
-            status,
-            reason: "Non-200 response",
-          });
-          failedCount++;
-          continue;
-        }
+      const normalizedBefore = normalizeUrl(before);
+      const normalizedActual = normalizeUrl(actualUrl);
+      const normalizedExpected = normalizeUrl(expectedUrl);
 
-        /**
-         * 2. Final URL must match expected redirect target
-         */
-        if (normalizedActual !== normalizedExpected) {
-          logger.error(`FAIL REDIRECT MISMATCH ${before}`);
-          failures.push({
-            before,
-            expected: expectedUrl,
-            actual: actualUrl,
-            status,
-            reason: "Redirect mismatch",
-          });
-          failedCount++;
-          continue;
-        }
-
-        /**
-         * 3. Ensure a redirect actually happened
-         * (i.e. we didn’t just land on the same URL)
-         */
-        if (normalizedBefore === normalizedActual) {
-          logger.error(`FAIL NO REDIRECT ${before}`);
-          failures.push({
-            before,
-            expected: expectedUrl,
-            actual: actualUrl,
-            status,
-            reason: "No redirect occurred",
-          });
-          failedCount++;
-          continue;
-        }
-
-        /**
-         * All checks passed
-         */
-        logger.info(`PASS ${before} -> ${actualUrl}`);
-      } catch (error) {
-        logger.error(`ERROR ${before}`);
-
+      /**
+       * 1. Final response must be 200
+       */
+      if (status !== 200) {
+        logger.error(`FAIL ${status} ${before}`);
         failures.push({
           before,
-          expected: after,
-          actual: "",
-          status: "ERROR",
-          reason: error instanceof Error ? error.message : "Unknown error",
+          expected: expectedUrl,
+          actual: actualUrl,
+          status,
+          reason: "Non-200 response",
         });
-
         failedCount++;
+        return;
       }
+
+      /**
+       * 2. Final URL must match expected redirect target
+       */
+      if (normalizedActual !== normalizedExpected) {
+        logger.error(`FAIL REDIRECT MISMATCH ${before}`);
+        failures.push({
+          before,
+          expected: expectedUrl,
+          actual: actualUrl,
+          status,
+          reason: "Redirect mismatch",
+        });
+        failedCount++;
+        return;
+      }
+
+      /**
+       * 3. Ensure a redirect actually happened
+       * (i.e. we didn’t just land on the same URL)
+       */
+      if (normalizedBefore === normalizedActual) {
+        logger.error(`FAIL NO REDIRECT ${before}`);
+        failures.push({
+          before,
+          expected: expectedUrl,
+          actual: actualUrl,
+          status,
+          reason: "No redirect occurred",
+        });
+        failedCount++;
+        return;
+      }
+
+      logger.info(`PASS ${before} -> ${actualUrl}`);
+    } catch (error) {
+      logger.error(`ERROR ${before}`);
+
+      failures.push({
+        before,
+        expected: after,
+        actual: "",
+        status: "ERROR",
+        reason: error instanceof Error ? error.message : "Unknown error",
+      });
+
+      failedCount++;
     }
+  }
+
+  /**
+   * Worker: keep taking the next URL until none remain
+   */
+  async function worker(): Promise<void> {
+    while (true) {
+      const index = currentIndex++;
+      const redirect = urlRedirects[index];
+
+      if (!redirect) {
+        return;
+      }
+
+      await checkRedirect(redirect);
+    }
+  }
+
+  try {
+    /**
+     * Start a small pool of workers
+     */
+    await Promise.all(
+      Array.from({ length: CONCURRENCY }, async () => worker()),
+    );
 
     /**
-     * Export failures to CSV for easy analysis (Excel, sharing, etc.)
+     * Export failures to CSV for easy analysis
      */
     if (failures.length > 0) {
       const filePath = path.resolve(process.cwd(), "redirect_failures.csv");
@@ -155,31 +188,20 @@ async function run(): Promise<void> {
     const durationMs = Date.now() - startTime;
     const durationSec = (durationMs / 1000).toFixed(2);
 
-    /**
-     * Summary output
-     */
     logger.info("Done");
     logger.info(`Total checked: ${urlRedirects.length}`);
     logger.info(`Failed: ${failedCount}`);
     logger.info(`Duration: ${durationSec}s`);
+    logger.info(`Concurrency: ${CONCURRENCY}`);
 
-    /**
-     * Fail CI if any redirects failed
-     */
     if (failedCount > 0) {
       throw new Error(`${failedCount} redirect check(s) failed`);
     }
   } finally {
-    /**
-     * Always clean up the API context
-     */
     await api.dispose();
   }
 }
 
-/**
- * Ensure process exits correctly for CI pipelines
- */
 run().catch((error) => {
   if (error instanceof Error) {
     logger.error(error.message);
