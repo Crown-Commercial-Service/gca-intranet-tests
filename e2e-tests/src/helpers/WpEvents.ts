@@ -32,32 +32,32 @@ export default class WpEvents {
       "Creating WordPress event via REST API",
     );
 
+    const content = event.mediaImagePath
+      ? `<img src="${restConfig.baseUrl}/wp-content/uploads/${event.mediaImagePath
+          .split("/")
+          .pop()}" />${event.content}`
+      : event.content;
+
     const created = await rest.wpRest<any>(
       restConfig,
       "POST",
       "/wp-json/wp/v2/events",
       {
         title: event.title,
-        content: event.content,
+        content,
         status: event.status,
         meta: {
           start_datetime: event.startDate,
           end_datetime: event.endDate,
           secondary_cta_label: event.ctaLabel ?? "",
           secondary_cta_destination: event.ctaDestination ?? "",
+          event_category: event.category,
+          event_location: event.eventLocation,
         },
       },
     );
 
-    const postId = Number(created?.id);
-
-    if (!Number.isFinite(postId)) {
-      throw new Error(
-        `Failed to parse event id from API: ${JSON.stringify(created)}`,
-      );
-    }
-
-    return postId;
+    return Number(created.id);
   }
 
   private async createLocal(event: Event): Promise<number> {

@@ -136,6 +136,10 @@ export default abstract class BasePage {
     await this.page.waitForTimeout(ms);
   }
 
+  async waitForPageToLoad(): Promise<void> {
+    await this.page.waitForLoadState("networkidle");
+  }
+
   async pause(): Promise<void> {
     await this.page.pause();
   }
@@ -374,7 +378,7 @@ export default abstract class BasePage {
   }
 
   async addMedia(fileName: string): Promise<void> {
-    await this.page.waitForLoadState("networkidle");
+    await this.waitForPageToLoad();
     await this.openMediaLibrary();
     await expect(this.mediaFileInput).toBeAttached();
     await this.mediaFileInput.setInputFiles(`assets/images/${fileName}`);
@@ -413,7 +417,7 @@ export default abstract class BasePage {
     //   .catch(() => {});
 
     await expect(this.publishMessage).toBeVisible({ timeout: 15000 });
-    await this.page.waitForLoadState("networkidle");
+    await this.waitForPageToLoad();
     await expect(this.publishButton).toBeEnabled({ timeout: 15000 });
   }
 
