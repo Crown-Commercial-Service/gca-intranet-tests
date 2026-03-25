@@ -49,27 +49,25 @@ test.describe("Accessibility - Events component", () => {
   test("events list page should have no serious or critical accessibility violations", async ({
     wp,
     wordpressLoginPage,
+    eventEditorPage,
     eventsListPage,
   }) => {
     await wp.posts.clearByTypeAndAuthor("events");
 
     const events = Event.manyEvents(11);
-    await wp.events.createMany(events);
+    const eventIds = await wp.events.createMany(events);
 
     await wordpressLoginPage.goto();
     await wordpressLoginPage.loginAsAdmin();
 
-    // for (let index = 0; index < events.length; index++) {
-    //   await eventEditorPage.gotoEdit(eventIds[index]);
-    //   await eventEditorPage.fillEventDetails(events[index]);
-    //   await eventEditorPage.selectCategory(events[index].category!);
-    //   await eventEditorPage.selectEventLocation(events[index].eventLocation!);
-    //   await eventEditorPage.update();
-    // }
-
+    // Only update the first event
+    await eventEditorPage.gotoEdit(eventIds[0]);
+    await eventEditorPage.fillEventDetails(events[0]);
+    await eventEditorPage.selectCategory(events[0].category!);
+    await eventEditorPage.selectEventLocation(events[0].eventLocation!);
+    await eventEditorPage.update();
     await eventsListPage.goto();
-
-    await eventsListPage.waitForPageToLoad()
+    await eventsListPage.waitForPageToLoad();
     await eventsListPage.checkAccessibilityFor([
       eventsListPage.eventsListSection,
     ]);
