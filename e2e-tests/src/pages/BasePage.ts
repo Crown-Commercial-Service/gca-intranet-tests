@@ -142,7 +142,7 @@ export default abstract class BasePage {
 
   async assertAuthor(author: string): Promise<void> {
     await expect(
-      this.page.locator("p.govuk-body-s", {
+      this.page.locator("p.govuk-body", {
         hasText: `By ${author}`,
       }),
     ).toBeVisible();
