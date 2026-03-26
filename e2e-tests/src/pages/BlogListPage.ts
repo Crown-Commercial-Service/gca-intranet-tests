@@ -3,7 +3,7 @@ import BasePage from "./BasePage";
 import { formatDateNew } from "../utils/formatters";
 
 export default class BlogListPage extends BasePage {
-  private readonly baseUrl?: string;
+  // private readonly baseUrl?: string;
 
   readonly container: Locator;
   readonly main: Locator;
@@ -15,9 +15,9 @@ export default class BlogListPage extends BasePage {
   readonly postLabels: Locator;
   readonly blogsListSection: string;
 
-  constructor(page: Page, baseUrl?: string) {
+  constructor(page: Page) {
     super(page);
-    this.baseUrl = baseUrl;
+    // this.baseUrl = baseUrl;
 
     this.container = this.page.getByTestId("blog-container");
     this.main = this.page.getByTestId("blog-main");

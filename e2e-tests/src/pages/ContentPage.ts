@@ -12,8 +12,8 @@ export default class ContentPage extends BasePage {
   readonly textComponents: Locator;
   readonly introComponents: Locator;
 
-  constructor(page: Page, baseUrl?: string) {
-    super(page, baseUrl);
+  constructor(page: Page) {
+    super(page);
 
     this.pageComponentsBox = this.page
       .locator(".postbox")
