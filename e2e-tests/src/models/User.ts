@@ -5,6 +5,7 @@ const chance = new Chance();
 export type UserRole =
   | "administrator"
   | "editor"
+  | "administrator_publisher"
   | "author"
   | "contributor"
   | "subscriber"
