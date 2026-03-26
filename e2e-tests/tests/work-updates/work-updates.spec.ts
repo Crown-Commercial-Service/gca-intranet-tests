@@ -77,6 +77,7 @@ test.describe("Work update component", () => {
 
       await workUpdateList.gotoWorkUpdateList();
       await workUpdateList.assertPostVisible(post.title);
+      await workUpdateList.assertAuthor(process.env.WP_ADMIN_USERNAME!);
       await workUpdateList.assertPostHasLabel(post.title, label);
       await workUpdateList.assertPostHasTeam(post.title, team);
       await workUpdateList.assertPostHasDate(post.title, post.createdAt);

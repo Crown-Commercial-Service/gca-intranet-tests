@@ -65,6 +65,7 @@ test.describe("Blog component", () => {
     async ({ blogList }) => {
       await blogList.gotoBlogList();
       await blogList.assertPostVisible(post.title);
+      await blogList.assertAuthor(process.env.WP_ADMIN_USERNAME!);
       await blogList.assertPostHasDate(post.title, post.createdAt);
       await blogList.assertPostHasContent(post.title, post.content);
       await blogList.assertPostHasFeaturedImage(post.title);

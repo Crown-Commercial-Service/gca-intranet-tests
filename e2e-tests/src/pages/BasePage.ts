@@ -140,6 +140,14 @@ export default abstract class BasePage {
     await this.page.waitForLoadState("networkidle");
   }
 
+  async assertAuthor(author: string): Promise<void> {
+    await expect(
+      this.page.locator("p.govuk-body-s", {
+        hasText: `By ${author}`,
+      }),
+    ).toBeVisible();
+  }
+
   async pause(): Promise<void> {
     await this.page.pause();
   }
