@@ -36,7 +36,10 @@ test.describe("Accessibility - Work update component", () => {
     workUpdate,
   }) => {
     await workUpdate.gotoById(postId);
-    await workUpdate.checkAccessibilityFor([workUpdate.workUpdateSection]);
+    await workUpdate.checkAccessibilityFor(
+      [workUpdate.workUpdateSection],
+      "work-update-page",
+    );
   });
 
   test("work update list page should have no serious or critical accessibility violations", async ({
@@ -49,8 +52,9 @@ test.describe("Accessibility - Work update component", () => {
     await wp.posts.createMany(posts);
 
     await workUpdateList.gotoWorkUpdateList();
-    await workUpdateList.checkAccessibilityFor([
-      workUpdateList.workUpdateListSection,
-    ]);
+    await workUpdateList.checkAccessibilityFor(
+      [workUpdateList.workUpdateListSection],
+      "work-update-list",
+    );
   });
 });

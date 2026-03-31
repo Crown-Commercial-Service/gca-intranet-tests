@@ -44,7 +44,10 @@ test.describe("Accessibility - Events component", () => {
     await eventEditorPage.selectEventLocation(eventLocation);
     await eventEditorPage.update();
     await eventPage.gotoById(eventId);
-    await eventPage.checkAccessibilityFor([eventPage.eventSection]);
+    await eventPage.checkAccessibilityFor(
+      [eventPage.eventSection],
+      "event-page",
+    );
   });
 
   test("events list page should have no serious or critical accessibility violations", async ({
@@ -70,8 +73,9 @@ test.describe("Accessibility - Events component", () => {
 
     await eventsListPage.goto();
     await eventsListPage.waitForPageToLoad();
-    await eventsListPage.checkAccessibilityFor([
-      eventsListPage.eventsListSection,
-    ]);
+    await eventsListPage.checkAccessibilityFor(
+      [eventsListPage.eventsListSection],
+      "event-list",
+    );
   });
 });

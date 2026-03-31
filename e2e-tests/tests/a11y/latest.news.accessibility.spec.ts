@@ -33,7 +33,10 @@ test.describe("Accessibility - Latest news component", () => {
     latestNews,
   }) => {
     await latestNews.gotoById(postId);
-    await latestNews.checkAccessibilityFor([latestNews.latestNewsSection]);
+    await latestNews.checkAccessibilityFor(
+      [latestNews.latestNewsSection],
+      "latest-news-page",
+    );
   });
 
   test("latest news list page should have no serious or critical accessibility violations", async ({
@@ -46,8 +49,9 @@ test.describe("Accessibility - Latest news component", () => {
 
     await wp.posts.createMany(posts);
     await latestNewsList.gotoNewsList();
-    await latestNewsList.checkAccessibilityFor([
-      latestNewsList.latestNewsListSection,
-    ]);
+    await latestNewsList.checkAccessibilityFor(
+      [latestNewsList.latestNewsListSection],
+      "latest-news-list",
+    );
   });
 });

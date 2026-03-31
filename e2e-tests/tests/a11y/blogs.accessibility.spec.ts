@@ -35,7 +35,7 @@ test.describe("Accessibility - Blog component", () => {
     { tag: "@regression" },
     async ({ blog }) => {
       await blog.gotoById(postId);
-      await blog.checkAccessibilityFor([blog.blogsSection]);
+      await blog.checkAccessibilityFor([blog.blogsSection], "blog-page");
     },
   );
 
@@ -47,7 +47,10 @@ test.describe("Accessibility - Blog component", () => {
 
       await wp.posts.createMany(posts);
       await blogList.gotoBlogList();
-      await blogList.checkAccessibilityFor([blogList.blogsListSection]);
+      await blogList.checkAccessibilityFor(
+        [blogList.blogsListSection],
+        "blog-list",
+      );
     },
   );
 });

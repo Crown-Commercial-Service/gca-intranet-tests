@@ -82,16 +82,17 @@ test.describe("Accessibility - Homepage components", () => {
     // await homepage.hoverParentLink("Parent Nav Link 1");
 
     // Run accessibility checks on homepage sections and navigation
-    await homepage.checkAccessibilityFor([
-      homepage.latestNewsSectionSelector,
-      homepage.workUpdatesSectionSelector,
-      homepage.blogsSectionSelector,
-      homepage.takeALookColumnSelector,
-      homepage.quickLinksSelector,
-      homepage.eventsSectionSelector,
-      homepage.primaryNavigationSelector,
-      // homepage.subMenuNavigation,
-      // homepage.footerSelector,
-    ]);
+    await homepage.checkAccessibilityFor(
+      [
+        homepage.latestNewsSectionSelector,
+        homepage.workUpdatesSectionSelector,
+        homepage.blogsSectionSelector,
+        homepage.takeALookColumnSelector,
+        homepage.quickLinksSelector,
+        homepage.eventsSectionSelector,
+        homepage.primaryNavigationSelector,
+      ],
+      "homepage-sections",
+    );
   });
 });
