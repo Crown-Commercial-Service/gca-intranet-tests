@@ -119,8 +119,8 @@ export default abstract class BasePage {
     await this.page.goto(path, { waitUntil: "networkidle" });
   }
 
-  async checkAccessibilityFor(selectors: string[]): Promise<void> {
-    await expectNoSeriousA11yViolationsForSelectors(this.page, selectors);
+  async checkAccessibilityFor(selectors: string[], label: string = "a11y-sections",): Promise<void> {
+    await expectNoSeriousA11yViolationsForSelectors(this.page, selectors, label);
   }
 
   async expectScreenshot(name: string): Promise<void> {

@@ -2,7 +2,6 @@ import { expect, Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { writeAxeHtmlReport, mergeAxeResults } from "./axeReport";
 import { runA11yScan } from "./axe";
-// import { writeAxeHtmlReport } from "./axeReport";
 
 type AxeViolation = {
   id: string;
@@ -32,12 +31,6 @@ export async function expectNoSeriousA11yViolations(
   label: string = "full-page",
 ) {
   const results = (await runA11yScan(page)) as AxeResults;
-
-  writeAxeHtmlReport(results as any, {
-    fileName: `${label}.html`,
-    projectKey: label,
-    customSummary: `Accessibility scan for: ${label}`,
-  });
 
   const critical = getCriticalViolations(results);
   const serious = getSeriousViolations(results);
@@ -69,6 +62,7 @@ async function expectNoSeriousA11yViolationsForSelector(
 
   return results;
 }
+
 export async function expectNoSeriousA11yViolationsForSelectors(
   page: Page,
   selectors: string[],
@@ -88,7 +82,7 @@ export async function expectNoSeriousA11yViolationsForSelectors(
 
   writeAxeHtmlReport(merged as any, {
     fileName: "index.html",
-    projectKey: "- GCA Intranet Homepage",
+    projectKey: label,
     customSummary: `Accessibility scan for selectors: ${selectors.join(", ")}`,
   });
 }
