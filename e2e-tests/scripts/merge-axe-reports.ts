@@ -41,7 +41,7 @@ function mergeAxeResults(resultsList: AxeResults[]): AxeResults {
 
   return {
     ...first,
-    url: "Consolidated accessibility report",
+    url: process.env.PW_BASE_URL || first.url,
     timestamp: new Date().toISOString(),
     violations: resultsList.flatMap((result) => result.violations ?? []),
     passes: resultsList.flatMap((result) => result.passes ?? []),
@@ -61,7 +61,7 @@ function writeMergedReport(results: AxeResults, outputDir: string): void {
   createHtmlReport({
     results,
     options: {
-      projectKey: "gca-intranet-a11y",
+      projectKey: "GCA Intranet",
       customSummary: "Consolidated accessibility report for all a11y test runs",
       outputDir,
       reportFileName: OUTPUT_FILE,
