@@ -34,7 +34,7 @@ export async function expectNoSeriousA11yViolations(
   const results = (await runA11yScan(page)) as AxeResults;
 
   writeAxeHtmlReport(results as any, {
-    fileName: `${label}.html`,
+    fileName: "index.html",
     projectKey: label,
     customSummary: `Accessibility scan for: ${label}`,
   });
