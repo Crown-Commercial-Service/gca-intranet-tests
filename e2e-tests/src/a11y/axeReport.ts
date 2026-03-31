@@ -18,6 +18,13 @@ export function writeAxeHtmlReport(
 
   fs.mkdirSync(outputDir, { recursive: true });
 
+  const jsonFileName = opts.fileName.replace(/\.html$/, ".json");
+
+  fs.writeFileSync(
+    path.join(outputDir, jsonFileName),
+    JSON.stringify(results, null, 2),
+  );
+
   createHtmlReport({
     results,
     options: {
