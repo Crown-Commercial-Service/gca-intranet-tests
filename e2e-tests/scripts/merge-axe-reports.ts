@@ -3,7 +3,7 @@ import path from "path";
 import type { AxeResults } from "axe-core";
 import { createHtmlReport } from "axe-html-reporter";
 
-const OUTPUT_DIR = path.resolve(process.cwd(), "test-results/axe");
+const OUTPUT_DIR = "test-results/axe";
 const OUTPUT_FILE = "index.html";
 
 function readAxeJsonFiles(dir: string): AxeResults[] {
