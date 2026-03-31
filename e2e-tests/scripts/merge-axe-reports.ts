@@ -62,7 +62,7 @@ function writeMergedReport(results: AxeResults, outputDir: string): void {
     results,
     options: {
       projectKey: "GCA Intranet",
-      customSummary: "Consolidated accessibility report for all a11y test runs",
+      customSummary: "Consolidated accessibility report for all accessibility test runs",
       outputDir,
       reportFileName: OUTPUT_FILE,
     },
