@@ -81,7 +81,7 @@ export async function expectNoSeriousA11yViolationsForSelectors(
   const merged = mergeAxeResults(results as any, page.url());
 
   writeAxeHtmlReport(merged as any, {
-    fileName: "index.html",
+    fileName: `${label}.html`,
     projectKey: label,
     customSummary: `Accessibility scan for selectors: ${selectors.join(", ")}`,
   });
