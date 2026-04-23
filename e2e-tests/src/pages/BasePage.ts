@@ -68,10 +68,8 @@ export default abstract class BasePage {
 
     this.titleInput = page.locator("#title");
     this.contentInput = page.locator("#content");
-    this.authorSection = page.locator(".components-panel__body", {
-      has: page.getByRole("heading", { name: "Author", level: 2 }),
-    });
-    this.authorSelect = this.authorSection.getByRole("combobox").last();
+    this.authorSection = page.locator("#gca-author-selector");
+    this.authorSelect = page.locator("#gca-author-select");
     this.publishButton = page.locator("#publish");
     this.publishingSpinner = page.locator("#publishing-action .spinner");
     this.publishMessage = page.locator("#message.updated, #message.notice");
@@ -176,15 +174,17 @@ export default abstract class BasePage {
     await this.authorSection.scrollIntoViewIfNeeded();
     await expect(this.authorSelect).toBeVisible();
 
-    await this.authorSelect.click();
-    await this.authorSelect.fill(author);
+    const option = this.authorSelect
+      .locator("option")
+      .filter({ hasText: author })
+      .first();
 
-    await this.page
-      .getByRole("option", { name: author, exact: true })
-      .first()
-      .click();
+    const value = await option.getAttribute("value");
 
-    await expect(this.authorSelect).toHaveValue(author);
+    expect(value).toBeTruthy();
+
+    await this.authorSelect.selectOption(value!);
+    await expect(this.authorSelect).toHaveValue(value!);
   }
 
   async expectUrlToContain(value: string): Promise<void> {
