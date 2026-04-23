@@ -262,7 +262,7 @@ class PostBuilder {
     content: this.randomParagraphWithin(400),
     status: "draft",
     type: "post",
-    createdAt: dayjs().toDate(),
+    createdAt: dayjs().hour(12).minute(0).second(0).millisecond(0).toDate(),
     category: undefined,
     template: undefined,
     excerpt: this.randomParagraphWithin(140),
