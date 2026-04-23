@@ -23,3 +23,4 @@ storybook-static
 allure-report/
 allure-results/
 allure-report-*.zip
+a11y-report*
