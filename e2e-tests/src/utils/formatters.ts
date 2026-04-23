@@ -120,7 +120,7 @@ export function formatEventDate(value: string): string {
 }
 
 export function formatEventTime(value: string): string {
-  return dayjs(value, "HH:mm").format("h:mm a");
+  return dayjs(value, "HH:mm").format("h:mma");
 }
 
 export function buildExpectedEventDateText(event: {
