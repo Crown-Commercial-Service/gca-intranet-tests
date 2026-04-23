@@ -97,7 +97,7 @@ test.describe("Latest news component", () => {
       await latestNewsList.assertPaginationVisible();
     },
   );
-
+  // test is skipped as this need a data wipe of all news on qa thus affecting other people testing
   test.skip("should not display pagination when there are fewer than 10 news posts", async ({
     wp,
     latestNewsList,

@@ -100,6 +100,7 @@ test.describe("Work update component", () => {
     },
   );
 
+    // test is skipped as this need a data wipe of all work update on qa thus affecting other people testing
   test.skip("should not display pagination when there are fewer than 10 work updates", async ({
     wp,
     workUpdateList,
