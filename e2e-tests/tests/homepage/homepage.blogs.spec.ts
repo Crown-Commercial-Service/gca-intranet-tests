@@ -132,8 +132,8 @@ test.describe("blogs", { tag: "@regression" }, () => {
     const postId = await wp.posts.create(post);
 
     const newUser = User.anAdmin()
-      .withUsername("verylongblogauthorname")
-      .withEmail("verylongblogauthorname@example.com")
+      .withUsername("verylongblogauthorname111111111111")
+      .withEmail("verylongblogauthorname111111111111@example.com")
       .withPassword("Password123!");
 
     await wp.users.upsert(newUser);

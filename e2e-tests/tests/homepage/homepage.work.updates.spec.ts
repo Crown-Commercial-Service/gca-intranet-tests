@@ -158,8 +158,8 @@ test.describe("work updates", () => {
       const postId = await wp.posts.create(post);
 
       const newUser = User.anAdmin()
-        .withUsername("verylongworkupdateauthorname")
-        .withEmail("verylongworkupdateauthorname@example.com")
+        .withUsername("verylongworkupdateauthorname1111111111")
+        .withEmail("verylongworkupdateauthorname1111111111@example.com")
         .withPassword("Password123!");
 
       await wp.users.upsert(newUser);
