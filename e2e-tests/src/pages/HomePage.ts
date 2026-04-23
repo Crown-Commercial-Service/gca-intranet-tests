@@ -135,7 +135,9 @@ export default class HomePage extends BasePage {
     this.baseUrl = baseUrl;
 
     this.primaryNavigation = this.page.locator(this.primaryNavigationSelector);
-    this.headerSearchInput = this.page.locator('header').getByRole("searchbox");
+    this.headerSearchInput = this.page
+      .locator("header")
+      .getByRole("combobox", { name: "Search the intranet" });
     this.searchButton = this.page.getByRole("button", { name: "Search" });
     this.primaryNavigationParentLinks = this.primaryNavigation.locator(
       this.primaryNavigationParentLinksSelector,
@@ -412,12 +414,7 @@ export default class HomePage extends BasePage {
       .first()
       .getByTestId(this.workUpdateLinkTestId);
 
-    const uiTitle = (await link.innerText()).trim();
-
-    expect(uiTitle).not.toBe(post.title);
-
-    const visiblePart = getVisibleTruncatedText(uiTitle);
-    expect(post.title.startsWith(visiblePart)).toBe(true);
+    await this.assertTextIsTruncated(link, post.title);
   }
 
   private workUpdateCardByTitle(title: string): Locator {
@@ -581,12 +578,7 @@ export default class HomePage extends BasePage {
 
     const link = this.blogCard.first().getByTestId(this.blogLinkTestId);
 
-    const uiTitle = (await link.innerText()).trim();
-
-    expect(uiTitle).not.toBe(post.title);
-
-    const visiblePart = getVisibleTruncatedText(uiTitle);
-    expect(post.title.startsWith(visiblePart)).toBe(true);
+    await this.assertTextIsTruncated(link, post.title);
   }
 
   async hasTruncatedChars(locator: Locator, maxChars: number): Promise<void> {
@@ -669,11 +661,18 @@ export default class HomePage extends BasePage {
     fullText: string,
   ): Promise<void> {
     await expect(locator).toBeVisible();
+    await expect(locator).toHaveText(fullText);
 
-    const actual = ((await locator.textContent()) ?? "").trim();
+    const isTruncated = await locator.evaluate((el) => {
+      const overflows = (e: Element) =>
+        e.scrollWidth > e.clientWidth || e.scrollHeight > e.clientHeight;
+      return (
+        overflows(el) ||
+        (el.parentElement ? overflows(el.parentElement) : false)
+      );
+    });
 
-    expect(actual).not.toBe(fullText);
-    expect(actual.endsWith("...")).toBe(true);
+    expect(isTruncated).toBe(true);
   }
 
   async assertBlogAuthorIsTruncated(expectedAuthor: string): Promise<void> {

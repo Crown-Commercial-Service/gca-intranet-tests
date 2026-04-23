@@ -29,7 +29,7 @@ test.describe("Content page component", () => {
 
     await contentPage.gotoEdit(pageId);
     await contentPage.fillSlug(`two-column-template-${runId}`);
-    await contentPage.selectColumnTemplate("Layout – 2 column");
+    await contentPage.selectColumnTemplate("Layout - 2 column");
     await contentPage.fillExcerpt(templatePage);
     await contentPage.selectAudience("Line managers");
     await contentPage.selectCategory("Digital and data");

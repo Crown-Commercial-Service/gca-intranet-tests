@@ -68,8 +68,10 @@ export default abstract class BasePage {
 
     this.titleInput = page.locator("#title");
     this.contentInput = page.locator("#content");
-    this.authorSection = page.locator("#authordiv");
-    this.authorSelect = page.locator("#post_author_override");
+    this.authorSection = page.locator(".components-panel__body", {
+      has: page.getByRole("heading", { name: "Author", level: 2 }),
+    });
+    this.authorSelect = this.authorSection.getByRole("combobox").last();
     this.publishButton = page.locator("#publish");
     this.publishingSpinner = page.locator("#publishing-action .spinner");
     this.publishMessage = page.locator("#message.updated, #message.notice");
@@ -174,17 +176,15 @@ export default abstract class BasePage {
     await this.authorSection.scrollIntoViewIfNeeded();
     await expect(this.authorSelect).toBeVisible();
 
-    const option = this.authorSelect
-      .locator("option")
-      .filter({ hasText: author })
-      .first();
+    await this.authorSelect.click();
+    await this.authorSelect.fill(author);
 
-    const value = await option.getAttribute("value");
+    await this.page
+      .getByRole("option", { name: author, exact: true })
+      .first()
+      .click();
 
-    expect(value).toBeTruthy();
-
-    await this.authorSelect.selectOption(value!);
-    await expect(this.authorSelect).toHaveValue(value!);
+    await expect(this.authorSelect).toHaveValue(author);
   }
 
   async expectUrlToContain(value: string): Promise<void> {

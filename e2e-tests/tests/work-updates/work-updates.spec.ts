@@ -191,7 +191,7 @@ test.describe("Work update component", { tag: "@regression" }, () => {
     await workUpdate.selectLabel("CCS live");
     await workUpdate.selectTeam("Finance");
     await workUpdate.addAuthorImage("author-image.jpg");
-    await workUpdate.selectColumnTemplate("Layout – 2 column");
+    await workUpdate.selectColumnTemplate("Layout - 2 column");
     await workUpdate.update();
     await workUpdate.gotoById(postId);
     await workUpdate.assertTwoColumnTemplateIsApplied();
@@ -218,7 +218,7 @@ test.describe("Work update component", { tag: "@regression" }, () => {
     await workUpdate.selectLabel("CCS live");
     await workUpdate.selectTeam("Finance");
     await workUpdate.addAuthorImage("author-image.jpg");
-    await workUpdate.selectColumnTemplate("Layout – 1 column");
+    await workUpdate.selectColumnTemplate("Layout - 1 column");
     await workUpdate.update();
     await workUpdate.gotoById(postId);
     await workUpdate.assertOneColumnTemplateIsApplied();
