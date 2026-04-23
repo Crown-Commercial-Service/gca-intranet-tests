@@ -293,8 +293,13 @@ test.describe("search", { tag: "@regression" }, () => {
       .withCreatedAt(now.subtract(1, "minute").toDate())
       .withFeaturedImage("featured.jpg");
 
+    const delay = (ms: number) =>
+      new Promise((resolve) => setTimeout(resolve, ms));
+
     await wp.posts.create(first);
+    await delay(2000);
     await wp.posts.create(second);
+    await delay(2000);
     await wp.posts.create(third);
 
     await wordpressLoginPage.goto();
