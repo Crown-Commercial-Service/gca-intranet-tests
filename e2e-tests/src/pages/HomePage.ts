@@ -551,7 +551,6 @@ export default class HomePage extends BasePage {
     await expect(card).toBeVisible();
 
     const link = card.getByTestId(this.blogLinkTestId);
-    
     const actualTitle = ((await link.textContent()) ?? "").trim();
     expect(actualTitle).toBe(post.title);
 
@@ -765,7 +764,12 @@ export default class HomePage extends BasePage {
       .filter({ hasText: prefix })
       .first();
 
-    await this.assertTextIsTruncated(link, event.title);
+    await expect(link).toBeVisible();
+
+    const actual = ((await link.textContent()) ?? "").trim();
+
+    expect(actual).not.toBe(event.title);
+    expect(actual.endsWith("...")).toBe(true);
   }
 
   async assertEventOrder(titles: string[]): Promise<void> {
