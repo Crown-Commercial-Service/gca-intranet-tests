@@ -152,7 +152,7 @@ test.describe("Latest news component", () => {
 
       await wp.users.upsert(newUser);
       await latestNews.gotoEdit(postId);
-      await latestNews.selectAuthor(newUser.username);
+      await latestNews.selectNewsAuthor(newUser.username);
       await latestNews.update();
       await latestNews.gotoById(postId);
       await latestNews.assertAuthor(newUser.username);
