@@ -13,8 +13,8 @@ test.describe("blogs", { tag: "@regression" }, () => {
   test.afterAll(async ({ wp }) => {
     await wp.posts.clearByTypeAndAuthor("blogs");
   });
-
-  test("should display a single blog", async ({ wp, homepage }) => {
+  // skipped so not affect other users data on qa
+  test.skip("should display a single blog", async ({ wp, homepage }) => {
     const post = Post.aPost()
       .withType("blogs")
       .withFixedTitle("E2E Blog Post")
