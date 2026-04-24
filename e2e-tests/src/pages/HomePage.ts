@@ -552,7 +552,8 @@ export default class HomePage extends BasePage {
 
     const link = card.getByTestId(this.blogLinkTestId);
 
-    await expect(link).toHaveText(post.title);
+    const actualTitle = ((await link.textContent()) ?? "").trim();
+    expect(actualTitle).toBe(post.title);
 
     await expect(
       card.getByTestId(this.blogAvatarTestId).locator("img"),
@@ -764,7 +765,12 @@ export default class HomePage extends BasePage {
       .filter({ hasText: prefix })
       .first();
 
-    await this.assertTextIsTruncated(link, event.title);
+    await expect(link).toBeVisible();
+
+    const actual = ((await link.textContent()) ?? "").trim();
+
+    expect(actual).not.toBe(event.title);
+    expect(actual.endsWith("...")).toBe(true);
   }
 
   async assertEventOrder(titles: string[]): Promise<void> {
