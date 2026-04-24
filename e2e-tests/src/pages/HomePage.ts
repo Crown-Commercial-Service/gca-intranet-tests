@@ -551,7 +551,6 @@ export default class HomePage extends BasePage {
     await expect(card).toBeVisible();
 
     const link = card.getByTestId(this.blogLinkTestId);
-
     const actualTitle = ((await link.textContent()) ?? "").trim();
     expect(actualTitle).toBe(post.title);
 
