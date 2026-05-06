@@ -8,7 +8,6 @@ import User from "../src/models/User";
 import WpUsers from "../src/helpers/WpUsers";
 import WpThemes from "../src/helpers/WpThemes";
 import WpPosts from "./helpers/WpPosts";
-import WpTaxonomies from "../src/helpers/WpTaxonomies";
 import HomePage from "../src/pages/HomePage";
 import LatestNews from "../src/pages/LatestNews";
 import LatestNewsList from "../src/pages/LatestNewsList";
@@ -34,7 +33,6 @@ type WpHelpers = {
   posts: WpPosts;
   events: WpEvents;
   customizer: WpCustomizer;
-  taxonomies: WpTaxonomies;
 
   expectUserToExist: (user: User) => Promise<void>;
   expectUserToHaveRole: (user: User) => Promise<void>;
@@ -159,7 +157,6 @@ export const test = base.extend<Fixtures>({
     const posts = new WpPosts(exec);
     const events = new WpEvents(exec);
     const customizer = new WpCustomizer(exec);
-    const taxonomies = new WpTaxonomies(exec);
 
     const helpers: WpHelpers = {
       exec,
@@ -168,7 +165,6 @@ export const test = base.extend<Fixtures>({
       posts,
       events,
       customizer,
-      taxonomies,
       expectUserToExist,
       expectUserToHaveRole,
     };

@@ -12,6 +12,12 @@ export default class ContentPage extends BasePage {
   readonly textComponents: Locator;
   readonly introComponents: Locator;
 
+  readonly contactCardPill: Locator;
+  readonly contactCardPanel: Locator;
+  readonly contactCardTitle: Locator;
+  readonly contactCardDescription: Locator;
+  readonly contactCardItems: Locator;
+
   constructor(page: Page) {
     super(page);
 
@@ -42,6 +48,52 @@ export default class ContentPage extends BasePage {
     this.introComponents = this.pageComponentValues.locator(
       '.layout[data-layout="intro_intro"]',
     );
+
+    this.contactCardPill = this.page.getByTestId("responsible-team-pill");
+    this.contactCardPanel = this.page.locator(".dc-widget__panel");
+    this.contactCardTitle = this.contactCardPanel.locator(".dc-widget__title");
+    this.contactCardDescription = this.contactCardPanel.locator(
+      ".dc-widget__description",
+    );
+    this.contactCardItems = this.contactCardPanel.locator(".dc-widget__item");
+  }
+
+  async openContactCard(): Promise<void> {
+    await expect(this.contactCardPill).toBeVisible();
+    await this.contactCardPill.click();
+    await expect(this.contactCardPanel).toBeVisible();
+  }
+
+  async assertContactCardTitle(title: string): Promise<void> {
+    await expect(this.contactCardTitle).toHaveText(title);
+  }
+
+  async assertContactCardDescription(description: string): Promise<void> {
+    await expect(this.contactCardDescription).toHaveText(description);
+  }
+
+  async assertContactCardItemCount(count: number): Promise<void> {
+    await expect(this.contactCardItems).toHaveCount(count);
+  }
+
+  async assertContactCardItem(params: {
+    title: string;
+    subtitle: string;
+    href?: string;
+  }): Promise<void> {
+    const { title, subtitle, href } = params;
+
+    const item = this.contactCardItems.filter({
+      has: this.page.locator(".dc-widget__item-title", { hasText: title }),
+    });
+
+    await expect(item.locator(".dc-widget__item-subtitle")).toHaveText(
+      subtitle,
+    );
+
+    if (href) {
+      await expect(item.locator("a")).toHaveAttribute("href", href);
+    }
   }
 
   async addTextComponent(content: string): Promise<void> {
