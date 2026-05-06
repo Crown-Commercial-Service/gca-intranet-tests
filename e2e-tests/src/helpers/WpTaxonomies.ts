@@ -58,6 +58,34 @@ export default class WpTaxonomies {
     );
   }
 
+  async getTermAcfV3(
+    taxonomy: string,
+    termId: number,
+  ): Promise<{ acf?: Record<string, unknown> }> {
+    this.assertRemote();
+    const restConfig = rest.getRestConfig();
+    return rest.wpRest(
+      restConfig,
+      "GET",
+      `/wp-json/acf/v3/${taxonomy}/${termId}`,
+    );
+  }
+
+  async updateTermAcfV3(
+    taxonomy: string,
+    termId: number,
+    fields: Record<string, unknown>,
+  ): Promise<{ acf?: Record<string, unknown> }> {
+    this.assertRemote();
+    const restConfig = rest.getRestConfig();
+    return rest.wpRest(
+      restConfig,
+      "POST",
+      `/wp-json/acf/v3/${taxonomy}/${termId}`,
+      { fields },
+    );
+  }
+
   private assertRemote(): void {
     if (docker.wpDriver() !== "remote") {
       throw new Error(
