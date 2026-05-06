@@ -161,11 +161,11 @@ export default abstract class BasePage {
   }
 
   async gotoById(postId: number): Promise<void> {
-    const url = this.baseUrl
-      ? `${this.baseUrl.replace(/\/+$/, "")}/?p=${postId}`
-      : `/?p=${postId}`;
-
-    await this.page.goto(url, { waitUntil: "networkidle" });
+    await this.gotoEdit(postId);
+    const permalink = this.page.locator("#sample-permalink a");
+    await expect(permalink).toBeVisible();
+    const href = await permalink.getAttribute("href");
+    await this.page.goto(href!, { waitUntil: "networkidle" });
   }
 
   async gotoEdit(postId: number): Promise<void> {
