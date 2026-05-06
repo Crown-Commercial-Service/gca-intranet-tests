@@ -142,7 +142,7 @@ test.describe("Latest news component", () => {
   );
 
   test(
-    "should show correct author after updating a new article",
+    "should dispayed the author that last update an article instead of author that created it",
     { tag: "@regression" },
     async ({ wp, wordpressLoginPage, latestNews }) => {
       const username = `e2e_author_${Date.now()}`;

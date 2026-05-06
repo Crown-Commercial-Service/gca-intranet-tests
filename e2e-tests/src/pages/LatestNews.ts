@@ -37,8 +37,8 @@ export default class LatestNews extends BasePage {
     await this.gotoEdit(postId);
     const permalink = this.page.locator("#sample-permalink a");
     await expect(permalink).toBeVisible();
-    await permalink.click();
-    await this.page.waitForLoadState("networkidle");
+    const href = await permalink.getAttribute("href");
+    await this.page.goto(href!, { waitUntil: "networkidle" });
   }
 
   async assertTitle(expected: string): Promise<void> {
