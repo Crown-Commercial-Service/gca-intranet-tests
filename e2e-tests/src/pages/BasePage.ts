@@ -22,6 +22,8 @@ export default abstract class BasePage {
   readonly contentInput: Locator;
   readonly authorSection: Locator;
   readonly authorSelect: Locator;
+  readonly newsAuthorSection: Locator;
+  readonly newsAuthorSelect: Locator;
   readonly publishButton: Locator;
   readonly publishingSpinner: Locator;
   readonly publishMessage: Locator;
@@ -68,8 +70,10 @@ export default abstract class BasePage {
 
     this.titleInput = page.locator("#title");
     this.contentInput = page.locator("#content");
-    this.authorSection = page.locator("#authordiv");
-    this.authorSelect = page.locator("#post_author_override");
+    this.authorSection = page.locator("#gca-author-selector");
+    this.authorSelect = page.locator("#gca-author-select");
+    this.newsAuthorSection = page.locator("#authordiv");
+    this.newsAuthorSelect = page.locator("#post_author_override");
     this.publishButton = page.locator("#publish");
     this.publishingSpinner = page.locator("#publishing-action .spinner");
     this.publishMessage = page.locator("#message.updated, #message.notice");
@@ -157,11 +161,11 @@ export default abstract class BasePage {
   }
 
   async gotoById(postId: number): Promise<void> {
-    const url = this.baseUrl
-      ? `${this.baseUrl.replace(/\/+$/, "")}/?p=${postId}`
-      : `/?p=${postId}`;
-
-    await this.page.goto(url, { waitUntil: "networkidle" });
+    await this.gotoEdit(postId);
+    const permalink = this.page.locator("#sample-permalink a");
+    await expect(permalink).toBeVisible();
+    const href = await permalink.getAttribute("href");
+    await this.page.goto(href!, { waitUntil: "networkidle" });
   }
 
   async gotoEdit(postId: number): Promise<void> {
@@ -185,6 +189,23 @@ export default abstract class BasePage {
 
     await this.authorSelect.selectOption(value!);
     await expect(this.authorSelect).toHaveValue(value!);
+  }
+
+  async selectNewsAuthor(author: string): Promise<void> {
+    await this.newsAuthorSection.scrollIntoViewIfNeeded();
+    await expect(this.newsAuthorSelect).toBeVisible();
+
+    const option = this.newsAuthorSelect
+      .locator("option")
+      .filter({ hasText: author })
+      .first();
+
+    const value = await option.getAttribute("value");
+
+    expect(value).toBeTruthy();
+
+    await this.newsAuthorSelect.selectOption(value!);
+    await expect(this.newsAuthorSelect).toHaveValue(value!);
   }
 
   async expectUrlToContain(value: string): Promise<void> {

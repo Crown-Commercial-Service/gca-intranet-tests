@@ -316,6 +316,7 @@ export default class WpPosts {
       title: post.title,
       content: post.content,
       status: post.status,
+      date_gmt: new Date(post.createdAt).toISOString(),
       ...(featuredMediaId ? { featured_media: featuredMediaId } : {}),
       ...(categoryId ? { categories: [categoryId] } : {}),
       ...(templateValue ? { template: templateValue } : {}),
@@ -344,6 +345,11 @@ export default class WpPosts {
     const username = this.getPostAuthorUsername(post);
     const authorId = await this.getLocalAuthorId(username);
 
+    const postDateGmt = new Date(post.createdAt)
+      .toISOString()
+      .replace("T", " ")
+      .replace(/\.\d+Z$/, "");
+
     const commandArguments = [
       "post",
       "create",
@@ -353,6 +359,7 @@ export default class WpPosts {
       `--post_content=${post.content}`,
       `--post_status=${post.status}`,
       `--post_author=${authorId}`,
+      `--post_date_gmt=${postDateGmt}`,
     ];
 
     if (categoryId) {

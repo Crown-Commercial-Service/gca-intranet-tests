@@ -33,13 +33,6 @@ export default class LatestNews extends BasePage {
     await this.page.goto(this.resolve(pathname), { waitUntil: "networkidle" });
   }
 
-  async gotoById(postId: number): Promise<void> {
-    const url = this.baseUrl
-      ? `${this.baseUrl.replace(/\/+$/, "")}/?p=${postId}`
-      : `/?p=${postId}`;
-    await this.page.goto(url, { waitUntil: "networkidle" });
-  }
-
   async assertTitle(expected: string): Promise<void> {
     await expect(this.title).toBeVisible();
     await expect(this.title).toContainText(expected);

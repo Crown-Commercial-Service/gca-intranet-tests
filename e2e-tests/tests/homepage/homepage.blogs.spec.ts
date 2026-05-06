@@ -13,8 +13,8 @@ test.describe("blogs", { tag: "@regression" }, () => {
   test.afterAll(async ({ wp }) => {
     await wp.posts.clearByTypeAndAuthor("blogs");
   });
-
-  test("should display a single blog", async ({ wp, homepage }) => {
+  // skipped so not affect other users data on qa
+  test.skip("should display a single blog", async ({ wp, homepage }) => {
     const post = Post.aPost()
       .withType("blogs")
       .withFixedTitle("E2E Blog Post")
@@ -132,8 +132,8 @@ test.describe("blogs", { tag: "@regression" }, () => {
     const postId = await wp.posts.create(post);
 
     const newUser = User.anAdmin()
-      .withUsername("verylongblogauthorname")
-      .withEmail("verylongblogauthorname@example.com")
+      .withUsername("verylongblogauthorname111111111111")
+      .withEmail("verylongblogauthorname111111111111@example.com")
       .withPassword("Password123!");
 
     await wp.users.upsert(newUser);

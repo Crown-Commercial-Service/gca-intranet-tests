@@ -11,6 +11,7 @@ test.describe("work updates", () => {
     await wp.posts.clearByTypeAndAuthor("work_updates");
   });
 
+    // test is skipped as this need a data wipe of all work update on qa thus affecting other people testing
   test.skip("should display a single work update", async ({ wp, homepage }) => {
     const post = Post.aPost()
       .withType("work_updates")
@@ -158,8 +159,8 @@ test.describe("work updates", () => {
       const postId = await wp.posts.create(post);
 
       const newUser = User.anAdmin()
-        .withUsername("verylongworkupdateauthorname")
-        .withEmail("verylongworkupdateauthorname@example.com")
+        .withUsername("verylongworkupdateauthorname1111111111")
+        .withEmail("verylongworkupdateauthorname1111111111@example.com")
         .withPassword("Password123!");
 
       await wp.users.upsert(newUser);

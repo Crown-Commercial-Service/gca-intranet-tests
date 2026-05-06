@@ -11,6 +11,7 @@ test.describe("events", () => {
     await wp.posts.clearByTypeAndAuthor("events");
   });
 
+  // test is skipped as this need a data wipe of all events on qa thus affecting other people testing
   test.skip("should display a single event", async ({
     wp,
     homepage,

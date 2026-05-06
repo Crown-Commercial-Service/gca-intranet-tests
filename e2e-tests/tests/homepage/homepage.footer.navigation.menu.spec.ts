@@ -1,6 +1,7 @@
 import { test, expect } from "../../src/wp.fixtures";
 import FooterPages from "../../src/models/FooterPages";
 
+// test is skipped as this need a data wipe of all events on qa thus affecting other people testing
 test.describe("footer navigation menu", () => {
   test.beforeEach(async ({ wp }) => {
     await wp.posts.clearByTypeAndAuthor("page");

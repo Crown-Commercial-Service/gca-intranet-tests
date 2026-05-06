@@ -97,7 +97,7 @@ test.describe("Latest news component", () => {
       await latestNewsList.assertPaginationVisible();
     },
   );
-
+  // test is skipped as this need a data wipe of all news on qa thus affecting other people testing
   test.skip("should not display pagination when there are fewer than 10 news posts", async ({
     wp,
     latestNewsList,
@@ -142,18 +142,23 @@ test.describe("Latest news component", () => {
   );
 
   test(
-    "should show correct author after updating a new article",
+    "should dispayed the author that last update an article instead of author that created it",
     { tag: "@regression" },
-    async ({ wp, latestNews }) => {
+    async ({ wp, wordpressLoginPage, latestNews }) => {
       const username = `e2e_author_${Date.now()}`;
       const newUser = User.anAdmin()
         .withUsername(username)
         .withEmail(`${username}@example.com`);
 
       await wp.users.upsert(newUser);
+
+      await wordpressLoginPage.logout();
+      await wordpressLoginPage.goto();
+      await wordpressLoginPage.login(newUser.username, newUser.password);
+
       await latestNews.gotoEdit(postId);
-      await latestNews.selectAuthor(newUser.username);
       await latestNews.update();
+
       await latestNews.gotoById(postId);
       await latestNews.assertAuthor(newUser.username);
     },
@@ -191,7 +196,7 @@ test.describe("Latest news component", { tag: "@regression" }, () => {
     await latestNews.selectCategory("Digital and data");
     await latestNews.selectLabel("CCS live");
     await latestNews.fillExcerpt(templatePage);
-    await latestNews.selectColumnTemplate("Layout – 2 column");
+    await latestNews.selectColumnTemplate("Layout - 2 column");
     await latestNews.update();
     await latestNews.gotoById(pageId);
     await latestNews.assertTwoColumnTemplateIsApplied();
@@ -220,7 +225,7 @@ test.describe("Latest news component", { tag: "@regression" }, () => {
     await latestNews.selectCategory("Digital and data");
     await latestNews.selectLabel("CCS live");
     await latestNews.fillExcerpt(templatePage);
-    await latestNews.selectColumnTemplate("Layout – 1 column");
+    await latestNews.selectColumnTemplate("Layout - 1 column");
     await latestNews.update();
     await latestNews.gotoById(pageId);
     await latestNews.assertOneColumnTemplateIsApplied();

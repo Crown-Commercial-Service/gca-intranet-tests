@@ -59,7 +59,7 @@ test.describe("Event Component", { tag: "@regression" }, () => {
     await eventPage.assertDateAndTime(event);
   });
 
-  test.skip("event with start and end date and start and end time", async ({ //fix date
+  test("event with start and end date and start and end time", async ({ //fix date
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -86,7 +86,7 @@ test.describe("Event Component", { tag: "@regression" }, () => {
     await eventPage.assertDateAndTime(event);
   });
 
-  test.skip("event with start date and start time only", async ({ //fix date
+  test("event with start date and start time only", async ({ //fix date
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -111,7 +111,7 @@ test.describe("Event Component", { tag: "@regression" }, () => {
     await eventPage.assertDateAndTime(event);
   });
 
-  test.skip("event with start and end date and only start time", async ({ //fix date
+  test("event with start and end date and only start time", async ({ //fix date
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -137,7 +137,7 @@ test.describe("Event Component", { tag: "@regression" }, () => {
     await eventPage.assertDateAndTime(event);
   });
 
-  test.skip("event with start and end date and only end time", async ({ //fix date
+  test("event with start and end date and only end time", async ({ //fix date
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -163,7 +163,7 @@ test.describe("Event Component", { tag: "@regression" }, () => {
     await eventPage.assertDateAndTime(event);
   });
 
-  test.skip("event with start date and end time", async ({ //fix date
+  test("event with start date and end time", async ({ //fix date
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -217,7 +217,7 @@ test.describe("Event Component", { tag: "@regression" }, () => {
     await wordpressLoginPage.goto();
     await wordpressLoginPage.loginAsAdmin();
     await eventEditorPage.gotoEdit(eventId);
-    await eventEditorPage.selectColumnTemplate("Layout – 2 column");
+    await eventEditorPage.selectColumnTemplate("Layout - 2 column");
     await eventEditorPage.fillEventDetails(event);
     await eventEditorPage.update();
     await eventPage.gotoById(eventId);
@@ -243,7 +243,7 @@ test.describe("Event Component", { tag: "@regression" }, () => {
     await wordpressLoginPage.goto();
     await wordpressLoginPage.loginAsAdmin();
     await eventEditorPage.gotoEdit(eventId);
-    await eventEditorPage.selectColumnTemplate("Layout – 1 column");
+    await eventEditorPage.selectColumnTemplate("Layout - 1 column");
     await eventEditorPage.fillEventDetails(event);
     await eventEditorPage.update();
     await eventPage.gotoById(eventId);

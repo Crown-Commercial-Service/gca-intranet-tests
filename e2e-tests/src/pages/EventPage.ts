@@ -32,16 +32,6 @@ export default class EventPage extends BasePage {
     this.eventSection = "[data-testid='event-main']";
   }
 
-  async gotoById(eventId: number): Promise<void> {
-    const url = this.baseUrl
-      ? `${this.baseUrl.replace(/\/+$/, "")}/?p=${eventId}`
-      : `/?p=${eventId}`;
-
-    await this.page.goto(url, {
-      waitUntil: "domcontentloaded",
-    });
-  }
-
   async assertHeading(title: string): Promise<void> {
     await expect(this.heading).toHaveText(title);
   }

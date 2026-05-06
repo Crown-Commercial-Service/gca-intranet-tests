@@ -174,7 +174,7 @@ test.describe("Blog component", { tag: "@regression" }, () => {
     await blog.gotoEdit(pageId);
     await blog.selectLabel("CCS live");
     await blog.addAuthorImage("author-image.jpg");
-    await blog.selectColumnTemplate("Layout – 2 column");
+    await blog.selectColumnTemplate("Layout - 2 column");
     await blog.update();
     await blog.gotoById(pageId);
     await blog.assertTwoColumnTemplateIsApplied();
@@ -200,7 +200,7 @@ test.describe("Blog component", { tag: "@regression" }, () => {
 
     await blog.gotoEdit(pageId);
     await blog.selectLabel("CCS live");
-    await blog.selectColumnTemplate("Layout – 1 column");
+    await blog.selectColumnTemplate("Layout - 1 column");
     await blog.addAuthorImage("author-image.jpg");
     await blog.update();
     await blog.gotoById(pageId);

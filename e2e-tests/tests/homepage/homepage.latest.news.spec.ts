@@ -90,8 +90,8 @@ test.describe("homepage - latest news", () => {
       });
     },
   );
-  // BUG: https://crowncommercialservice.atlassian.net/browse/GI-379
-  test.skip(
+  
+  test(
     "should enforce title and paragraph character limits in two columns",
     { tag: "@regression" },
     async ({ wp, homepage }) => {
