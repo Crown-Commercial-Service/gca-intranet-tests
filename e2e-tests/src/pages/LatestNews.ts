@@ -34,10 +34,11 @@ export default class LatestNews extends BasePage {
   }
 
   async gotoById(postId: number): Promise<void> {
-    const url = this.baseUrl
-      ? `${this.baseUrl.replace(/\/+$/, "")}/?p=${postId}`
-      : `/?p=${postId}`;
-    await this.page.goto(url, { waitUntil: "networkidle" });
+    await this.gotoEdit(postId);
+    const permalink = this.page.locator("#sample-permalink a");
+    await expect(permalink).toBeVisible();
+    await permalink.click();
+    await this.page.waitForLoadState("networkidle");
   }
 
   async assertTitle(expected: string): Promise<void> {
