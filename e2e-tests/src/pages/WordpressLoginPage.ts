@@ -35,4 +35,8 @@ export default class WordpressLoginPage {
       process.env.WP_ADMIN_PASSWORD!,
     );
   }
+
+  async logout(): Promise<void> {
+    await this.page.context().clearCookies();
+  }
 }

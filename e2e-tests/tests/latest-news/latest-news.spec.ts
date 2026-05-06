@@ -144,16 +144,21 @@ test.describe("Latest news component", () => {
   test(
     "should show correct author after updating a new article",
     { tag: "@regression" },
-    async ({ wp, latestNews }) => {
+    async ({ wp, wordpressLoginPage, latestNews }) => {
       const username = `e2e_author_${Date.now()}`;
       const newUser = User.anAdmin()
         .withUsername(username)
         .withEmail(`${username}@example.com`);
 
       await wp.users.upsert(newUser);
+
+      await wordpressLoginPage.logout();
+      await wordpressLoginPage.goto();
+      await wordpressLoginPage.login(newUser.username, newUser.password);
+
       await latestNews.gotoEdit(postId);
-      await latestNews.selectNewsAuthor(newUser.username);
       await latestNews.update();
+
       await latestNews.gotoById(postId);
       await latestNews.assertAuthor(newUser.username);
     },
