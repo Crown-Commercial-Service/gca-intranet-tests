@@ -4,7 +4,7 @@ import User from "../../src/models/User";
 
 test.describe("work updates", () => {
   test.beforeEach(async ({ wp }) => {
-    await wp.posts.clearByTypeAndAuthor("work_updates");
+    await wp.posts.clearByType("work_updates");
   });
 
   test.afterAll(async ({ wp }) => {
@@ -85,7 +85,8 @@ test.describe("work updates", () => {
   test(
     "should open work update page",
     { tag: "@regression" },
-    async ({ wp, workUpdate }) => {
+    async ({ wp, homepage, workUpdate }) => {
+      void homepage;
       const post = Post.aPost()
         .withType("work_updates")
         .withFixedTitle("Supplier Onboarding Improvements")
