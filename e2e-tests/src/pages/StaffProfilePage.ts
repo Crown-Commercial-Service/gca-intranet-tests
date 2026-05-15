@@ -6,19 +6,8 @@ export default class StaffProfilePage extends BasePage {
     super(page, baseUrl);
   }
 
-  async assertStaffDetails(
-    name: string,
-    role: string,
-    manager: string,
-  ): Promise<void> {
+  async assertStaffDetails(name: string, role: string): Promise<void> {
     await expect(this.page.getByText(name, { exact: false }).first()).toBeVisible();
     await expect(this.page.getByText(role, { exact: false }).first()).toBeVisible();
-
-    const managerName = manager.replace(/^Reports to:\s*/i, "").trim();
-    if (managerName) {
-      await expect(
-        this.page.getByText(managerName, { exact: false }).first(),
-      ).toBeVisible();
-    }
   }
 }

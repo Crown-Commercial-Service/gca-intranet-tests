@@ -85,35 +85,8 @@ export default class StaffDirectoryPage extends BasePage {
     );
   }
 
-  async firstCardDetails(): Promise<{
-    name: string;
-    role: string;
-    manager: string;
-    profileHref: string;
-  }> {
-    const card = this.staffCards.first();
-    await expect(card).toBeVisible();
-
-    const name = ((await card.locator(".sd-staff-card__name").textContent()) ?? "").trim();
-    const role = ((await card.locator(".sd-staff-card__role").textContent()) ?? "").trim();
-    const manager = ((await card.locator(".sd-staff-card__manager").textContent()) ?? "").trim();
-    const profileHref =
-      (await card.locator(".sd-staff-card__link").getAttribute("href")) ?? "";
-
-    expect(name).toBeTruthy();
-    expect(profileHref).toBeTruthy();
-
-    return { name, role, manager, profileHref };
-  }
-
   async openStaffProfile(name: string): Promise<void> {
     const link = this.cardByName(name).locator(".sd-staff-card__link");
-    await expect(link).toBeVisible();
-    await link.click();
-  }
-
-  async openFirstStaffProfile(): Promise<void> {
-    const link = this.staffCards.first().locator(".sd-staff-card__link");
     await expect(link).toBeVisible();
     await link.click();
   }

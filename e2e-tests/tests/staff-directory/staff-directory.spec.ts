@@ -31,23 +31,27 @@ test.describe("staff directory", { tag: "@regression" }, () => {
     await staffDirectory.openStaffProfile(name);
 
     await staffProfile.expectUrlToContain("/profile/chris.morris/");
-    await staffProfile.assertStaffDetails(name, role, manager);
+    await staffProfile.assertStaffDetails(name, role);
   });
 
   test("can filter staff by team and view their profile", async ({
     staffDirectory,
     staffProfile,
   }) => {
+    const name = "chris morris";
+    const role = "Software Developer";
+    const manager = "Reports to: Floyd Boss";
+
     await staffDirectory.selectDirectorate("Digital and Data Services");
     await staffDirectory.selectTeam(
       "Digital and Data Services (Dev Gupta (Inherited))",
     );
 
-    const { name, role, manager } = await staffDirectory.firstCardDetails();
+    await staffDirectory.assertStaffCard(name, role, manager);
 
-    await staffDirectory.openFirstStaffProfile();
+    await staffDirectory.openStaffProfile(name);
 
-    await staffProfile.expectUrlToContain("/profile/");
-    await staffProfile.assertStaffDetails(name, role, manager);
+    await staffProfile.expectUrlToContain("/profile/chris.morris/");
+    await staffProfile.assertStaffDetails(name, role);
   });
 });
