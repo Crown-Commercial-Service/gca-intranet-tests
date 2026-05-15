@@ -25,6 +25,8 @@ import EventsListPage from "../src/pages/EventsListPage";
 import EventPage from "../src/pages/EventPage";
 import ContentPage from "../src/pages/ContentPage";
 import SearchResultsPage from "../src/pages/SearchResultsPage";
+import StaffDirectoryPage from "../src/pages/StaffDirectoryPage";
+import StaffProfilePage from "../src/pages/StaffProfilePage";
 
 type WpHelpers = {
   exec: typeof runWp;
@@ -55,6 +57,8 @@ type Fixtures = {
   eventPage: EventPage;
   searchResultsPage: SearchResultsPage;
   contentPage: ContentPage;
+  staffDirectory: StaffDirectoryPage;
+  staffProfile: StaffProfilePage;
 
   runId: string;
 };
@@ -241,7 +245,8 @@ export const test = base.extend<Fixtures>({
     const parallel = qaMode ? false : await isParallelEnabled();
     const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
 
-    await use(new ContentPage(page, baseUrl));
+    // await use(new ContentPage(page, baseUrl));
+        await use(new ContentPage(page));
   },
 
   blogList: async ({ page }, use, testInfo) => {
@@ -249,7 +254,8 @@ export const test = base.extend<Fixtures>({
     const parallel = qaMode ? false : await isParallelEnabled();
     const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
 
-    await use(new BlogListPage(page, baseUrl));
+    // await use(new BlogListPage(page, baseUrl));
+        await use(new BlogListPage(page));
   },
 
   eventsListPage: async ({ page }, use, testInfo) => {
@@ -274,6 +280,26 @@ export const test = base.extend<Fixtures>({
     const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
 
     await use(new SearchResultsPage(page, baseUrl));
+  },
+
+  staffDirectory: async ({ page }, use, testInfo) => {
+    const qaMode = isQaMode();
+    const parallel = qaMode ? false : await isParallelEnabled();
+    const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
+
+    if (qaMode) {
+      await loginToQaWordpress(page);
+    }
+
+    await use(new StaffDirectoryPage(page, baseUrl));
+  },
+
+  staffProfile: async ({ page }, use, testInfo) => {
+    const qaMode = isQaMode();
+    const parallel = qaMode ? false : await isParallelEnabled();
+    const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
+
+    await use(new StaffProfilePage(page, baseUrl));
   },
 });
 
