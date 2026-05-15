@@ -180,6 +180,37 @@ export default class WpPosts {
     await this.wp(["post", "delete", ...ids.split(/\s+/), "--force"]);
   }
 
+  async getPostLink(postId: number, postType: string): Promise<string> {
+    if (this.isRemoteDriver()) {
+      const restConfig = rest.getRestConfig();
+      const endpoint = rest.restEndpointForType(postType);
+
+      const post = await rest.wpRest<any>(
+        restConfig,
+        "GET",
+        `/wp-json/wp/v2/${endpoint}/${postId}?_fields=link`,
+      );
+
+      const link = String(post?.link || "").trim();
+      if (!link) {
+        throw new Error(`Failed to resolve link for post ${postId}`);
+      }
+
+      return link;
+    }
+
+    const result = await this.wp(["eval", `echo get_permalink(${postId});`]);
+
+    if (result.exitCode !== 0) {
+      throw utils.formatWpCliFailure(
+        `Failed to resolve link for post ${postId}`,
+        result,
+      );
+    }
+
+    return (result.stdout || "").trim();
+  }
+
   async getPublishedDate(postId: number): Promise<string> {
     if (this.isRemoteDriver()) {
       const post = await rest.wpRest<any>(

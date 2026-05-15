@@ -53,7 +53,7 @@ test.describe("blogs", { tag: "@regression" }, () => {
     await homepage.goto();
     await homepage.selectBlogLink(post);
 
-    await blog.expectUrlToContain("e2e-blog-navigation/");
+    await blog.expectUrlToContain("e2e-blog-navigation(?:-\\d+)?/");
     await blog.assertBreadcrumbs(post);
   });
 

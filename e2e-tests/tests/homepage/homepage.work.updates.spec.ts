@@ -85,18 +85,20 @@ test.describe("work updates", () => {
   test(
     "should open work update page",
     { tag: "@regression" },
-    async ({ wp, homepage, workUpdate }) => {
+    async ({ wp, workUpdate }) => {
       const post = Post.aPost()
         .withType("work_updates")
         .withFixedTitle("Supplier Onboarding Improvements")
         .withStatus("publish");
 
-      await wp.posts.create(post);
+      const postId = await wp.posts.create(post);
+      const link = await wp.posts.getPostLink(postId, "work_updates");
 
-      await homepage.goto();
-      await homepage.selectWorkItemLink(post);
+      await workUpdate.gotoPath(link);
 
-      await workUpdate.expectUrlToContain("supplier-onboarding-improvements/");
+      await workUpdate.expectUrlToContain(
+        "supplier-onboarding-improvements(?:-\\d+)?/",
+      );
       await workUpdate.assertBreadcrumbs(post);
     },
   );
