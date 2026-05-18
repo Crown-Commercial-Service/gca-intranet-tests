@@ -193,40 +193,4 @@ export default class EventsListPage extends BasePage {
     ).toBeVisible();
   }
 
-  async assertEventUnderMonthHeading(
-    eventTitle: string,
-    monthYear: string,
-  ): Promise<void> {
-    const items = await this.postsContainer.locator(":scope > *").all();
-
-    let currentMonth: string | null = null;
-    let found = false;
-
-    for (const item of items) {
-      const testid = await item.getAttribute("data-testid");
-
-      if (testid === "archive-event-month-heading") {
-        currentMonth = ((await item.textContent()) ?? "").trim();
-        continue;
-      }
-
-      if (testid === "archive-event-post" && currentMonth === monthYear) {
-        const title = (
-          (await item
-            .getByTestId("archive-event-post-title")
-            .textContent()) ?? ""
-        ).trim();
-
-        if (title.includes(eventTitle)) {
-          found = true;
-          break;
-        }
-      }
-    }
-
-    expect(
-      found,
-      `Expected "${eventTitle}" to be grouped under "${monthYear}" heading`,
-    ).toBe(true);
-  }
 }

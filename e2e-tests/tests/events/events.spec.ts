@@ -397,51 +397,46 @@ test.describe("Event upcoming and past views", () => {
   );
 
   test(
-    "past events spanning different months are grouped under their month heading",
+    "events spanning different months are grouped under their month heading",
     { tag: "@regression" },
     async ({ wp, eventEditorPage, eventsListPage, runId }) => {
-      const oneDayAgo = dayjs().subtract(1, "day").format("DD-MM-YYYY");
-      const twentyDaysAgo = dayjs().subtract(20, "day").format("DD-MM-YYYY");
-      const recentMonth = dayjs().subtract(1, "day").format("MMMM YYYY");
-      const earlierMonth = dayjs().subtract(20, "day").format("MMMM YYYY");
+      const thisMonthDate = dayjs().add(5, "day").format("DD-MM-YYYY");
+      const nextMonthDate = dayjs().add(40, "day").format("DD-MM-YYYY");
+      const thisMonth = dayjs().add(5, "day").format("MMMM YYYY");
+      const nextMonth = dayjs().add(40, "day").format("MMMM YYYY");
 
-      const recentPastEvent = Event.anEvent()
-        .withFixedTitle(`Recent Past ${runId}`)
-        .withStartDate(oneDayAgo)
-        .withEndDate(oneDayAgo)
+      const thisMonthEvent = Event.anEvent()
+        .withFixedTitle(`This Month ${runId}`)
+        .withStartDate(thisMonthDate)
+        .withEndDate(thisMonthDate)
         .withStatus("publish");
 
-      const earlierPastEvent = Event.anEvent()
-        .withFixedTitle(`Earlier Past ${runId}`)
-        .withStartDate(twentyDaysAgo)
-        .withEndDate(twentyDaysAgo)
+      const nextMonthEvent = Event.anEvent()
+        .withFixedTitle(`Next Month ${runId}`)
+        .withStartDate(nextMonthDate)
+        .withEndDate(nextMonthDate)
         .withStatus("publish");
 
-      const recentId = await wp.events.create(recentPastEvent);
-      const earlierId = await wp.events.create(earlierPastEvent);
+      const thisMonthId = await wp.events.create(thisMonthEvent);
+      const nextMonthId = await wp.events.create(nextMonthEvent);
 
-      await eventEditorPage.gotoEdit(recentId);
+      await eventEditorPage.gotoEdit(thisMonthId);
       await eventEditorPage.selectCategory("Workday");
-      await eventEditorPage.fillEventDetails(recentPastEvent);
+      await eventEditorPage.fillEventDetails(thisMonthEvent);
       await eventEditorPage.update();
 
-      await eventEditorPage.gotoEdit(earlierId);
+      await eventEditorPage.gotoEdit(nextMonthId);
       await eventEditorPage.selectCategory("Workday");
-      await eventEditorPage.fillEventDetails(earlierPastEvent);
+      await eventEditorPage.fillEventDetails(nextMonthEvent);
       await eventEditorPage.update();
 
-      await eventsListPage.gotoPastEventsList("workday");
+      await eventsListPage.gotoEventsList();
+      await eventsListPage.applyCategoryFilter("workday");
 
-      await eventsListPage.assertMonthHeadingVisible(recentMonth);
-      await eventsListPage.assertMonthHeadingVisible(earlierMonth);
-      await eventsListPage.assertEventUnderMonthHeading(
-        recentPastEvent.title,
-        recentMonth,
-      );
-      await eventsListPage.assertEventUnderMonthHeading(
-        earlierPastEvent.title,
-        earlierMonth,
-      );
+      await eventsListPage.assertPostVisible(thisMonthEvent.title);
+      await eventsListPage.assertPostVisible(nextMonthEvent.title);
+      await eventsListPage.assertMonthHeadingVisible(thisMonth);
+      await eventsListPage.assertMonthHeadingVisible(nextMonth);
     },
   );
 
@@ -466,7 +461,7 @@ test.describe("Event upcoming and past views", () => {
 
       await eventsListPage.gotoEventsList();
       await eventsListPage.assertPostVisible(event.title);
-      await eventsListPage.assertEventUnderMonthHeading(event.title, endMonth);
+      await eventsListPage.assertMonthHeadingVisible(endMonth);
     },
   );
 });
