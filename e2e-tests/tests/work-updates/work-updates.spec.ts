@@ -163,6 +163,154 @@ test.describe("Work update component", () => {
   );
 });
 
+test.describe("Work update filtering", () => {
+  test.beforeEach(async ({ wp, wordpressLoginPage }) => {
+    await wp.posts.clearByTypeAndAuthor("work_updates");
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+  });
+
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("work_updates");
+  });
+
+  const aWorkUpdate = (title: string) =>
+    Post.aPost()
+      .withType("work_updates")
+      .withFixedTitle(title)
+      .withParagraphMaxChars(120)
+      .withStatus("publish")
+      .build();
+
+  test(
+    "filters work updates by a single article type",
+    { tag: "@regression" },
+    async ({ wp, workUpdate, workUpdateList, runId }) => {
+      const businessPost = aWorkUpdate(`Business Update ${runId}`);
+      const rewardPost = aWorkUpdate(`Reward Update ${runId}`);
+
+      const businessPostId = await wp.posts.create(businessPost);
+      const rewardPostId = await wp.posts.create(rewardPost);
+
+      await workUpdate.gotoEdit(businessPostId);
+      await workUpdate.selectLabel("Business update");
+      await workUpdate.update();
+
+      await workUpdate.gotoEdit(rewardPostId);
+      await workUpdate.selectLabel("Reward");
+      await workUpdate.update();
+
+      await workUpdateList.gotoWorkUpdateList();
+      await workUpdateList.assertPostVisible(businessPost.title);
+      await workUpdateList.assertPostVisible(rewardPost.title);
+
+      await workUpdateList.applyLabelFilter("business-update");
+
+      await workUpdateList.assertPostVisible(businessPost.title);
+      await workUpdateList.assertPostNotVisible(rewardPost.title);
+    },
+  );
+
+  test(
+    "filters work updates by article type and responsible team together",
+    { tag: "@regression" },
+    async ({ wp, workUpdate, workUpdateList, runId }) => {
+      const matchingPost = aWorkUpdate(`Business Finance ${runId}`);
+      const wrongLabelPost = aWorkUpdate(`Reward Finance ${runId}`);
+      const wrongTeamPost = aWorkUpdate(`Business NoTeam ${runId}`);
+
+      const matchingId = await wp.posts.create(matchingPost);
+      const wrongLabelId = await wp.posts.create(wrongLabelPost);
+      const wrongTeamId = await wp.posts.create(wrongTeamPost);
+
+      await workUpdate.gotoEdit(matchingId);
+      await workUpdate.selectLabel("Business update");
+      await workUpdate.selectTeam("Finance");
+      await workUpdate.update();
+
+      await workUpdate.gotoEdit(wrongLabelId);
+      await workUpdate.selectLabel("Reward");
+      await workUpdate.selectTeam("Finance");
+      await workUpdate.update();
+
+      await workUpdate.gotoEdit(wrongTeamId);
+      await workUpdate.selectLabel("Business update");
+      await workUpdate.update();
+
+      await workUpdateList.gotoWorkUpdateList();
+      await workUpdateList.applyLabelFilter("business-update");
+      await workUpdateList.applyTeamFilter("finance");
+
+      await workUpdateList.assertPostVisible(matchingPost.title);
+      await workUpdateList.assertPostNotVisible(wrongLabelPost.title);
+      await workUpdateList.assertPostNotVisible(wrongTeamPost.title);
+    },
+  );
+
+  test(
+    "shows article type and team in the filter list when posts use them",
+    { tag: "@regression" },
+    async ({ wp, workUpdate, workUpdateList, runId }) => {
+      const post = aWorkUpdate(`Filter Visibility ${runId}`);
+      const postId = await wp.posts.create(post);
+
+      await workUpdate.gotoEdit(postId);
+      await workUpdate.selectLabel("Business update");
+      await workUpdate.selectTeam("Finance");
+      await workUpdate.update();
+
+      await workUpdateList.gotoWorkUpdateList();
+      await workUpdateList.assertLabelFilterAvailable(
+        "business-update",
+        "Business update",
+      );
+      await workUpdateList.assertTeamFilterAvailable("finance", "Finance");
+    },
+  );
+
+  test(
+    "sorts work updates by newest first by default and reverses when oldest first is selected",
+    { tag: "@regression" },
+    async ({ wp, workUpdate, workUpdateList, runId }) => {
+      const now = Date.now();
+      const olderPost = Post.aPost()
+        .withType("work_updates")
+        .withFixedTitle(`Older Update ${runId}`)
+        .withParagraphMaxChars(120)
+        .withStatus("publish")
+        .withCreatedAt(new Date(now - 10 * 60 * 1000))
+        .build();
+
+      const newerPost = Post.aPost()
+        .withType("work_updates")
+        .withFixedTitle(`Newer Update ${runId}`)
+        .withParagraphMaxChars(120)
+        .withStatus("publish")
+        .withCreatedAt(new Date(now - 1 * 60 * 1000))
+        .build();
+
+      const olderId = await wp.posts.create(olderPost);
+      const newerId = await wp.posts.create(newerPost);
+
+      await workUpdate.gotoEdit(olderId);
+      await workUpdate.selectLabel("Reward");
+      await workUpdate.update();
+
+      await workUpdate.gotoEdit(newerId);
+      await workUpdate.selectLabel("Reward");
+      await workUpdate.update();
+
+      await workUpdateList.gotoWorkUpdateList();
+      await workUpdateList.applyLabelFilter("reward");
+
+      await workUpdateList.assertPostBefore(newerPost.title, olderPost.title);
+
+      await workUpdateList.selectSortOrder("oldest");
+      await workUpdateList.assertPostBefore(olderPost.title, newerPost.title);
+    },
+  );
+});
+
 test.describe("Work update component", { tag: "@regression" }, () => {
   test.beforeEach(async ({ wp }) => {
     await wp.posts.clearByTypeAndAuthor("work_updates");

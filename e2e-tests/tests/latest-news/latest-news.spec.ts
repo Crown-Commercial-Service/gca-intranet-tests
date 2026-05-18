@@ -165,6 +165,147 @@ test.describe("Latest news component", () => {
   );
 });
 
+test.describe("Latest news filtering", () => {
+  test.beforeEach(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("news");
+  });
+
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("news");
+  });
+
+  test(
+    "filters news posts by a single category",
+    { tag: "@regression" },
+    async ({ wp, latestNewsList, runId }) => {
+      const hrPost = Post.aPost()
+        .withType("news")
+        .withFixedTitle(`HR News ${runId}`)
+        .withParagraphMaxChars(120)
+        .withStatus("publish")
+        .withCategory("HR")
+        .build();
+
+      const securityPost = Post.aPost()
+        .withType("news")
+        .withFixedTitle(`Security News ${runId}`)
+        .withParagraphMaxChars(120)
+        .withStatus("publish")
+        .withCategory("Information security")
+        .build();
+
+      await wp.posts.create(hrPost);
+      await wp.posts.create(securityPost);
+
+      await latestNewsList.gotoNewsList();
+      await latestNewsList.assertPostVisible(hrPost.title);
+      await latestNewsList.assertPostVisible(securityPost.title);
+
+      await latestNewsList.applyCategoryFilter("hr");
+
+      await latestNewsList.assertPostVisible(hrPost.title);
+      await latestNewsList.assertPostNotVisible(securityPost.title);
+    },
+  );
+
+  test(
+    "filters news posts by multiple categories selected together",
+    { tag: "@regression" },
+    async ({ wp, latestNewsList, runId }) => {
+      const hrPost = Post.aPost()
+        .withType("news")
+        .withFixedTitle(`HR News ${runId}`)
+        .withParagraphMaxChars(120)
+        .withStatus("publish")
+        .withCategory("HR")
+        .build();
+
+      const securityPost = Post.aPost()
+        .withType("news")
+        .withFixedTitle(`Security News ${runId}`)
+        .withParagraphMaxChars(120)
+        .withStatus("publish")
+        .withCategory("Information security")
+        .build();
+
+      const workdayPost = Post.aPost()
+        .withType("news")
+        .withFixedTitle(`Workday News ${runId}`)
+        .withParagraphMaxChars(120)
+        .withStatus("publish")
+        .withCategory("Workday")
+        .build();
+
+      await wp.posts.create(hrPost);
+      await wp.posts.create(securityPost);
+      await wp.posts.create(workdayPost);
+
+      await latestNewsList.gotoNewsList();
+      await latestNewsList.applyCategoryFilter("hr");
+      await latestNewsList.applyCategoryFilter("information-security");
+
+      await latestNewsList.assertPostVisible(hrPost.title);
+      await latestNewsList.assertPostVisible(securityPost.title);
+      await latestNewsList.assertPostNotVisible(workdayPost.title);
+    },
+  );
+
+  test(
+    "shows a category in the filter list when at least one post uses it",
+    { tag: "@regression" },
+    async ({ wp, latestNewsList, runId }) => {
+      const hrPost = Post.aPost()
+        .withType("news")
+        .withFixedTitle(`HR News ${runId}`)
+        .withParagraphMaxChars(120)
+        .withStatus("publish")
+        .withCategory("HR")
+        .build();
+
+      await wp.posts.create(hrPost);
+
+      await latestNewsList.gotoNewsList();
+      await latestNewsList.assertCategoryFilterAvailable("hr", "HR");
+    },
+  );
+
+  test(
+    "sorts news by newest first by default and reverses when oldest first is selected",
+    { tag: "@regression" },
+    async ({ wp, latestNewsList, runId }) => {
+      const now = Date.now();
+      const olderPost = Post.aPost()
+        .withType("news")
+        .withFixedTitle(`Older News ${runId}`)
+        .withParagraphMaxChars(120)
+        .withStatus("publish")
+        .withCategory("Workday")
+        .withCreatedAt(new Date(now - 10 * 60 * 1000))
+        .build();
+
+      const newerPost = Post.aPost()
+        .withType("news")
+        .withFixedTitle(`Newer News ${runId}`)
+        .withParagraphMaxChars(120)
+        .withStatus("publish")
+        .withCategory("Workday")
+        .withCreatedAt(new Date(now - 1 * 60 * 1000))
+        .build();
+
+      await wp.posts.create(olderPost);
+      await wp.posts.create(newerPost);
+
+      await latestNewsList.gotoNewsList();
+      await latestNewsList.applyCategoryFilter("workday");
+
+      await latestNewsList.assertPostBefore(newerPost.title, olderPost.title);
+
+      await latestNewsList.selectSortOrder("oldest");
+      await latestNewsList.assertPostBefore(olderPost.title, newerPost.title);
+    },
+  );
+});
+
 test.describe("Latest news component", { tag: "@regression" }, () => {
   test.beforeEach(async ({ wp }) => {
     await wp.posts.clearByTypeAndAuthor("news");

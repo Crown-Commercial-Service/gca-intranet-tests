@@ -144,6 +144,150 @@ test.describe("Blog component", () => {
   );
 });
 
+test.describe("Blog filtering", () => {
+  test.beforeEach(async ({ wp, wordpressLoginPage }) => {
+    await wp.posts.clearByTypeAndAuthor("blogs");
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+  });
+
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("blogs");
+  });
+
+  const aBlog = (title: string) =>
+    Post.aPost()
+      .withType("blogs")
+      .withFixedTitle(title)
+      .withParagraphMaxChars(120)
+      .withStatus("publish")
+      .build();
+
+  test(
+    "filters blogs by a single article type",
+    { tag: "@regression" },
+    async ({ wp, blog, blogList, runId }) => {
+      const businessPost = aBlog(`Business Blog ${runId}`);
+      const rewardPost = aBlog(`Reward Blog ${runId}`);
+
+      const businessId = await wp.posts.create(businessPost);
+      const rewardId = await wp.posts.create(rewardPost);
+
+      await blog.gotoEdit(businessId);
+      await blog.selectLabel("Business update");
+      await blog.update();
+
+      await blog.gotoEdit(rewardId);
+      await blog.selectLabel("Reward");
+      await blog.update();
+
+      await blogList.gotoBlogList();
+      await blogList.assertPostVisible(businessPost.title);
+      await blogList.assertPostVisible(rewardPost.title);
+
+      await blogList.applyLabelFilter("business-update");
+
+      await blogList.assertPostVisible(businessPost.title);
+      await blogList.assertPostNotVisible(rewardPost.title);
+    },
+  );
+
+  test(
+    "filters blogs by multiple article types selected together",
+    { tag: "@regression" },
+    async ({ wp, blog, blogList, runId }) => {
+      const businessPost = aBlog(`Business Blog ${runId}`);
+      const rewardPost = aBlog(`Reward Blog ${runId}`);
+      const recognitionPost = aBlog(`Recognition Blog ${runId}`);
+
+      const businessId = await wp.posts.create(businessPost);
+      const rewardId = await wp.posts.create(rewardPost);
+      const recognitionId = await wp.posts.create(recognitionPost);
+
+      await blog.gotoEdit(businessId);
+      await blog.selectLabel("Business update");
+      await blog.update();
+
+      await blog.gotoEdit(rewardId);
+      await blog.selectLabel("Reward");
+      await blog.update();
+
+      await blog.gotoEdit(recognitionId);
+      await blog.selectLabel("Recognition");
+      await blog.update();
+
+      await blogList.gotoBlogList();
+      await blogList.applyLabelFilter("business-update");
+      await blogList.applyLabelFilter("reward");
+
+      await blogList.assertPostVisible(businessPost.title);
+      await blogList.assertPostVisible(rewardPost.title);
+      await blogList.assertPostNotVisible(recognitionPost.title);
+    },
+  );
+
+  test(
+    "shows an article type in the filter list when at least one blog uses it",
+    { tag: "@regression" },
+    async ({ wp, blog, blogList, runId }) => {
+      const post = aBlog(`Filter Visibility ${runId}`);
+      const postId = await wp.posts.create(post);
+
+      await blog.gotoEdit(postId);
+      await blog.selectLabel("Business update");
+      await blog.update();
+
+      await blogList.gotoBlogList();
+      await blogList.assertLabelFilterAvailable(
+        "business-update",
+        "Business update",
+      );
+    },
+  );
+
+  test(
+    "sorts blogs by newest first by default and reverses when oldest first is selected",
+    { tag: "@regression" },
+    async ({ wp, blog, blogList, runId }) => {
+      const now = Date.now();
+      const olderPost = Post.aPost()
+        .withType("blogs")
+        .withFixedTitle(`Older Blog ${runId}`)
+        .withParagraphMaxChars(120)
+        .withStatus("publish")
+        .withCreatedAt(new Date(now - 10 * 60 * 1000))
+        .build();
+
+      const newerPost = Post.aPost()
+        .withType("blogs")
+        .withFixedTitle(`Newer Blog ${runId}`)
+        .withParagraphMaxChars(120)
+        .withStatus("publish")
+        .withCreatedAt(new Date(now - 1 * 60 * 1000))
+        .build();
+
+      const olderId = await wp.posts.create(olderPost);
+      const newerId = await wp.posts.create(newerPost);
+
+      await blog.gotoEdit(olderId);
+      await blog.selectLabel("Reward");
+      await blog.update();
+
+      await blog.gotoEdit(newerId);
+      await blog.selectLabel("Reward");
+      await blog.update();
+
+      await blogList.gotoBlogList();
+      await blogList.applyLabelFilter("reward");
+
+      await blogList.assertPostBefore(newerPost.title, olderPost.title);
+
+      await blogList.selectSortOrder("oldest");
+      await blogList.assertPostBefore(olderPost.title, newerPost.title);
+    },
+  );
+});
+
 test.describe("Blog component", { tag: "@regression" }, () => {
   test.beforeEach(async ({ wp }) => {
     await wp.posts.clearByTypeAndAuthor("blogs");

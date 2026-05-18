@@ -15,6 +15,8 @@ export default class WorkUpdateList extends BasePage {
   readonly postLabels: Locator;
   readonly postTeams: Locator;
 
+  readonly filters: Locator;
+
   // Work update Selectors
   readonly workUpdateListSection: string;
 
@@ -31,6 +33,7 @@ export default class WorkUpdateList extends BasePage {
     this.postDates = this.page.getByTestId("work-update-post-date");
     this.postLabels = this.page.getByTestId("work-update-tax");
     this.postTeams = this.page.getByTestId("work-update-team");
+    this.filters = this.page.getByTestId("archive-filters");
     this.workUpdateListSection = "[data-testid='work-update-main']";
   }
 
@@ -104,5 +107,117 @@ export default class WorkUpdateList extends BasePage {
 
   async assertPostCount(count: number): Promise<void> {
     await expect(this.posts).toHaveCount(count);
+  }
+
+  async assertPostNotVisible(title: string): Promise<void> {
+    await expect(
+      this.posts.filter({
+        has: this.postLinks.filter({ hasText: title }),
+      }),
+    ).toHaveCount(0);
+  }
+
+  private filterSection(sectionTitle: string): Locator {
+    return this.filters
+      .locator("[data-filter-section]")
+      .filter({ hasText: sectionTitle })
+      .first();
+  }
+
+  async expandFilterSection(sectionTitle: string): Promise<void> {
+    const section = this.filterSection(sectionTitle);
+    const toggle = section.locator("[data-toggle-section]");
+    const body = section.locator("[data-section-body]");
+
+    await expect(toggle).toBeVisible();
+
+    if ((await toggle.getAttribute("aria-expanded")) !== "true") {
+      await toggle.click();
+    }
+
+    await expect(body).toBeVisible();
+  }
+
+  private filterCheckbox(filterTerm: string, slug: string): Locator {
+    return this.page.locator(`#filter_${filterTerm}-${slug}`);
+  }
+
+  async applyLabelFilter(slug: string): Promise<void> {
+    await this.expandFilterSection("Type of article");
+    await this.toggleFilter("label", slug);
+  }
+
+  async applyTeamFilter(slug: string): Promise<void> {
+    await this.expandFilterSection("Responsible Team");
+    await this.toggleFilter("responsible_team", slug);
+  }
+
+  private async toggleFilter(filterTerm: string, slug: string): Promise<void> {
+    const checkbox = this.filterCheckbox(filterTerm, slug);
+    await expect(checkbox).toBeVisible();
+
+    await Promise.all([
+      this.page.waitForURL(
+        (url) =>
+          url.searchParams.getAll(`filter_${filterTerm}[]`).includes(slug),
+        { waitUntil: "networkidle" },
+      ),
+      checkbox.check(),
+    ]);
+
+    await expect(this.main).toBeVisible();
+  }
+
+  async assertLabelFilterAvailable(
+    slug: string,
+    label: string,
+  ): Promise<void> {
+    await this.expandFilterSection("Type of article");
+    const checkbox = this.filterCheckbox("label", slug);
+    await expect(checkbox).toBeVisible();
+    await expect(
+      this.page.locator(`label[for="filter_label-${slug}"]`),
+    ).toContainText(label);
+  }
+
+  async assertTeamFilterAvailable(slug: string, team: string): Promise<void> {
+    await this.expandFilterSection("Responsible Team");
+    const checkbox = this.filterCheckbox("responsible_team", slug);
+    await expect(checkbox).toBeVisible();
+    await expect(
+      this.page.locator(`label[for="filter_responsible_team-${slug}"]`),
+    ).toContainText(team);
+  }
+
+  async selectSortOrder(order: "newest" | "oldest"): Promise<void> {
+    const radio = this.page.locator(`#sort-${order}`);
+    await expect(radio).toBeVisible();
+
+    await Promise.all([
+      this.page.waitForURL(
+        (url) => url.searchParams.get("sort") === order,
+        { waitUntil: "networkidle" },
+      ),
+      radio.check(),
+    ]);
+
+    await expect(this.main).toBeVisible();
+  }
+
+  async assertPostBefore(
+    firstTitle: string,
+    secondTitle: string,
+  ): Promise<void> {
+    const titles = (await this.postTitles.allTextContents()).map((t) =>
+      t.trim(),
+    );
+    const firstIdx = titles.findIndex((t) => t.includes(firstTitle));
+    const secondIdx = titles.findIndex((t) => t.includes(secondTitle));
+
+    expect(firstIdx, `Expected to find "${firstTitle}" on page`).toBeGreaterThanOrEqual(0);
+    expect(
+      secondIdx,
+      `Expected "${firstTitle}" to appear before "${secondTitle}"`,
+    ).toBeGreaterThan(firstIdx);
   }
 }
