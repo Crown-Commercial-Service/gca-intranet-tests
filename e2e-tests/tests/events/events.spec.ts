@@ -349,13 +349,14 @@ test.describe("Event upcoming and past views", () => {
     "event with future start and end date appears on the Upcoming Events tab",
     { tag: "@regression" },
     async ({ wp, eventEditorPage, eventsListPage, runId }) => {
+      const startDate = dayjs().add(30, "day").format("DD-MM-YYYY");
+      const endDate = dayjs().add(31, "day").format("DD-MM-YYYY");
+
       const event = Event.anEvent()
         .withFixedTitle(`Upcoming Event ${runId}`)
-        .withParagraphMaxChars(120)
-        .withStartInDays(30)
-        .withEndInDays(31)
-        .withStatus("publish")
-        .build();
+        .withStartDate(startDate)
+        .withEndDate(endDate)
+        .withStatus("publish");
 
       const eventId = await wp.events.create(event);
 
@@ -372,13 +373,14 @@ test.describe("Event upcoming and past views", () => {
     "event with past start and end date appears on the Past Events tab",
     { tag: "@regression" },
     async ({ wp, eventEditorPage, eventsListPage, runId }) => {
+      const startDate = dayjs().subtract(2, "day").format("DD-MM-YYYY");
+      const endDate = dayjs().subtract(1, "day").format("DD-MM-YYYY");
+
       const event = Event.anEvent()
         .withFixedTitle(`Past Event ${runId}`)
-        .withParagraphMaxChars(120)
-        .withStartInDays(-2)
-        .withEndInDays(-1)
-        .withStatus("publish")
-        .build();
+        .withStartDate(startDate)
+        .withEndDate(endDate)
+        .withStatus("publish");
 
       const eventId = await wp.events.create(event);
 
@@ -398,32 +400,31 @@ test.describe("Event upcoming and past views", () => {
     "past events spanning different months are grouped under their month heading",
     { tag: "@regression" },
     async ({ wp, eventEditorPage, eventsListPage, runId }) => {
-      const recentPastEvent = Event.anEvent()
-        .withFixedTitle(`Recent Past ${runId}`)
-        .withParagraphMaxChars(120)
-        .withStartInDays(-1)
-        .withEndInDays(-1)
-        .withStatus("publish")
-        .build();
-
-      const earlierPastEvent = Event.anEvent()
-        .withFixedTitle(`Earlier Past ${runId}`)
-        .withParagraphMaxChars(120)
-        .withStartInDays(-20)
-        .withEndInDays(-20)
-        .withStatus("publish")
-        .build();
-
+      const oneDayAgo = dayjs().subtract(1, "day").format("DD-MM-YYYY");
+      const twentyDaysAgo = dayjs().subtract(20, "day").format("DD-MM-YYYY");
       const recentMonth = dayjs().subtract(1, "day").format("MMMM YYYY");
       const earlierMonth = dayjs().subtract(20, "day").format("MMMM YYYY");
 
+      const recentPastEvent = Event.anEvent()
+        .withFixedTitle(`Recent Past ${runId}`)
+        .withStartDate(oneDayAgo)
+        .withEndDate(oneDayAgo)
+        .withStatus("publish");
+
+      const earlierPastEvent = Event.anEvent()
+        .withFixedTitle(`Earlier Past ${runId}`)
+        .withStartDate(twentyDaysAgo)
+        .withEndDate(twentyDaysAgo)
+        .withStatus("publish");
+
       const recentId = await wp.events.create(recentPastEvent);
+      const earlierId = await wp.events.create(earlierPastEvent);
+
       await eventEditorPage.gotoEdit(recentId);
       await eventEditorPage.selectCategory("Workday");
       await eventEditorPage.fillEventDetails(recentPastEvent);
       await eventEditorPage.update();
 
-      const earlierId = await wp.events.create(earlierPastEvent);
       await eventEditorPage.gotoEdit(earlierId);
       await eventEditorPage.selectCategory("Workday");
       await eventEditorPage.fillEventDetails(earlierPastEvent);
@@ -448,15 +449,15 @@ test.describe("Event upcoming and past views", () => {
     "event with past start and future end date appears on Upcoming under the end month",
     { tag: "@regression" },
     async ({ wp, eventEditorPage, eventsListPage, runId }) => {
+      const startDate = dayjs().subtract(20, "day").format("DD-MM-YYYY");
+      const endDate = dayjs().add(5, "day").format("DD-MM-YYYY");
+      const endMonth = dayjs().add(5, "day").format("MMMM YYYY");
+
       const event = Event.anEvent()
         .withFixedTitle(`Spanning Event ${runId}`)
-        .withParagraphMaxChars(120)
-        .withStartInDays(-20)
-        .withEndInDays(5)
-        .withStatus("publish")
-        .build();
-
-      const endMonth = dayjs().add(5, "day").format("MMMM YYYY");
+        .withStartDate(startDate)
+        .withEndDate(endDate)
+        .withStatus("publish");
 
       const eventId = await wp.events.create(event);
       await eventEditorPage.gotoEdit(eventId);
