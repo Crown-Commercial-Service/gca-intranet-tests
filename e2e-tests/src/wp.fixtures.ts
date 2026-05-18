@@ -40,8 +40,13 @@ type WpHelpers = {
   expectUserToHaveRole: (user: User) => Promise<void>;
 };
 
+type Auth = {
+  loginAs: (user: { username: string; password: string }) => Promise<void>;
+};
+
 type Fixtures = {
   wp: WpHelpers;
+  auth: Auth;
   homepage: HomePage;
   eventEditorPage: EventEditorPage;
   wordpressLoginPage: WordpressLoginPage;
@@ -190,6 +195,16 @@ export const test = base.extend<Fixtures>({
 
   wordpressLoginPage: async ({ page }, use) => {
     await use(new WordpressLoginPage(page));
+  },
+
+  auth: async ({ wordpressLoginPage }, use) => {
+    await use({
+      loginAs: async (user) => {
+        await wordpressLoginPage.logout();
+        await wordpressLoginPage.goto();
+        await wordpressLoginPage.login(user.username, user.password);
+      },
+    });
   },
 
   customizerPage: async ({ page }, use) => {
