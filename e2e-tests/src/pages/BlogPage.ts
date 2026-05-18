@@ -16,6 +16,7 @@ export default class BlogPage extends BasePage {
   // Social: likes + comments
   readonly socialSection: Locator;
   readonly postLikeButton: Locator;
+  readonly commentsToggle: Locator;
   readonly commentForm: Locator;
   readonly commentTextarea: Locator;
   readonly postCommentButton: Locator;
@@ -41,6 +42,9 @@ export default class BlogPage extends BasePage {
     this.socialSection = this.page.locator("section.gca-lc");
     this.postLikeButton = this.socialSection.locator(
       '[data-action="toggle-post-like"]',
+    );
+    this.commentsToggle = this.socialSection.locator(
+      '[data-action="toggle-comments"]',
     );
     this.commentForm = this.socialSection.locator("form.gca-lc__form").filter({
       has: this.page.locator('input[name="parent_id"][value="0"]'),
@@ -95,6 +99,13 @@ export default class BlogPage extends BasePage {
     await this.page.goto(link, { waitUntil: "networkidle" });
   }
 
+  async expandComments(): Promise<void> {
+    if ((await this.commentsToggle.getAttribute("aria-expanded")) !== "true") {
+      await this.commentsToggle.click();
+    }
+    await expect(this.commentTextarea).toBeVisible();
+  }
+
   private commentByText(text: string): Locator {
     return this.comments
       .filter({
@@ -104,6 +115,7 @@ export default class BlogPage extends BasePage {
   }
 
   async addComment(text: string): Promise<void> {
+    await this.expandComments();
     await this.commentTextarea.fill(text);
     await this.postCommentButton.click();
   }
@@ -113,6 +125,7 @@ export default class BlogPage extends BasePage {
   }
 
   async assertCommentVisible(author: string, text: string): Promise<void> {
+    await this.expandComments();
     const comment = this.commentByText(text);
     await expect(comment).toBeVisible();
     await expect(comment.locator(".gca-lc__comment-author")).toContainText(
@@ -121,6 +134,7 @@ export default class BlogPage extends BasePage {
   }
 
   async assertCommentNotVisible(text: string): Promise<void> {
+    await this.expandComments();
     await expect(
       this.comments.filter({
         has: this.page.locator(".gca-lc__comment-text", { hasText: text }),
@@ -129,17 +143,20 @@ export default class BlogPage extends BasePage {
   }
 
   async likeComment(text: string): Promise<void> {
+    await this.expandComments();
     await this.commentByText(text)
       .locator('[data-action="toggle-comment-like"]')
       .click();
   }
 
   async assertLikeCount(text: string, count: number): Promise<void> {
+    await this.expandComments();
     const likeCount = this.commentByText(text).locator("[data-like-count]");
     await expect(likeCount).toHaveText(String(count));
   }
 
   async startDeleteComment(text: string): Promise<void> {
+    await this.expandComments();
     await this.commentByText(text)
       .locator('[data-action="delete-comment"]')
       .click();
@@ -160,12 +177,14 @@ export default class BlogPage extends BasePage {
   }
 
   async assertDeleteUnavailable(text: string): Promise<void> {
+    await this.expandComments();
     await expect(
       this.commentByText(text).locator('[data-action="delete-comment"]'),
     ).toHaveCount(0);
   }
 
   async replyToComment(parentText: string, replyText: string): Promise<void> {
+    await this.expandComments();
     const parent = this.commentByText(parentText);
     await parent.locator('[data-action="show-reply-form"]').click();
 
@@ -183,6 +202,7 @@ export default class BlogPage extends BasePage {
     author: string,
     replyText: string,
   ): Promise<void> {
+    await this.expandComments();
     const reply = this.commentByText(replyText);
     await expect(reply).toBeVisible();
     await expect(reply.locator(".gca-lc__comment-author")).toContainText(
@@ -194,6 +214,7 @@ export default class BlogPage extends BasePage {
     prefix: string,
     user: { username: string },
   ): Promise<void> {
+    await this.expandComments();
     await this.commentTextarea.click();
     await this.commentTextarea.fill("");
     await this.commentTextarea.pressSequentially(`${prefix}@${user.username}`);
@@ -210,6 +231,7 @@ export default class BlogPage extends BasePage {
     author: string,
     mentionedUser: { username: string },
   ): Promise<void> {
+    await this.expandComments();
     const comment = this.comments
       .filter({
         has: this.page.locator(".gca-lc__comment-author", { hasText: author }),
