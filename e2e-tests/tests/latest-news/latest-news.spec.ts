@@ -166,8 +166,10 @@ test.describe("Latest news component", () => {
 });
 
 test.describe("Latest news filtering", () => {
-  test.beforeEach(async ({ wp }) => {
+  test.beforeEach(async ({ wp, wordpressLoginPage }) => {
     await wp.posts.clearByTypeAndAuthor("news");
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
   });
 
   test.afterAll(async ({ wp }) => {
