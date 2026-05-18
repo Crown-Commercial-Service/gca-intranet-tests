@@ -1,5 +1,6 @@
 import { test } from "../../src/wp.fixtures";
 import Event from "../../src/models/Events";
+import dayjs from "dayjs";
 
 test.describe("Event Component", { tag: "@regression" }, () => {
   test.beforeEach(async ({ wp }) => {
@@ -111,7 +112,7 @@ test.describe("Event Component", { tag: "@regression" }, () => {
     await eventPage.assertDateAndTime(event);
   });
 
-  test("event with start and end date and only start time", async ({ //fix date
+  test("event with start and end date and only start time", async ({
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -137,7 +138,7 @@ test.describe("Event Component", { tag: "@regression" }, () => {
     await eventPage.assertDateAndTime(event);
   });
 
-  test("event with start and end date and only end time", async ({ //fix date
+  test("event with start and end date and only end time", async ({
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -163,7 +164,7 @@ test.describe("Event Component", { tag: "@regression" }, () => {
     await eventPage.assertDateAndTime(event);
   });
 
-  test("event with start date and end time", async ({ //fix date
+  test("event with start date and end time", async ({
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -327,6 +328,140 @@ test.describe("Event filtering", () => {
         earlierEvent.title,
         laterEvent.title,
       );
+    },
+  );
+});
+
+test.describe("Event upcoming and past views", () => {
+  test.beforeEach(async ({ wp, wordpressLoginPage }) => {
+    await wp.posts.clearByTypeAndAuthor("events");
+    await wordpressLoginPage.goto();
+    await wordpressLoginPage.loginAsAdmin();
+  });
+
+  test.afterAll(async ({ wp }) => {
+    await wp.posts.clearByTypeAndAuthor("events");
+  });
+
+  test(
+    "event with future start and end date appears on the Upcoming Events tab",
+    { tag: "@regression" },
+    async ({ wp, eventEditorPage, eventsListPage, runId }) => {
+      const event = Event.anEvent()
+        .withFixedTitle(`Upcoming Event ${runId}`)
+        .withParagraphMaxChars(120)
+        .withStartInDays(30)
+        .withEndInDays(31)
+        .withStatus("publish")
+        .build();
+
+      const eventId = await wp.events.create(event);
+
+      await eventEditorPage.gotoEdit(eventId);
+      await eventEditorPage.fillEventDetails(event);
+      await eventEditorPage.update();
+
+      await eventsListPage.gotoEventsList();
+      await eventsListPage.assertPostVisible(event.title);
+    },
+  );
+
+  test(
+    "event with past start and end date appears on the Past Events tab",
+    { tag: "@regression" },
+    async ({ wp, eventEditorPage, eventsListPage, runId }) => {
+      const event = Event.anEvent()
+        .withFixedTitle(`Past Event ${runId}`)
+        .withParagraphMaxChars(120)
+        .withStartInDays(-2)
+        .withEndInDays(-1)
+        .withStatus("publish")
+        .build();
+
+      const eventId = await wp.events.create(event);
+
+      await eventEditorPage.gotoEdit(eventId);
+      await eventEditorPage.fillEventDetails(event);
+      await eventEditorPage.update();
+
+      await eventsListPage.gotoPastEventsList();
+      await eventsListPage.assertPostVisible(event.title);
+
+      await eventsListPage.gotoEventsList();
+      await eventsListPage.assertPostNotVisible(event.title);
+    },
+  );
+
+  test(
+    "past events spanning different months are grouped under their month heading",
+    { tag: "@regression" },
+    async ({ wp, eventEditorPage, eventsListPage, runId }) => {
+      const recentPastEvent = Event.anEvent()
+        .withFixedTitle(`Recent Past ${runId}`)
+        .withParagraphMaxChars(120)
+        .withStartInDays(-1)
+        .withEndInDays(-1)
+        .withStatus("publish")
+        .build();
+
+      const earlierPastEvent = Event.anEvent()
+        .withFixedTitle(`Earlier Past ${runId}`)
+        .withParagraphMaxChars(120)
+        .withStartInDays(-20)
+        .withEndInDays(-20)
+        .withStatus("publish")
+        .build();
+
+      const recentMonth = dayjs().subtract(1, "day").format("MMMM YYYY");
+      const earlierMonth = dayjs().subtract(20, "day").format("MMMM YYYY");
+
+      const recentId = await wp.events.create(recentPastEvent);
+      await eventEditorPage.gotoEdit(recentId);
+      await eventEditorPage.fillEventDetails(recentPastEvent);
+      await eventEditorPage.update();
+
+      const earlierId = await wp.events.create(earlierPastEvent);
+      await eventEditorPage.gotoEdit(earlierId);
+      await eventEditorPage.fillEventDetails(earlierPastEvent);
+      await eventEditorPage.update();
+
+      await eventsListPage.gotoPastEventsList();
+
+      await eventsListPage.assertMonthHeadingVisible(recentMonth);
+      await eventsListPage.assertMonthHeadingVisible(earlierMonth);
+      await eventsListPage.assertEventUnderMonthHeading(
+        recentPastEvent.title,
+        recentMonth,
+      );
+      await eventsListPage.assertEventUnderMonthHeading(
+        earlierPastEvent.title,
+        earlierMonth,
+      );
+    },
+  );
+
+  test(
+    "event with past start and future end date appears on Upcoming under the end month",
+    { tag: "@regression" },
+    async ({ wp, eventEditorPage, eventsListPage, runId }) => {
+      const event = Event.anEvent()
+        .withFixedTitle(`Spanning Event ${runId}`)
+        .withParagraphMaxChars(120)
+        .withStartInDays(-20)
+        .withEndInDays(5)
+        .withStatus("publish")
+        .build();
+
+      const endMonth = dayjs().add(5, "day").format("MMMM YYYY");
+
+      const eventId = await wp.events.create(event);
+      await eventEditorPage.gotoEdit(eventId);
+      await eventEditorPage.fillEventDetails(event);
+      await eventEditorPage.update();
+
+      await eventsListPage.gotoEventsList();
+      await eventsListPage.assertPostVisible(event.title);
+      await eventsListPage.assertEventUnderMonthHeading(event.title, endMonth);
     },
   );
 });

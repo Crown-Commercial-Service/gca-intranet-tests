@@ -10,6 +10,10 @@ export default class EventsListPage extends BasePage {
   readonly postTitles: Locator;
   readonly postLinks: Locator;
   readonly filters: Locator;
+  readonly postsContainer: Locator;
+  readonly monthHeadings: Locator;
+  readonly upcomingTab: Locator;
+  readonly pastTab: Locator;
 
   // Event Selectors
   readonly eventsListSection: string;
@@ -24,6 +28,10 @@ export default class EventsListPage extends BasePage {
     this.postTitles = this.page.getByTestId("archive-event-post-title");
     this.postLinks = this.page.getByTestId("archive-event-post-link");
     this.filters = this.page.getByTestId("archive-filters");
+    this.postsContainer = this.page.getByTestId("archive-event-posts");
+    this.monthHeadings = this.page.getByTestId("archive-event-month-heading");
+    this.upcomingTab = this.page.getByTestId("events-tab-upcoming");
+    this.pastTab = this.page.getByTestId("events-tab-past");
 
     this.eventsListSection = "[data-testid='archive-event-main']";
   }
@@ -38,6 +46,15 @@ export default class EventsListPage extends BasePage {
     const url = this.baseUrl
       ? `${this.baseUrl.replace(/\/+$/, "")}/event`
       : "/event";
+
+    await this.page.goto(url, { waitUntil: "networkidle" });
+    await expect(this.main).toBeVisible();
+  }
+
+  async gotoPastEventsList(): Promise<void> {
+    const url = this.baseUrl
+      ? `${this.baseUrl.replace(/\/+$/, "")}/event/?view=past`
+      : "/event/?view=past";
 
     await this.page.goto(url, { waitUntil: "networkidle" });
     await expect(this.main).toBeVisible();
@@ -162,5 +179,48 @@ export default class EventsListPage extends BasePage {
       secondIdx,
       `Expected "${firstTitle}" to appear before "${secondTitle}"`,
     ).toBeGreaterThan(firstIdx);
+  }
+
+  async assertMonthHeadingVisible(monthYear: string): Promise<void> {
+    await expect(
+      this.monthHeadings.filter({ hasText: monthYear }).first(),
+    ).toBeVisible();
+  }
+
+  async assertEventUnderMonthHeading(
+    eventTitle: string,
+    monthYear: string,
+  ): Promise<void> {
+    const items = await this.postsContainer.locator(":scope > *").all();
+
+    let currentMonth: string | null = null;
+    let found = false;
+
+    for (const item of items) {
+      const testid = await item.getAttribute("data-testid");
+
+      if (testid === "archive-event-month-heading") {
+        currentMonth = ((await item.textContent()) ?? "").trim();
+        continue;
+      }
+
+      if (testid === "archive-event-post" && currentMonth === monthYear) {
+        const title = (
+          (await item
+            .getByTestId("archive-event-post-title")
+            .textContent()) ?? ""
+        ).trim();
+
+        if (title.includes(eventTitle)) {
+          found = true;
+          break;
+        }
+      }
+    }
+
+    expect(
+      found,
+      `Expected "${eventTitle}" to be grouped under "${monthYear}" heading`,
+    ).toBe(true);
   }
 }
