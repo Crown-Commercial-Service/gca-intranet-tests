@@ -94,7 +94,10 @@ test.describe("social - likes and comments", { tag: "@regression" }, () => {
     await auth.loginAs(postOwner);
     await blog.gotoPath(link);
     await blog.addComment("This is a draft thought I'll remove");
-    await blog.assertCommentVisible(postOwner.username, "This is a draft thought I'll remove");
+    await blog.assertCommentVisible(
+      postOwner.username,
+      "This is a draft thought I'll remove",
+    );
 
     await blog.startDeleteComment("This is a draft thought I'll remove");
     await blog.assertDeleteConfirmationVisible();
@@ -122,7 +125,10 @@ test.describe("social - likes and comments", { tag: "@regression" }, () => {
 
     await auth.loginAs(postViewer);
     await blog.gotoPath(link);
-    await blog.assertCommentVisible(postOwner.username, "Only the author can remove this");
+    await blog.assertCommentVisible(
+      postOwner.username,
+      "Only the author can remove this",
+    );
     await blog.assertDeleteUnavailable("Only the author can remove this");
   });
 
@@ -145,7 +151,10 @@ test.describe("social - likes and comments", { tag: "@regression" }, () => {
 
     await auth.loginAs(postViewer);
     await blog.gotoPath(link);
-    await blog.replyToComment("Anyone else seeing this in their team?", "Yes, same here");
+    await blog.replyToComment(
+      "Anyone else seeing this in their team?",
+      "Yes, same here",
+    );
 
     await blog.assertReplyVisible(
       "Anyone else seeing this in their team?",
