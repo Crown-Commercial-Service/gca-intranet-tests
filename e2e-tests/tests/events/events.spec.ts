@@ -419,15 +419,17 @@ test.describe("Event upcoming and past views", () => {
 
       const recentId = await wp.events.create(recentPastEvent);
       await eventEditorPage.gotoEdit(recentId);
+      await eventEditorPage.selectCategory("Workday");
       await eventEditorPage.fillEventDetails(recentPastEvent);
       await eventEditorPage.update();
 
       const earlierId = await wp.events.create(earlierPastEvent);
       await eventEditorPage.gotoEdit(earlierId);
+      await eventEditorPage.selectCategory("Workday");
       await eventEditorPage.fillEventDetails(earlierPastEvent);
       await eventEditorPage.update();
 
-      await eventsListPage.gotoPastEventsList();
+      await eventsListPage.gotoPastEventsList("workday");
 
       await eventsListPage.assertMonthHeadingVisible(recentMonth);
       await eventsListPage.assertMonthHeadingVisible(earlierMonth);

@@ -51,10 +51,16 @@ export default class EventsListPage extends BasePage {
     await expect(this.main).toBeVisible();
   }
 
-  async gotoPastEventsList(): Promise<void> {
+  async gotoPastEventsList(categorySlug?: string): Promise<void> {
+    const params = new URLSearchParams({ view: "past" });
+    if (categorySlug) {
+      params.append("filter_category[]", categorySlug);
+    }
+
+    const path = `/event/?${params.toString()}`;
     const url = this.baseUrl
-      ? `${this.baseUrl.replace(/\/+$/, "")}/event/?view=past`
-      : "/event/?view=past";
+      ? `${this.baseUrl.replace(/\/+$/, "")}${path}`
+      : path;
 
     await this.page.goto(url, { waitUntil: "networkidle" });
     await expect(this.main).toBeVisible();
