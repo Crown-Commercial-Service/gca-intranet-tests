@@ -60,7 +60,8 @@ test.describe("Event Component", { tag: "@regression" }, () => {
     await eventPage.assertDateAndTime(event);
   });
 
-  test("event with start and end date and start and end time", async ({ //fix date
+  test("event with start and end date and start and end time", async ({
+    //fix date
     wp,
     wordpressLoginPage,
     eventEditorPage,
@@ -87,7 +88,8 @@ test.describe("Event Component", { tag: "@regression" }, () => {
     await eventPage.assertDateAndTime(event);
   });
 
-  test("event with start date and start time only", async ({ //fix date
+  test("event with start date and start time only", async ({
+    //fix date
     wp,
     wordpressLoginPage,
     eventEditorPage,
