@@ -1,14 +1,5 @@
 import { expect } from "@playwright/test";
-import { wp as runWp } from "../utils/wpCli";
 import User from "../models/User";
-
-type Driver = "docker" | "remote";
-
-function wpDriver(): Driver {
-  return (process.env.WP_DRIVER || "docker").toLowerCase() === "remote"
-    ? "remote"
-    : "docker";
-}
 
 function resolveBaseUrl(): string {
   const raw =
@@ -93,47 +84,19 @@ async function findUserByUsername(
 }
 
 export async function expectUserToExist(user: User) {
-  if (wpDriver() === "remote") {
-    const found = await findUserByUsername(user.username);
+  const found = await findUserByUsername(user.username);
 
-    expect(found, `User ${user.username} should exist`).not.toBeNull();
+  expect(found, `User ${user.username} should exist`).not.toBeNull();
 
-    expect(found?.slug || found?.username).toBe(user.username);
-    return;
-  }
-
-  const res = await runWp(["user", "get", user.username, "--field=user_login"]);
-
-  expect(res.exitCode, `User ${user.username} should exist`).toBe(0);
-  expect(res.stdout.trim()).toBe(user.username);
+  expect(found?.slug || found?.username).toBe(user.username);
 }
 
 export async function expectUserToHaveRole(user: User) {
-  if (wpDriver() === "remote") {
-    const found = await findUserByUsername(user.username);
+  const found = await findUserByUsername(user.username);
 
-    expect(found, `User ${user.username} should exist`).not.toBeNull();
+  expect(found, `User ${user.username} should exist`).not.toBeNull();
 
-    const roles = (found?.roles || []).map((r) => r.trim());
-
-    expect(
-      roles,
-      `Expected ${user.username} to have role "${user.role}" but got [${roles.join(
-        ", ",
-      )}]`,
-    ).toContain(user.role);
-
-    return;
-  }
-
-  const res = await runWp(["user", "get", user.username, "--field=roles"]);
-
-  expect(res.exitCode, `User ${user.username} should exist`).toBe(0);
-
-  const roles = res.stdout
-    .trim()
-    .split(",")
-    .map((r) => r.trim());
+  const roles = (found?.roles || []).map((r) => r.trim());
 
   expect(
     roles,

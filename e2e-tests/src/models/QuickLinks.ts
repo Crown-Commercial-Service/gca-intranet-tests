@@ -1,5 +1,4 @@
 import Chance from "chance";
-import type WpCustomizer from "../helpers/WpCustomizer";
 
 const chance = new Chance();
 
@@ -27,10 +26,6 @@ export default class QuickLinks {
 
   static quickLinks(): QuickLinksBuilder {
     return new QuickLinksBuilder();
-  }
-
-  async apply(customizer: WpCustomizer): Promise<void> {
-    await customizer.applyQuickLinks(this);
   }
 }
 
@@ -79,17 +74,6 @@ class QuickLinksBuilder {
   withLink3(text: string, url: string): this {
     this.setLinkAtIndex(2, text, url);
     return this;
-  }
-
-  build(): QuickLinks {
-    return new QuickLinks({
-      ...this.props,
-      links: [...this.props.links],
-    });
-  }
-
-  async apply(customizer: WpCustomizer): Promise<void> {
-    await this.build().apply(customizer);
   }
 
   get title() {
