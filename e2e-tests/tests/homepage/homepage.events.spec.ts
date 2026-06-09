@@ -156,7 +156,7 @@ test.describe("events", () => {
   );
 
   test(
-    "should not show events when the start date is the current date",
+    "should show events when the start date is the current date",
     { tag: "@regression" },
     async ({ wp, wordpressLoginPage, eventEditorPage, homepage }) => {
       const event = Event.anEvent()
@@ -179,12 +179,7 @@ test.describe("events", () => {
       await eventEditorPage.update();
 
       await homepage.goto();
-      // failing here but this shoudl not be in the spec.. it shoudl be in a function..following test design.
-      await expect(
-        homepage.eventsRows
-          .getByTestId("events-link")
-          .filter({ hasText: event.title }),
-      ).toHaveCount(0);
+      await homepage.assertEventOnHomepage(event);
     },
   );
 
