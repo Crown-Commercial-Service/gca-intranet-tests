@@ -1,9 +1,10 @@
 import { test } from "../../src/wp.fixtures";
 
-// These tests depend on a real staff member existing on QA that have been imported from Data warehouse (currently "Chris Morris",
-// directorate "Digital and Data Services", role "Software Developer", manager "Floyd Boss").
+// These tests depend on a real staff member existing on QA that has been imported from the Data warehouse
+// (currently "Chris Morris", team "Digital and Data Services (Dev Gupta (Inherited))").
+// The imported profile only returns name, team and email - there is no job title or manager.
 // If that account is deleted, seed a replacement staff member in the QA DB with the same
-// profile data (job title, manager, directorate/team) and update the expected values below.
+// profile data and update the expected values below.
 test.describe("staff directory", { tag: "@regression" }, () => {
   test.beforeEach(async ({ staffDirectory }) => {
     await staffDirectory.goto();
@@ -20,18 +21,17 @@ test.describe("staff directory", { tag: "@regression" }, () => {
     staffProfile,
   }) => {
     const name = "chris morris";
-    const role = "Software Developer";
-    const manager = "Reports to: Floyd Boss";
+    const team = "Digital and Data Services (Dev Gupta (Inherited))";
 
     await staffDirectory.search("Chris Morris");
 
     await staffDirectory.assertResultCount(1);
-    await staffDirectory.assertStaffCard(name, role, manager);
+    await staffDirectory.assertStaffCard(name);
 
     await staffDirectory.openStaffProfile(name);
 
     await staffProfile.expectUrlToContain("/profile/chris.morris/");
-    await staffProfile.assertStaffDetails(name, role);
+    await staffProfile.assertStaffDetails(name, team);
   });
 
   test("can filter staff by team and view their profile", async ({
@@ -39,19 +39,18 @@ test.describe("staff directory", { tag: "@regression" }, () => {
     staffProfile,
   }) => {
     const name = "chris morris";
-    const role = "Software Developer";
-    const manager = "Reports to: Floyd Boss";
+    const team = "Digital and Data Services (Dev Gupta (Inherited))";
 
     await staffDirectory.selectDirectorate("Digital and Data Services");
     await staffDirectory.selectTeam(
       "Digital and Data Services (Dev Gupta (Inherited))",
     );
 
-    await staffDirectory.assertStaffCard(name, role, manager);
+    await staffDirectory.assertStaffCard(name);
 
     await staffDirectory.openStaffProfile(name);
 
     await staffProfile.expectUrlToContain("/profile/chris.morris/");
-    await staffProfile.assertStaffDetails(name, role);
+    await staffProfile.assertStaffDetails(name, team);
   });
 });
