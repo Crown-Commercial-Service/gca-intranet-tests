@@ -441,12 +441,13 @@ test.describe("Event upcoming and past views", () => {
   );
 
   test(
-    "event with past start and future end date appears on Upcoming under the end month",
+    "event with past start and future end date appears on Upcoming under the start month",
     { tag: "@regression" },
     async ({ wp, eventEditorPage, eventsListPage, runId }) => {
       const startDate = dayjs().subtract(20, "day").format("DD-MM-YYYY");
       const endDate = dayjs().add(5, "day").format("DD-MM-YYYY");
-      const endMonth = dayjs().add(5, "day").format("MMMM YYYY");
+      // Upcoming groups ongoing events by their start month, so the heading is the start month.
+      const startMonth = dayjs().subtract(20, "day").format("MMMM YYYY");
 
       const event = Event.anEvent()
         .withFixedTitle(`Spanning Event ${runId}`)
@@ -461,7 +462,7 @@ test.describe("Event upcoming and past views", () => {
 
       await eventsListPage.gotoEventsList();
       await eventsListPage.assertPostVisible(event.title);
-      await eventsListPage.assertMonthHeadingVisible(endMonth);
+      await eventsListPage.assertMonthHeadingVisible(startMonth);
     },
   );
 });

@@ -189,7 +189,10 @@ export default class EventsListPage extends BasePage {
 
   async assertMonthHeadingVisible(monthYear: string): Promise<void> {
     await expect(
-      this.monthHeadings.filter({ hasText: monthYear }).first(),
+      this.postsContainer
+        .getByTestId("archive-event-month-heading")
+        .filter({ hasText: monthYear })
+        .first(),
     ).toBeVisible();
   }
 
