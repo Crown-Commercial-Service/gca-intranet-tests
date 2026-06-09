@@ -31,9 +31,14 @@ test.describe("blogs", { tag: "@regression" }, () => {
     wp,
     homepage,
   }) => {
+    // Date it to "now" so it is the most recent blog and is the one rendered in
+    // the homepage Blogs component, which only shows the single latest blog.
+    // The default createdAt (today at 12:00 + counter) can be beaten by a blog
+    // left over from an earlier run on shared QA.
     const post = Post.aPost()
       .withType("blogs")
       .withTitleOver100Chars()
+      .withCreatedAt(new Date())
       .withStatus("publish");
 
     await wp.posts.create(post);
