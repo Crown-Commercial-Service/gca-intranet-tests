@@ -179,7 +179,7 @@ test.describe("events", () => {
       await eventEditorPage.update();
 
       await homepage.goto();
-
+      // failing here but this shoudl not be in the spec.. it shoudl be in a function..following test design.
       await expect(
         homepage.eventsRows
           .getByTestId("events-link")

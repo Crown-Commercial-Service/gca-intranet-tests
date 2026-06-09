@@ -51,6 +51,7 @@ test.describe("blogs", { tag: "@regression" }, () => {
     const post = Post.aPost()
       .withType("blogs")
       .withFixedTitle("E2E Blog Navigation")
+      .withCreatedAt(new Date())
       .withStatus("publish");
 
     await wp.posts.create(post);
@@ -82,11 +83,13 @@ test.describe("blogs", { tag: "@regression" }, () => {
   }) => {
     const older = Post.aPost()
       .withType("blogs")
+      .withCreatedAt(new Date())
       .withFixedTitle("E2E Blog Older")
       .withStatus("publish");
 
     const latest = Post.aPost()
       .withType("blogs")
+      .withCreatedAt(new Date())
       .withFixedTitle("E2E Blog Latest")
       .withStatus("publish");
 
@@ -102,6 +105,7 @@ test.describe("blogs", { tag: "@regression" }, () => {
   test("can edit author details of a blog post", async ({ wp, homepage }) => {
     const post = Post.aPost()
       .withType("blogs")
+      .withCreatedAt(new Date())
       .withFixedTitle("E2E Blog Author Change")
       .withStatus("publish");
 
@@ -131,6 +135,7 @@ test.describe("blogs", { tag: "@regression" }, () => {
   }) => {
     const post = Post.aPost()
       .withType("blogs")
+      .withCreatedAt(new Date())
       .withFixedTitle("Digital Procurement Insights")
       .withStatus("publish");
 
