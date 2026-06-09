@@ -320,15 +320,19 @@ test.describe("Event filtering", () => {
       await eventsListPage.gotoEventsList();
       await eventsListPage.applyCategoryFilter("workday");
 
+      // Upcoming events default to "Newest First", which shows the soonest
+      // upcoming event first, so the earlier event appears before the later one.
       await eventsListPage.assertPostBefore(
-        laterEvent.title,
         earlierEvent.title,
+        laterEvent.title,
       );
 
+      // Selecting "Oldest First" reverses the order so the furthest-away event
+      // appears first.
       await eventsListPage.selectSortOrder("oldest");
       await eventsListPage.assertPostBefore(
-        earlierEvent.title,
         laterEvent.title,
+        earlierEvent.title,
       );
     },
   );

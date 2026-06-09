@@ -174,9 +174,13 @@ export default class EventsListPage extends BasePage {
     firstTitle: string,
     secondTitle: string,
   ): Promise<void> {
-    const titles = (await this.postTitles.allTextContents()).map((t) =>
-      t.trim(),
-    );
+    // Scope to the upcoming events list container so we only read the rendered
+    // event titles (the archive-event-* testids are shared with other views).
+    const titles = (
+      await this.postsContainer
+        .getByTestId("archive-event-post-title")
+        .allTextContents()
+    ).map((t) => t.trim());
     const firstIdx = titles.findIndex((t) => t.includes(firstTitle));
     const secondIdx = titles.findIndex((t) => t.includes(secondTitle));
 
