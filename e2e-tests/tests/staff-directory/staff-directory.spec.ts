@@ -22,11 +22,12 @@ test.describe("staff directory", { tag: "@regression" }, () => {
   }) => {
     const name = "chris morris";
     const team = "Digital and Data Services (Dev Gupta (Inherited))";
+    const manager = "Floyd Boss"
 
     await staffDirectory.search("Chris Morris");
 
     await staffDirectory.assertResultCount(1);
-    await staffDirectory.assertStaffCard(name);
+    await staffDirectory.assertStaffCard(name, undefined, manager);
 
     await staffDirectory.openStaffProfile(name);
 
@@ -40,13 +41,14 @@ test.describe("staff directory", { tag: "@regression" }, () => {
   }) => {
     const name = "chris morris";
     const team = "Digital and Data Services (Dev Gupta (Inherited))";
+    const manager = "Floyd Boss"
 
     await staffDirectory.selectDirectorate("Digital and Data Services");
     await staffDirectory.selectTeam(
       "Digital and Data Services (Dev Gupta (Inherited))",
     );
 
-    await staffDirectory.assertStaffCard(name);
+    await staffDirectory.assertStaffCard(name, undefined, manager);
 
     await staffDirectory.openStaffProfile(name);
 

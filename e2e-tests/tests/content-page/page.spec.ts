@@ -97,12 +97,8 @@ test.describe("Content page component", () => {
 
     await wordpressLoginPage.goto();
     await wordpressLoginPage.loginAsAdmin();
-
     await contentPage.gotoEdit(pageId);
-
-    // await contentPage.pause()
     await contentPage.addTextComponent("oishfodofjo");
-
     await contentPage.update();
   });
 });

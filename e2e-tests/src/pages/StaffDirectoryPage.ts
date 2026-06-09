@@ -87,7 +87,7 @@ export default class StaffDirectoryPage extends BasePage {
     }
     if (manager !== undefined) {
       await expect(card.locator(".sd-staff-card__manager")).toContainText(
-        manager,
+        `Reports to: ${manager}`,
       );
     }
   }
