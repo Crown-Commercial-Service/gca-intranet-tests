@@ -159,6 +159,7 @@ test.describe("blogs", { tag: "@regression" }, () => {
   }) => {
     const post = Post.aPost()
       .withType("blogs")
+      .withCreatedAt(new Date())
       .withTitleOver100Chars()
       .withStatus("publish");
 
