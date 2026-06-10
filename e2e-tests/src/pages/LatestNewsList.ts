@@ -4,7 +4,6 @@ import { formatDateNew } from "../utils/formatters";
 import Post from "../models/Post";
 
 export default class LatestNewsList extends BasePage {
-  // private readonly baseUrl?: string;
 
   readonly column: Locator;
   readonly featuredCard: Locator;
@@ -29,7 +28,6 @@ export default class LatestNewsList extends BasePage {
 
   constructor(page: Page, baseUrl?: string) {
     super(page);
-    // this.baseUrl = baseUrl;
 
     this.column = this.page.getByTestId("latest-news-column");
     this.featuredCard = this.column.getByTestId("latest-news-featured-card");

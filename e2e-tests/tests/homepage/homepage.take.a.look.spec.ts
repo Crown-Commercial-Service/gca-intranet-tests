@@ -1,4 +1,4 @@
-import { test, expect } from "../../src/wp.fixtures";
+import { test } from "../../src/wp.fixtures";
 import TakeALook from "../../src/models/TakeALook";
 
 test.describe("homepage - take a look", { tag: '@regression' }, () => {

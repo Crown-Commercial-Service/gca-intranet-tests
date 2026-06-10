@@ -1,6 +1,5 @@
 import * as docker from "../../src/lib/wp-docker-client";
 import type { WpResult } from "../../src/utils/wp-utils";
-import * as utils from "../../src/utils/wp-utils";
 import type TakeALook from "../../src/models/TakeALook";
 import type QuickLinks from "../../src/models/QuickLinks";
 import { expect } from "../../src/wp.fixtures";
@@ -91,20 +90,6 @@ export default class WpCustomizer {
     const result = await this.wp(["theme", "mod", "set", key, value]);
 
     expect(result.exitCode, result.stderr).toBe(0);
-  }
-
-  /**
-   * Remove a theme mod
-   */
-  private async removeThemeMod(key: string): Promise<void> {
-    const result = await this.wp(["theme", "mod", "remove", key]);
-
-    if (result.exitCode !== 0) {
-      throw utils.formatWpCliFailure(
-        `Failed to remove theme mod "${key}"`,
-        result,
-      );
-    }
   }
 
   /**

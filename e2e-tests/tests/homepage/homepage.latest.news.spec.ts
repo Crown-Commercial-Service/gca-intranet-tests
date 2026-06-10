@@ -1,4 +1,4 @@
-import { test, expect } from "../../src/wp.fixtures";
+import { test } from "../../src/wp.fixtures";
 import Post from "../../src/models/Post";
 
 test.describe("homepage - latest news", () => {

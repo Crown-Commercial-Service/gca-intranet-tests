@@ -1,5 +1,4 @@
 import { Page, Locator, expect } from "@playwright/test";
-// import { expectNoSeriousA11yViolations } from "../a11y/assertions";
 import {
   expectNoSeriousA11yViolations,
   expectNoSeriousA11yViolationsForSelectors,
@@ -443,10 +442,6 @@ export default abstract class BasePage {
   }
 
   private async waitForSaveToComplete(): Promise<void> {
-    // await expect(this.publishButton)
-    //   .toBeDisabled({ timeout: 10000 })
-    //   .catch(() => {});
-
     await expect(this.publishMessage).toBeVisible({ timeout: 15000 });
     await this.waitForPageToLoad();
     await expect(this.publishButton).toBeEnabled({ timeout: 15000 });

@@ -16,12 +16,6 @@ function wpDriver(): Driver {
     : "docker";
 }
 
-function requiredEnv(name: string): string {
-  const v = (process.env[name] || "").trim();
-  if (!v) throw new Error(`Missing required env var: ${name}`);
-  return v;
-}
-
 function baseUrl(): string {
   const raw = (
     process.env.WP_REST_BASE_URL ||

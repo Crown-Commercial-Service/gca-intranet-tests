@@ -1,4 +1,4 @@
-import { test, expect } from "../../src/wp.fixtures";
+import { test } from "../../src/wp.fixtures";
 import FooterPages from "../../src/models/FooterPages";
 
 // test is skipped as this need a data wipe of all events on qa thus affecting other people testing

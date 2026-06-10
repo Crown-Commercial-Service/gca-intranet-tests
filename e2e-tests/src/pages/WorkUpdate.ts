@@ -2,7 +2,6 @@ import { Page, Locator, expect } from "@playwright/test";
 import BasePage from "./BasePage";
 
 export default class WorkUpdate extends BasePage {
-  // private readonly baseUrl?: string;
 
   readonly container: Locator;
   readonly main: Locator;
@@ -20,7 +19,6 @@ export default class WorkUpdate extends BasePage {
 
   constructor(page: Page, baseUrl?: string) {
     super(page);
-    // this.baseUrl = baseUrl;
 
     this.container = this.page.getByTestId("work-update-container");
     this.main = this.page.getByTestId("work-update-main");

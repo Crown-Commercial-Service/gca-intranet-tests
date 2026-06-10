@@ -7,7 +7,6 @@ import {
 } from "../utils/formatters";
 
 export default class EventPage extends BasePage {
-  // readonly baseUrl?: string;
 
   readonly heading: Locator;
   readonly eventDate: Locator;
@@ -21,7 +20,6 @@ export default class EventPage extends BasePage {
 
   constructor(page: Page, baseUrl?: string) {
     super(page);
-    // this.baseUrl = baseUrl;
 
     this.heading = this.page.getByRole("heading", { level: 1 });
     this.eventDate = this.page.getByTestId("events-date");

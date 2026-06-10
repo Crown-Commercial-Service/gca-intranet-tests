@@ -352,7 +352,6 @@ export default class HomePage extends BasePage {
       const dateEl = await this.latestNewsDateElement(card);
       await expect(dateEl).toBeVisible();
 
-      // const uiDate = (await dateEl.textContent())?.trim() ?? "";
       const expectedDate = formatDateNew(post.createdAt);
       await expect(dateEl).toHaveText(expectedDate);
     }

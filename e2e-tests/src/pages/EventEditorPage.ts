@@ -72,16 +72,6 @@ export default class EventEditorPage extends BasePage {
     });
   }
 
-  // async selectCategory(categoryName: string): Promise<void> {
-  //   const categoryOption = this.categoriesBox
-  //     .locator("label")
-  //     .filter({ hasText: categoryName })
-  //     .first();
-
-  //   await expect(categoryOption).toBeVisible();
-  //   await categoryOption.click();
-  // }
-
   async selectEventLocation(eventLocation: string): Promise<void> {
     const eventLocationOption = this.eventLocationBox
       .locator("label")

@@ -1,4 +1,4 @@
-import { test, expect } from "../../src/wp.fixtures";
+import { test } from "../../src/wp.fixtures";
 import User from "../../src/models/User";
 import Post from "../../src/models/Post";
 import { formatDateNew } from "../../src/utils/formatters";

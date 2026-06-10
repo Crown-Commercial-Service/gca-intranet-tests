@@ -19,7 +19,6 @@ import WpCustomizer from "../src/helpers/WpCustomizer";
 import WordpressLoginPage from "./pages/WordpressLoginPage";
 import CustomizerPage from "../src/pages/CustomizerPage";
 import WpEvents from "../src/helpers/WpEvents";
-import logger from "../src/utils/logger";
 import EventEditorPage from "../src/pages/EventEditorPage";
 import EventsListPage from "../src/pages/EventsListPage";
 import EventPage from "../src/pages/EventPage";
@@ -147,17 +146,6 @@ export const test = base.extend<Fixtures>({
 
     process.env.WP_SERVICE = service;
 
-    // logger.info(
-    //   {
-    //     qaMode,
-    //     parallel,
-    //     service,
-    //     baseUrl: process.env.PW_BASE_URL,
-    //     wpDriver: process.env.WP_DRIVER,
-    //   },
-    //   "Initialising WordPress test helpers",
-    // );
-
     const exec: typeof runWp = (args: string[], opts?: any) =>
       runWp(args, { ...(opts ?? {}), service });
 
@@ -255,22 +243,12 @@ export const test = base.extend<Fixtures>({
     await use(new BlogPage(page, baseUrl));
   },
 
-  contentPage: async ({ page }, use, testInfo) => {
-    const qaMode = isQaMode();
-    const parallel = qaMode ? false : await isParallelEnabled();
-    const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
-
-    // await use(new ContentPage(page, baseUrl));
-        await use(new ContentPage(page));
+  contentPage: async ({ page }, use) => {
+    await use(new ContentPage(page));
   },
 
-  blogList: async ({ page }, use, testInfo) => {
-    const qaMode = isQaMode();
-    const parallel = qaMode ? false : await isParallelEnabled();
-    const baseUrl = baseUrlForWorker(testInfo.workerIndex, parallel);
-
-    // await use(new BlogListPage(page, baseUrl));
-        await use(new BlogListPage(page));
+  blogList: async ({ page }, use) => {
+    await use(new BlogListPage(page));
   },
 
   eventsListPage: async ({ page }, use, testInfo) => {

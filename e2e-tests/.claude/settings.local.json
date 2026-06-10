@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(git stash *)",
+      "Bash(node *)",
+      "Skill(superpowers:brainstorming)",
+      "Bash(xargs ls -la)",
+      "Read(//Users/chrismorris/**)",
+      "Bash(python3 -c \"import openpyxl; print\\('openpyxl', openpyxl.__version__\\)\")",
+      "Read(//Users/chrismorris/Library/Containers/com.apple.mail/Data/Library/Mail Downloads/02595D74-B13C-4AA6-BE40-B444E8499C56/**)",
+      "Bash(pip3 install *)",
+      "Bash(python3 -c \"import openpyxl; print\\('ok', openpyxl.__version__\\)\")",
+      "Bash(python3)",
+      "Bash(sed -n '124,131p' src/pages/HomePage.ts)",
+      "Bash(sed -n '692,723p' src/pages/HomePage.ts)",
+      "Bash(sed -n '90,110p' src/helpers/WpCustomizer.ts)",
+      "Bash(sed -n '10,30p' src/helpers/WpUsers.ts)",
+      "Bash(sed -n '20,45p' src/a11y/assertions.ts)",
+      "Bash(sed -n '250,270p' src/models/Post.ts)",
+      "Bash(sed -n '1,5p' src/helpers/WpPosts.ts)",
+      "Bash(sed -n '333,346p' src/helpers/WpPosts.ts)",
+      "Bash(sed -n '17,25p' src/helpers/WpUsers.ts)",
+      "Bash(sed -n '96,110p' src/helpers/WpCustomizer.ts)",
+      "Bash(sed -n '1,4p' src/pages/BasePage.ts)",
+      "Bash(echo \"exit: $?\")"
+    ]
+  }
+}

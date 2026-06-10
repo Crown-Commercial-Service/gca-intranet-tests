@@ -1,4 +1,4 @@
-import { test, expect } from "../../src/wp.fixtures";
+import { test } from "../../src/wp.fixtures";
 import QuickLinks from "../../src/models/QuickLinks";
 
 test.describe("homepage - quick links", { tag: '@regression' }, () => {

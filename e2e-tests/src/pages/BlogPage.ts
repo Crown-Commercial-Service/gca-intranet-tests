@@ -3,7 +3,6 @@ import BasePage from "./BasePage";
 import { formatDateNew } from "../utils/formatters";
 
 export default class BlogPage extends BasePage {
-  // private readonly baseUrl?: string;
 
   readonly main: Locator;
   readonly title: Locator;
@@ -29,7 +28,6 @@ export default class BlogPage extends BasePage {
 
   constructor(page: Page, baseUrl?: string) {
     super(page);
-    // this.baseUrl = baseUrl;
 
     this.main = this.page.getByTestId("blog-main");
     this.title = this.page.getByTestId("blog-title");
