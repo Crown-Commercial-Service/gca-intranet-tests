@@ -12,6 +12,7 @@ test.describe("Blog component", () => {
 
     post = Post.aPost()
       .withType("blogs")
+      .withCreatedAt(new Date())
       .withFixedTitle("Commercial Strategy Blog")
       .withParagraphMaxChars(180)
       .withStatus("publish")

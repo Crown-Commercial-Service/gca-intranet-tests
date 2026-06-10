@@ -1,50 +1,18 @@
 import fs from "fs";
 import path from "path";
 
-/**
- * Types shared across the WordPress service suite
- */
-export type WpResult = {
-  exitCode: number;
-  stdout: string;
-  stderr?: string;
-};
-
 export type PathResolution = {
   resolvedPath: string;
   triedPaths: string[];
 };
-
-/**
- * Environment & Service Helpers
- */
-export function isParallelLocal(): boolean {
-  return process.env.PARALLEL_LOCAL === "true";
-}
-
-export function isInitService(serviceName: string): boolean {
-  return /^init\d+$/.test(serviceName);
-}
-
-export function isParallelWordpressService(serviceName: string): boolean {
-  return /^wordpress\d+$/.test(serviceName);
-}
 
 export function toEnvKey(type: string): string {
   return type.replace(/[^a-z0-9]+/gi, "_").toUpperCase();
 }
 
 /**
- * Error Formatting
- */
-export function formatWpCliFailure(message: string, result: WpResult): Error {
-  const details = (result.stderr || result.stdout || "").trim();
-  return new Error(message + (details ? `\n\nWP-CLI output:\n${details}` : ""));
-}
-
-/**
  * File System & Path Resolution
- * Logic for finding assets across local, e2e, and docker roots.
+ * Logic for finding assets across local and e2e roots.
  */
 export function resolveLocalPath(inputPath: string): PathResolution {
   if (path.isAbsolute(inputPath)) {
@@ -80,13 +48,6 @@ export function resolveLocalPath(inputPath: string): PathResolution {
   // 4. Try CWD
   const foundFromCwd = tryPath(path.resolve(process.cwd(), inputPath));
   if (foundFromCwd) return { resolvedPath: foundFromCwd, triedPaths };
-
-  // 5. Try Docker Repo Root
-  const wordpressRepo = (process.env.WP_DOCKER_CWD || "").trim();
-  if (wordpressRepo) {
-    const foundFromWpRepo = tryPath(path.resolve(wordpressRepo, inputPath));
-    if (foundFromWpRepo) return { resolvedPath: foundFromWpRepo, triedPaths };
-  }
 
   // Fallback
   return { resolvedPath: path.resolve(e2eTestsRoot, inputPath), triedPaths };

@@ -4,34 +4,8 @@ import { htmlToText } from "html-to-text";
 
 dayjs.extend(customParseFormat);
 
-function getOrdinal(dayNumber: number) {
-  if (dayNumber > 3 && dayNumber < 21) return "th";
-  switch (dayNumber % 10) {
-    case 1:
-      return "st";
-    case 2:
-      return "nd";
-    case 3:
-      return "rd";
-    default:
-      return "th";
-  }
-}
-
 export function formatDateNew(value: string | Date): string {
   return dayjs(value).format("D MMMM YYYY");
-}
-
-export function formatDateOld(value: string | Date): string {
-  const parsedDate = dayjs(value);
-  const dayOfMonth = parsedDate.date();
-  const ordinal = getOrdinal(dayOfMonth);
-
-  return `${dayOfMonth}${ordinal} ${parsedDate.format("MMMM YYYY")}`;
-}
-
-export function formatPostDate(date: Date): string {
-  return formatDateOld(date);
 }
 
 /**
@@ -67,24 +41,6 @@ export function getVisibleTruncatedText(text: string): string {
   return normalized;
 }
 
-export function toEditorDateTime(value: string): string {
-  const match = value.match(
-    /^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})(?::\d{2})?$/,
-  );
-
-  if (!match) {
-    return value;
-  }
-
-  const [, year, month, day, hourRaw, minute] = match;
-  const hour = Number(hourRaw);
-
-  const suffix = hour >= 12 ? "pm" : "am";
-  const twelveHour = hour % 12 === 0 ? 12 : hour % 12;
-
-  return `${day}-${month}-${year} ${twelveHour}:${minute} ${suffix}`;
-}
-
 export function toEditorDate(value: string): string {
   const parsed = dayjs(value, [
     "DD-MM-YYYY h:mm a",
@@ -94,21 +50,6 @@ export function toEditorDate(value: string): string {
   ]);
 
   return parsed.isValid() ? parsed.format("DD-MM-YYYY") : value;
-}
-
-export function toEditorTime(value: string): string {
-  const parsed = dayjs(value, [
-    "DD-MM-YYYY h:mm a",
-    "DD-MM-YYYY HH:mm",
-    "YYYY-MM-DD HH:mm:ss",
-    "YYYY-MM-DD 00:00:00",
-  ]);
-
-  return parsed.isValid() ? parsed.format("HH:mm") : value;
-}
-
-export function formatHomepageArticleDate(value: string | Date): string {
-  return formatDateOld(value);
 }
 
 export function formatHomepageEventDate(value: string | Date): string {

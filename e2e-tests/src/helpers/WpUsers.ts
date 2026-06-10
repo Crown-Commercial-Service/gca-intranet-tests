@@ -1,26 +1,6 @@
 import type User from "../models/User";
 
-export type WpRunner = (args: string[]) => Promise<{
-  exitCode: number;
-  stdout: string;
-  stderr: string;
-}>;
-
 type UserLike = Pick<User, "username" | "password" | "email" | "role">;
-
-type Driver = "docker" | "remote";
-
-function wpDriver(): Driver {
-  return (process.env.WP_DRIVER || "docker").toLowerCase() === "remote"
-    ? "remote"
-    : "docker";
-}
-
-function requiredEnv(name: string): string {
-  const v = (process.env[name] || "").trim();
-  if (!v) throw new Error(`Missing required env var: ${name}`);
-  return v;
-}
 
 function baseUrl(): string {
   const raw = (
@@ -129,88 +109,19 @@ async function findUserIdByUsername(username: string): Promise<number | null> {
 }
 
 export default class WpUsers {
-  private readonly wp: WpRunner;
-
-  constructor(wp: WpRunner) {
-    this.wp = wp;
-  }
-
   async exists(username: string): Promise<boolean> {
-    if (wpDriver() === "remote") {
-      const id = await findUserIdByUsername(username);
-      return id != null;
-    }
-
-    const res = await this.wp(["user", "get", username, "--field=ID"]);
-    return res.exitCode === 0 && !!res.stdout.trim();
-  }
-
-  async create(user: UserLike): Promise<void> {
-    const exists = await this.exists(user.username);
-    if (exists) throw new Error(`User "${user.username}" already exists`);
-
-    if (wpDriver() === "remote") {
-      await rest("POST", "/wp-json/wp/v2/users", {
-        username: user.username,
-        email: user.email,
-        password: user.password,
-        roles: [user.role],
-      });
-      return;
-    }
-
-    await this.wp([
-      "user",
-      "create",
-      user.username,
-      user.email,
-      `--role=${user.role}`,
-      `--user_pass=${user.password}`,
-    ]);
-  }
-
-  async updatePassword(user: UserLike): Promise<void> {
-    const exists = await this.exists(user.username);
-    if (!exists) throw new Error(`User "${user.username}" does not exist`);
-
-    if (wpDriver() === "remote") {
-      const id = await findUserIdByUsername(user.username);
-      if (!id) throw new Error(`User "${user.username}" does not exist`);
-
-      await rest("POST", `/wp-json/wp/v2/users/${id}`, {
-        password: user.password,
-      });
-
-      return;
-    }
-
-    await this.wp([
-      "user",
-      "update",
-      user.username,
-      `--user_pass=${user.password}`,
-    ]);
+    const id = await findUserIdByUsername(username);
+    return id != null;
   }
 
   async upsert(user: UserLike): Promise<void> {
     const exists = await this.exists(user.username);
 
-    if (wpDriver() === "remote") {
-      if (exists) {
-        const id = await findUserIdByUsername(user.username);
-        if (!id) throw new Error(`User "${user.username}" does not exist`);
+    if (exists) {
+      const id = await findUserIdByUsername(user.username);
+      if (!id) throw new Error(`User "${user.username}" does not exist`);
 
-        await rest("POST", `/wp-json/wp/v2/users/${id}`, {
-          password: user.password,
-          roles: [user.role],
-        });
-
-        return;
-      }
-
-      await rest("POST", "/wp-json/wp/v2/users", {
-        username: user.username,
-        email: user.email,
+      await rest("POST", `/wp-json/wp/v2/users/${id}`, {
         password: user.password,
         roles: [user.role],
       });
@@ -218,25 +129,11 @@ export default class WpUsers {
       return;
     }
 
-    if (exists) {
-      await this.wp([
-        "user",
-        "update",
-        user.username,
-        `--user_pass=${user.password}`,
-      ]);
-
-      await this.wp(["user", "set-role", user.username, user.role]);
-      return;
-    }
-
-    await this.wp([
-      "user",
-      "create",
-      user.username,
-      user.email,
-      `--role=${user.role}`,
-      `--user_pass=${user.password}`,
-    ]);
+    await rest("POST", "/wp-json/wp/v2/users", {
+      username: user.username,
+      email: user.email,
+      password: user.password,
+      roles: [user.role],
+    });
   }
 }

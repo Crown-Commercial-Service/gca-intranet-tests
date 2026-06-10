@@ -216,7 +216,9 @@ export default class ContentPage extends BasePage {
             ) => { setContent: (html: string) => void } | null;
           };
           jQuery?: (selector: string) => {
-            val: (nextValue: string) => unknown;
+            val: (nextValue: string) => {
+              trigger: (eventName: string) => unknown;
+            };
             trigger: (eventName: string) => unknown;
           };
         };

@@ -1,5 +1,4 @@
 import Chance from "chance";
-import type WpCustomizer from "../helpers/WpCustomizer";
 
 const chance = new Chance();
 
@@ -25,10 +24,6 @@ export default class TakeALook {
 
   static aTakeALook(): TakeALookBuilder {
     return new TakeALookBuilder();
-  }
-
-  async apply(customizer: WpCustomizer): Promise<void> {
-    await customizer.applyTakeALook(this);
   }
 }
 
@@ -73,14 +68,6 @@ class TakeALookBuilder {
   withLinkTextMaxChars(max: number): this {
     this.props.linkText = chance.word({ length: max + 5 }).trim();
     return this;
-  }
-
-  build(): TakeALook {
-    return new TakeALook({ ...this.props });
-  }
-
-  async apply(customizer: WpCustomizer): Promise<void> {
-    await this.build().apply(customizer);
   }
 
   get title() {
