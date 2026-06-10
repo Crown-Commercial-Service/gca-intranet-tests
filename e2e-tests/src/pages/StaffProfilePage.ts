@@ -6,8 +6,17 @@ export default class StaffProfilePage extends BasePage {
     super(page, baseUrl);
   }
 
-  async assertStaffDetails(name: string, role: string): Promise<void> {
-    await expect(this.page.getByText(name, { exact: false }).first()).toBeVisible();
-    await expect(this.page.getByText(role, { exact: false }).first()).toBeVisible();
+  async assertStaffDetails(name: string, role?: string): Promise<void> {
+    await expect(
+      this.page.getByText(name, { exact: false }).first(),
+    ).toBeVisible();
+
+    // Role is not always returned for a staff member, so only assert it when
+    // the caller provides a value.
+    if (role !== undefined) {
+      await expect(
+        this.page.getByText(role, { exact: false }).first(),
+      ).toBeVisible();
+    }
   }
 }

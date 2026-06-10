@@ -575,7 +575,9 @@ export default class HomePage extends BasePage {
   async assertBlogCharLimits(post: Post): Promise<void> {
     await expect(this.blogsSection).toBeVisible();
 
-    const link = this.blogCard.first().getByTestId(this.blogLinkTestId);
+    // Target this test's own blog by title rather than the first card, which
+    // can be a more-recent blog left over from a previous run on shared QA.
+    const link = this.blogLinkByTitle(post.title);
 
     await this.assertTextIsTruncated(link, post.title);
   }

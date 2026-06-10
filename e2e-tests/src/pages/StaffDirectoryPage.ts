@@ -73,16 +73,23 @@ export default class StaffDirectoryPage extends BasePage {
 
   async assertStaffCard(
     name: string,
-    role: string,
-    manager: string,
+    role?: string,
+    manager?: string,
   ): Promise<void> {
     const card = this.cardByName(name);
     await expect(card).toHaveCount(1);
     await expect(card.locator(".sd-staff-card__name")).toContainText(name);
-    await expect(card.locator(".sd-staff-card__role")).toContainText(role);
-    await expect(card.locator(".sd-staff-card__manager")).toContainText(
-      manager,
-    );
+
+    // Role and manager are not always returned for a staff member, so only
+    // assert them when the caller provides a value.
+    if (role !== undefined) {
+      await expect(card.locator(".sd-staff-card__role")).toContainText(role);
+    }
+    if (manager !== undefined) {
+      await expect(card.locator(".sd-staff-card__manager")).toContainText(
+        `Reports to: ${manager}`,
+      );
+    }
   }
 
   async openStaffProfile(name: string): Promise<void> {
